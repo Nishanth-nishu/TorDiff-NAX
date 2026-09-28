@@ -48,7 +48,7 @@ class TensorProductConvLayer(torch.nn.Module):
 class TensorProductScoreModel(torch.nn.Module):
     def __init__(self, in_node_features=74, in_edge_features=4, sigma_embed_dim=32, sigma_min=0.01 * np.pi,
                  sigma_max=np.pi, sh_lmax=2, ns=32, nv=8, num_conv_layers=4, max_radius=5, radius_embed_dim=50,
-                 scale_by_sigma=True, use_second_order_repr=True, batch_norm=True, residual=True
+                 scale_by_sigma=True, use_second_order_repr=True, batch_norm=True, residual=True, parity=True
                  ):
         super(TensorProductScoreModel, self).__init__()
         self.in_node_features = in_node_features
@@ -115,7 +115,7 @@ class TensorProductScoreModel(torch.nn.Module):
         self.bond_conv = TensorProductConvLayer(
             in_irreps=self.conv_layers[-1].out_irreps,
             sh_irreps=self.final_tp.irreps_out,
-            out_irreps=f'{ns}x0o',
+            out_irreps=f'{ns}x0o' if parity else f'{ns}x0e',  # [ablation-hooks] 0e = parity-invariant ablation
             n_edge_features=3 * ns,
             residual=False,
             batch_norm=batch_norm

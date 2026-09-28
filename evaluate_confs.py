@@ -173,7 +173,17 @@ summary = {
     'n_evaluated': len(results), 'n_model_failures': num_failures,
     'n_additional_failures': int(np.isnan(amr_recall).sum()),
 }
-print('SUMMARY', ' '.join(f'{k}={v:.4f}' if isinstance(v, float) else f'{k}={v}' for k, v in summary.items()))
+print('SUMMARY', ' '.join(f'{k}={v:.4f}' if isinstance(v, float) else f'{k}={v}' for k, v in summary.items() if k != 'sweep'))
+# threshold sweep incl. sub-grid values (QM9 at 0.5 A is saturated; 0.05/0.1/0.25 A are more informative).
+# Same conventions as above: strict <, failures count as 0 coverage.
+sweep = {}
+for thr in (0.05, 0.1, 0.25, 0.5, 0.75, 1.0, 1.25):
+    cr = [float(np.mean(np.min(r['rmsd'], axis=1) < thr)) for r in results.values()] + [0] * num_failures
+    cp = [float(np.mean(np.min(r['rmsd'], axis=0) < thr)) for r in results.values()] + [0] * num_failures
+    sweep[thr] = (100 * np.mean(cr), 100 * np.median(cr), 100 * np.mean(cp), 100 * np.median(cp))
+    print(f'SWEEP thr={thr:.3f} COV-R_mean={sweep[thr][0]:.2f} COV-R_median={sweep[thr][1]:.2f} '
+          f'COV-P_mean={sweep[thr][2]:.2f} COV-P_median={sweep[thr][3]:.2f}')
+summary['sweep'] = sweep
 if args.out_results:
     with open(args.out_results, 'wb') as f:
         pickle.dump({'summary': summary, 'threshold_ranges': threshold_ranges, 'num_failures': num_failures,

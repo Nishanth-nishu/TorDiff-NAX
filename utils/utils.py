@@ -14,7 +14,8 @@ def get_model(args):
                                    max_radius=args.max_radius, radius_embed_dim=args.radius_embed_dim,
                                    scale_by_sigma=args.scale_by_sigma,
                                    use_second_order_repr=args.use_second_order_repr,
-                                   residual=not args.no_residual, batch_norm=not args.no_batch_norm)
+                                   residual=not args.no_residual, batch_norm=not args.no_batch_norm,
+                                   parity=not getattr(args, 'no_parity', False))
 
 
 def get_optimizer_and_scheduler(args, model):

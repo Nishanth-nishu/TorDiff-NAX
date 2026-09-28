@@ -43,6 +43,7 @@ def parse_train_args():
     parser.add_argument('--no_residual', action='store_true', default=False, help='If set, it removes residual connection')
     parser.add_argument('--no_batch_norm', action='store_true', default=False, help='If set, it removes the batch norm')
     parser.add_argument('--use_second_order_repr', action='store_true', default=False, help='Whether to use only up to first order representations or also second')
+    parser.add_argument('--no_parity', action='store_true', default=False, help='[ablation-hooks] parity-INVARIANT torsion head (0e instead of 0o outputs); reproduces TD Table 8 "no parity equivariance"')
 
     # Boltzmann training arguments
     parser.add_argument('--boltzmann_training', action='store_true', default=False, help='Set to true for torsional Boltzmann training')
