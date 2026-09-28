@@ -60,9 +60,10 @@ if args.likelihood:
 
 
 def embed_func(mol, numConfs):
-    # [ablation-hooks] seeded ETKDG when --seed is given (upstream: randomSeed=-1)
+    # [ablation-hooks] seeded ETKDG when --seed is given (upstream: randomSeed=-1).
+    # NB: RDKit randomSeed=0 makes ALL conformers identical (degenerate per-conformer seeds), hence the +1.
     AllChem.EmbedMultipleConfs(mol, numConfs=numConfs, numThreads=5,
-                               randomSeed=args.seed if args.seed is not None else -1)
+                               randomSeed=args.seed + 1 if args.seed is not None else -1)
     return mol
 
 
