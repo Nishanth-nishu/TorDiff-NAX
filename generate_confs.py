@@ -48,6 +48,7 @@ parser.add_argument('--pg_invariant', type=bool, default=False)
 parser.add_argument('--seed', type=int, default=None, help='[ablation-hooks] RNG seed for random/numpy/torch (upstream: unseeded)')
 parser.add_argument('--sigma_min_inf', type=float, default=None, help='[ablation-hooks] override sigma_min of the inference schedule only (model sigma embedding keeps training values)')
 parser.add_argument('--sigma_max_inf', type=float, default=None, help='[ablation-hooks] override sigma_max of the inference schedule only')
+parser.add_argument('--seed_confs_cycle', action='store_true', default=False, help='[ablation-hooks] with --seed_confs: assign GT local structures round-robin (conformer i <- GT conformer i mod L) instead of random.choice')
 args = parser.parse_args()
 
 """
@@ -129,7 +130,8 @@ def sample_confs(raw_smi, n_confs, smi):
     n_rotable_bonds = int(data.edge_mask.sum())
     if args.seed_confs:
         conformers, pdb = embed_seeds(mol, data, n_confs, single_conf=args.single_conf, smi=raw_smi,
-                                      pdb=args.dump_pymol, seed_confs=seed_confs)
+                                      pdb=args.dump_pymol, seed_confs=seed_confs,
+                                      seed_confs_cycle=args.seed_confs_cycle)
     else:
         conformers, pdb = embed_seeds(mol, data, n_confs, single_conf=args.single_conf,
                                       pdb=args.dump_pymol, embed_func=embed_func, mmff=args.pre_mmff)

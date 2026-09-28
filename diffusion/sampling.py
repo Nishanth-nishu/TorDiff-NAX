@@ -43,7 +43,8 @@ def get_seed(smi, seed_confs=None, dataset='drugs'):
     return mol, data
 
 
-def embed_seeds(mol, data, n_confs, single_conf=False, smi=None, embed_func=None, seed_confs=None, pdb=None, mmff=False):
+def embed_seeds(mol, data, n_confs, single_conf=False, smi=None, embed_func=None, seed_confs=None, pdb=None, mmff=False,
+                seed_confs_cycle=False):
     if not seed_confs:
         embed_num_confs = n_confs if not single_conf else 1
         try:
@@ -63,7 +64,9 @@ def embed_seeds(mol, data, n_confs, single_conf=False, smi=None, embed_func=None
         if single_conf:
             seed_mol = copy.deepcopy(mol)
         elif seed_confs:
-            seed_mol = random.choice(seed_confs[smi])
+            # [ablation-hooks] cycle=True: conformer i gets the local structure of GT conformer i mod L (each GT L used
+            # ~K/L times: 'coupled-L oracle'); default random.choice = 'perfect independent L sampler'
+            seed_mol = seed_confs[smi][i % len(seed_confs[smi])] if seed_confs_cycle else random.choice(seed_confs[smi])
         else:
             seed_mol = copy.deepcopy(mol)
             [seed_mol.RemoveConformer(j) for j in range(n_confs) if j != i]
