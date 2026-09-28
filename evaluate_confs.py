@@ -161,11 +161,12 @@ print(len(results), 'conformer sets compared', num_failures, 'model failures', n
 
 # [ablation-hooks] compact summary at the dataset threshold + optional dump of the raw per-molecule RMSD matrices
 report_thr = args.report_threshold if args.report_threshold is not None else (0.5 if args.dataset == 'qm9' else 0.75)
-i_thr = int(np.argmin(np.abs(threshold_ranges - report_thr)))
-_cr = [stat[i_thr] for stat in coverage_recall] + [0] * num_failures
-_cp = [stat[i_thr] for stat in coverage_precision] + [0] * num_failures
+# computed at EXACTLY report_thr from the RMSD matrices (upstream grid is np.arange(0, 2.5, .125): snapping to the
+# nearest grid value silently turned e.g. --report_threshold 0.1 into 0.125). Identical to the printed block at 0.5/0.75.
+_cr = [float(np.mean(np.min(r['rmsd'], axis=1) < report_thr)) for r in results.values()] + [0] * num_failures
+_cp = [float(np.mean(np.min(r['rmsd'], axis=0) < report_thr)) for r in results.values()] + [0] * num_failures
 summary = {
-    'threshold': float(threshold_ranges[i_thr]),
+    'threshold': float(report_thr),
     'COV-R_mean': float(np.mean(_cr) * 100), 'COV-R_median': float(np.median(_cr) * 100),
     'MAT-R_mean': float(np.nanmean(amr_recall)), 'MAT-R_median': float(np.nanmedian(amr_recall)),
     'COV-P_mean': float(np.mean(_cp) * 100), 'COV-P_median': float(np.median(_cp) * 100),
