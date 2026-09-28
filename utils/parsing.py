@@ -26,6 +26,7 @@ def parse_train_args():
     parser.add_argument('--sigma_max', type=float, default=3.14, help='Maximum sigma used for training')
     parser.add_argument('--limit_train_mols', type=int, default=0, help='Limit to the number of molecules in dataset, 0 uses them all')
     parser.add_argument('--boltzmann_weight', action='store_true', default=False, help='Whether to sample conformers based on B.w.')
+    parser.add_argument('--loader_workers', type=int, default=0, help='[ablation-hooks] DataLoader worker processes (0 = original behaviour)')
 
     # Feature arguments
     parser.add_argument('--in_node_features', type=int, default=74, help='Dimension of node features: 74 for drugs and xl, 44 for qm9')

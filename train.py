@@ -1,4 +1,4 @@
-import math, os, torch, yaml
+import math, os, random, torch, yaml
 torch.multiprocessing.set_sharing_strategy('file_system')
 import numpy as np
 from rdkit import RDLogger
@@ -42,7 +42,7 @@ def train(args, model, optimizer, scheduler, train_loader, val_loader):
             'epoch': epoch,
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
-            'scheduler': scheduler.state_dict(),
+            'scheduler': scheduler.state_dict() if scheduler else None,
         }, os.path.join(args.log_dir, 'last_model.pt'))
 
     print("Best Validation Loss {} on Epoch {}".format(best_val_loss, best_epoch))
@@ -79,6 +79,8 @@ def boltzmann_train(args, model, optimizer, train_loader, val_loader, resampler)
 
 if __name__ == '__main__':
     args = parse_train_args()
+    # [ablation-hooks] args.seed was parsed but never used upstream
+    random.seed(args.seed); np.random.seed(args.seed); torch.manual_seed(args.seed)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # build model

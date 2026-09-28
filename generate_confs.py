@@ -44,6 +44,10 @@ parser.add_argument('--pg_langevin_weight_log_1', type=float, default=None)
 parser.add_argument('--pg_kernel_size_log_0', type=float, default=None)
 parser.add_argument('--pg_kernel_size_log_1', type=float, default=None)
 parser.add_argument('--pg_invariant', type=bool, default=False)
+# [ablation-hooks]
+parser.add_argument('--seed', type=int, default=None, help='[ablation-hooks] RNG seed for random/numpy/torch (upstream: unseeded)')
+parser.add_argument('--sigma_min_inf', type=float, default=None, help='[ablation-hooks] override sigma_min of the inference schedule only (model sigma embedding keeps training values)')
+parser.add_argument('--sigma_max_inf', type=float, default=None, help='[ablation-hooks] override sigma_max of the inference schedule only')
 args = parser.parse_args()
 
 """
@@ -56,7 +60,9 @@ if args.likelihood:
 
 
 def embed_func(mol, numConfs):
-    AllChem.EmbedMultipleConfs(mol, numConfs=numConfs, numThreads=5)
+    # [ablation-hooks] seeded ETKDG when --seed is given (upstream: randomSeed=-1)
+    AllChem.EmbedMultipleConfs(mol, numConfs=numConfs, numThreads=5,
+                               randomSeed=args.seed if args.seed is not None else -1)
     return mol
 
 
@@ -73,9 +79,21 @@ elif args.seed_mols:
     with open(args.seed_mols, 'rb') as f:
         seed_confs = pickle.load(f)
 
+_cli_args = dict(args.__dict__)
 with open(f'{args.model_dir}/model_parameters.yml') as f:
     args.__dict__.update(yaml.full_load(f))
 args.batch_size = batch_size  # override the training one
+# [ablation-hooks] the training yaml contains `likelihood: full` (train-arg default) and `seed`, which silently
+# overrode the CLI upstream: every --ode run then computed the full divergence, and with any likelihood set
+# molecules with 0 rotatable bonds were dropped (counted as model failures by evaluate_confs.py).
+for _k in ('likelihood', 'seed'):
+    args.__dict__[_k] = _cli_args[_k]
+if args.seed is not None:
+    random.seed(args.seed); np.random.seed(args.seed); torch.manual_seed(args.seed)
+sigma_max_inf = args.sigma_max_inf if args.sigma_max_inf else args.sigma_max
+sigma_min_inf = args.sigma_min_inf if args.sigma_min_inf else args.sigma_min
+print(f'Inference schedule: sigma_max={sigma_max_inf} sigma_min={sigma_min_inf} steps={args.inference_steps} '
+      f'ode={args.ode} likelihood={args.likelihood}')
 if not args.no_model:
     model = get_model(args)
     state_dict = torch.load(f'{args.model_dir}/{args.ckpt}', map_location=torch.device('cpu'))
@@ -122,7 +140,7 @@ def sample_confs(raw_smi, n_confs, smi):
         conformers = perturb_seeds(conformers, pdb)
 
     if not args.no_model and n_rotable_bonds > 0.5:
-        conformers = sample(conformers, model, args.sigma_max, args.sigma_min, args.inference_steps,
+        conformers = sample(conformers, model, sigma_max_inf, sigma_min_inf, args.inference_steps,
                             args.batch_size, args.ode, args.likelihood, pdb,
                             pg_weight_log_0=args.pg_weight_log_0, pg_weight_log_1=args.pg_weight_log_1,
                             pg_repulsive_weight_log_0=args.pg_repulsive_weight_log_0,

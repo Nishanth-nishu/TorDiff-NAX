@@ -52,6 +52,9 @@ class ConformerDataset(Dataset):
                  cache=None, pickle_dir=None, boltzmann_resampler=None):
         # part of the featurisation and filtering code taken from GeoMol https://github.com/PattanaikL/GeoMol
 
+        # [ablation-hooks] names are derived as path[len(root):-7], so root MUST end with '/' (GitHub issue #12)
+        if not root.endswith('/'):
+            root = root + '/'
         super(ConformerDataset, self).__init__(root, transform)
         self.root = root
         self.types = types
@@ -84,6 +87,13 @@ class ConformerDataset(Dataset):
         if limit_molecules:
             split = split[:limit_molecules]
         smiles = np.array(sorted(glob.glob(osp.join(self.root, '*.pickle'))))
+        # [ablation-hooks] guard against split indices beyond the number of raw pickles (GitHub issue #20, QM9)
+        n_oob = int(np.sum(np.asarray(split) >= len(smiles)))
+        if n_oob:
+            print(f'WARNING: {n_oob} split indices >= number of raw pickles ({len(smiles)}); dropping them')
+            split = [i for i in split if i < len(smiles)]
+        if len(smiles) == 0:
+            raise FileNotFoundError(f'No *.pickle files found under data_dir={root!r}')
         smiles = smiles[split]
 
         self.open_pickles = {}
@@ -256,7 +266,8 @@ def construct_loader(args, modes=('train', 'val'), boltzmann_resampler=None):
                                    boltzmann_resampler=boltzmann_resampler)
         loader = DataLoader(dataset=dataset,
                             batch_size=args.batch_size,
-                            shuffle=False if mode == 'test' else True)
+                            shuffle=False if mode == 'test' else True,
+                            num_workers=getattr(args, 'loader_workers', 0))
         loaders.append(loader)
 
     if len(loaders) == 1:

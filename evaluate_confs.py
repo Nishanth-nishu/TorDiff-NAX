@@ -16,6 +16,9 @@ parser.add_argument('--limit_mols', type=int, default=0, help='Limit number of m
 parser.add_argument('--dataset', type=str, default="drugs", help='Dataset: drugs, qm9 and xl')
 parser.add_argument('--filter_mols', type=str, default=None, help='If set, is path to list of smiles to test')
 parser.add_argument('--only_alignmol', action='store_true', default=False, help='If set instead of GetBestRMSD, it uses AlignMol (for large molecules)')
+# [ablation-hooks]
+parser.add_argument('--out_results', type=str, default=None, help='[ablation-hooks] pickle path for the per-molecule RMSD matrices + summary')
+parser.add_argument('--report_threshold', type=float, default=None, help='[ablation-hooks] threshold for the one-line summary (default 0.5 for qm9, 0.75 otherwise)')
 args = parser.parse_args()
 
 """
@@ -155,3 +158,24 @@ for i, thresh in enumerate(threshold_ranges):
 
 print(len(results), 'conformer sets compared', num_failures, 'model failures', np.isnan(amr_recall).sum(),
       'additional failures')
+
+# [ablation-hooks] compact summary at the dataset threshold + optional dump of the raw per-molecule RMSD matrices
+report_thr = args.report_threshold if args.report_threshold is not None else (0.5 if args.dataset == 'qm9' else 0.75)
+i_thr = int(np.argmin(np.abs(threshold_ranges - report_thr)))
+_cr = [stat[i_thr] for stat in coverage_recall] + [0] * num_failures
+_cp = [stat[i_thr] for stat in coverage_precision] + [0] * num_failures
+summary = {
+    'threshold': float(threshold_ranges[i_thr]),
+    'COV-R_mean': float(np.mean(_cr) * 100), 'COV-R_median': float(np.median(_cr) * 100),
+    'MAT-R_mean': float(np.nanmean(amr_recall)), 'MAT-R_median': float(np.nanmedian(amr_recall)),
+    'COV-P_mean': float(np.mean(_cp) * 100), 'COV-P_median': float(np.median(_cp) * 100),
+    'MAT-P_mean': float(np.nanmean(amr_precision)), 'MAT-P_median': float(np.nanmedian(amr_precision)),
+    'n_evaluated': len(results), 'n_model_failures': num_failures,
+    'n_additional_failures': int(np.isnan(amr_recall).sum()),
+}
+print('SUMMARY', ' '.join(f'{k}={v:.4f}' if isinstance(v, float) else f'{k}={v}' for k, v in summary.items()))
+if args.out_results:
+    with open(args.out_results, 'wb') as f:
+        pickle.dump({'summary': summary, 'threshold_ranges': threshold_ranges, 'num_failures': num_failures,
+                     'results': results, 'args': vars(args)}, f)
+    print('Saved per-molecule results to', args.out_results)
