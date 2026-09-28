@@ -17,6 +17,7 @@ parser.add_argument('--max_iter', type=int, default=15, help='Maximum number of 
 parser.add_argument('--confs_per_mol', type=int, default=30, help='Maximum number of conformers to take for each molecule')
 parser.add_argument('--mmff', action='store_true', default=False, help='Whether to relax seed conformers with MMFF before matching')
 parser.add_argument('--no_match', action='store_true', default=False, help='Whether to skip conformer matching')
+parser.add_argument('--heavy_objective', action='store_true', default=False, help='[ablation-hooks] DE optimises the heavy-atom RMSD (evaluation metric) instead of the H-inclusive RMSD')
 parser.add_argument('--boltzmann', choices=['top', 'resample'], default=None, help='If set, specifies a different conformer selection policy')
 args = parser.parse_args()
 
@@ -103,7 +104,7 @@ def conformer_match(name, confs):
             mol_rdkit_single = copy.deepcopy(mol_rdkit)
             [mol_rdkit_single.RemoveConformer(j) for j in range(n_confs) if j != conf_id]
             optimize_rotatable_bonds(mol_rdkit_single, mol, rotable_bonds,
-                                     popsize=args.popsize, maxiter=args.max_iter)
+                                     popsize=args.popsize, maxiter=args.max_iter, heavy_only=args.heavy_objective)
             rmsd = AllChem.AlignMol(REMOVE_HS(mol_rdkit_single), REMOVE_HS(mol))
             long_term_log['confs_success'] += 1
 
