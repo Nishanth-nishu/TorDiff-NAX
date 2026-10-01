@@ -32,6 +32,12 @@ def get_seed(smi, seed_confs=None, dataset='drugs'):
             print("smile not in seeds", smi)
             return None, None
         mol = seed_confs[smi][0]
+        # [ablation-hooks] same rejection as featurize_mol_from_smiles ('.' in smiles): a multi-fragment graph makes
+        # every bond look rotatable and breaks mask_rotate (AssertionError in modify_conformer)
+        from rdkit import Chem
+        if len(Chem.GetMolFrags(mol)) > 1:
+            print("multi-fragment seed mol", smi)
+            return None, None
         data = featurize_mol(mol, dataset)
 
     else:
