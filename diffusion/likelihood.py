@@ -92,6 +92,8 @@ def log_det_jac(data):
         dx = dx - np.cross(omega, pos)
         jac.append(dx.flatten())
     jac = np.array(jac)
+    if jac.ndim < 2 or jac.shape[0] == 0:  # [ablation-hooks] 0 rotatable bonds: empty Jacobian, log det = 0
+        return 0.0
     _, D, _ = np.linalg.svd(jac)
     return np.sum(np.log(D))
 
