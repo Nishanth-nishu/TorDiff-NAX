@@ -120,7 +120,7 @@ def sample_confs(raw_smi, n_confs, smi):
         mol, data = get_seed(raw_smi, seed_confs=seed_confs, dataset=args.dataset)
     elif args.seed_mols:
         mol, data = get_seed(smi, seed_confs=seed_confs, dataset=args.dataset)
-        mol.RemoveAllConformers()
+        if mol: mol.RemoveAllConformers()  # [ablation-hooks] get_seed may return None (missing/multi-fragment seed)
     else:
         mol, data = get_seed(smi, dataset=args.dataset)
     if not mol:
