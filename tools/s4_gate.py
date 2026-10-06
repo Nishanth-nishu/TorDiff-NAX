@@ -1,10 +1,13 @@
 """
 S4 go/no-go gate (round2/DECISION.md D7; code_plan_2 §8). PASS requires all of:
   (1) pairing >= 98 % clean   : PAIRING_CLEAN line of tools/build_paired_pickles.py --summarize
-  (2) pair_ok passes          : included in (1) (pairs failing pair_ok are dropped and counted there)
-  (3) V18: lambda = 1 reproduces gtLcycle within the seed SD, for every model given with --v18. MAT-R is compared on
-      the molecules evaluated in both runs (the lambda family drops molecules with any unsafe pair); the tolerance is
-      the training-seed SD of gtLcycle MAT-R of that model family on the same molecules (--sd_files).
+  (2) pair_ok                 : INFO only. Unsafe pairs are flagged offline (build_paired_pickles.py, PAIR_OK line) and
+                                 dropped by the S4 loader; the user ruling (DECISION.md, 2026-10-06/07) runs S4 on the
+                                 safe pairs, so the rate is reported, not thresholded (FIXES X13)
+  (3) V18: lambda = 1 reproduces gtLcycle, for every model given with --v18. MAT-R is compared on the molecules
+      evaluated in both runs. FIXES X9: the two runs are single, non-bit-reproducible SDE runs, so the check is not
+      "exact": PASS if |mean diff| <= max(3 x training-seed SD of gtLcycle MAT-R on the same molecules (--sd_files),
+      0.003 A) OR the 95 % paired molecule-bootstrap CI of the difference contains 0.
   (4) the smoke test passed    : no SMOKE_*_FAILED line and an S4 SUMMARY line in the smoke log
 Usage:
   python s4_gate.py --paired_summary $QM9_PAIRED/SUMMARY.txt --smoke_log $LOGS/tordiff_r2_smoke_<id>.log \
@@ -55,10 +58,15 @@ for spec in a.v18:
     common = [c for c in common if np.isfinite(lam1[c]) and np.isfinite(cyc[c])]
     diff = np.mean([lam1[c] for c in common]) - np.mean([cyc[c] for c in common])
     seeds = [np.nanmean([d[c] for c in common]) for d in sd.get(name, [])]
-    tol = float(np.std(seeds, ddof=1)) if len(seeds) > 1 else 0.003
-    good = abs(diff) <= tol
-    print(f'(3) V18 {name}: n={len(common)} MAT-R lam1.00 - gtLcycle = {diff:+.5f} A; seed SD = {tol:.5f}',
-          'PASS' if good else 'FAIL')
+    sd_seed = float(np.std(seeds, ddof=1)) if len(seeds) > 1 else 0.0
+    tol = max(3 * sd_seed, 0.003)
+    dd = np.array([lam1[c] - cyc[c] for c in common])
+    rng = np.random.default_rng(0)
+    bs = dd[rng.integers(0, len(dd), size=(5000, len(dd)))].mean(1)
+    lo, hi = np.percentile(bs, [2.5, 97.5])
+    good = abs(diff) <= tol or lo <= 0.0 <= hi
+    print(f'(3) V18 {name}: n={len(common)} MAT-R lam1.00 - gtLcycle = {diff:+.5f} A, 95% CI [{lo:+.5f}, {hi:+.5f}]; '
+          f'seed SD {sd_seed:.5f} -> tol {tol:.5f}', 'PASS' if good else 'FAIL')
     ok &= good
 
 log = open(a.smoke_log, errors='replace').read()
