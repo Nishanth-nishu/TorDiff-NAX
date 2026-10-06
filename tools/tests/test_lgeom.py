@@ -155,3 +155,23 @@ def test_T9_graph_signature_detects_renumbering():
     assert lgeom.same_graph([m, Chem.Mol(m)]) and not lgeom.same_graph([m, r])
     w = lgeom.with_positions(m, X)
     assert w.GetNumConformers() == 1 and np.allclose(lgeom.positions(w), X)
+
+
+def test_X1_seed_sources_replace_unsafe_pairs():
+    ok = [True, False, True, False, False]
+    assert lgeom.seed_sources(ok, interpolates=False) == [0, 1, 2, 3, 4]       # lambda 0/1, A5: no filter
+    src = lgeom.seed_sources(ok, interpolates=True)
+    assert len(src) == 5 and all(ok[s] for s in src) and src[0] == 0 and src[2] == 2
+    assert src[1] == 0 and src[3] == 2 and src[4] == 0                            # cycling over the safe pairs
+    assert lgeom.seed_sources([False, False], interpolates=True) is None           # no safe pair: dropped
+    assert lgeom.seed_sources([False, False], interpolates=False) == [0, 1]
+
+
+def test_X1_pair_check_grid_reports_failing_lambda():
+    m, (X, _) = embed('C[C@H](N)C(=O)O')
+    res = lgeom.align_pair(m, X, X * np.array([-1.0, 1.0, 1.0]))
+    chk = lgeom.pair_check_grid(m, X, res['Y_al'])
+    assert not chk['pair_ok'] and chk['lam'] == 0.25
+    m2, (X2, _) = embed('CCOC(=O)CCN')
+    ok = lgeom.pair_check_grid(m2, X2, X2.copy())
+    assert ok['pair_ok'] and ok['worst_bond_dev'] < 1e-9

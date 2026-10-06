@@ -254,6 +254,20 @@ def pair_check(mol, X, Y_al, lam=0.5):
     return dict(pair_ok=reason == 'ok', stereo_ok=stereo_ok, worst_bond_dev=worst, min_nonbonded=min_nb, reason=reason)
 
 
+def pair_check_grid(mol, X, Y_al, lams=(0.25, 0.5, 0.75)):
+    """FIXES X1 / research_check_A I1: pair_check on a lambda grid instead of lambda = 0.5 only. Returns the first
+    failing lambda's result (with 'lam' set), else the lambda = 0.5 result with the worst bond deviation and the
+    smallest non-bonded distance over the grid."""
+    res = [dict(pair_check(mol, X, Y_al, lam=l), lam=l) for l in lams]
+    for r in res:
+        if not r['pair_ok']:
+            return r
+    out = dict(res[len(res) // 2])
+    out['worst_bond_dev'] = max(r['worst_bond_dev'] for r in res)
+    out['min_nonbonded'] = min(r['min_nonbonded'] for r in res)
+    return out
+
+
 # ----------------------------------------------------------------------------------------------------------- F5
 def internal_sets(mol):
     """ALL-atom bonds / angles / endocyclic dihedrals with ring flags (DECISION D2: H belongs to the acyclic set).
@@ -353,3 +367,22 @@ def set_internal_subset(mol, X_base, X_src, n_passes=3):
             except Exception:
                 pass
     return np.array(conf.GetPositions(), dtype=float)
+
+
+def seed_sources(pair_ok, interpolates):
+    """FIXES X1: source pair for every seed slot of one molecule. Non-interpolating sets (lambda 0/1, A5) use their own
+    pair. Interpolating sets replace an unsafe pair by the molecule's safe pairs, cycling; None if no safe pair."""
+    n = len(pair_ok)
+    if not interpolates:
+        return list(range(n))
+    safe = [i for i, o in enumerate(pair_ok) if o]
+    if not safe:
+        return None
+    out, r = [], 0
+    for i in range(n):
+        if pair_ok[i]:
+            out.append(i)
+        else:
+            out.append(safe[r % len(safe)])
+            r += 1
+    return out

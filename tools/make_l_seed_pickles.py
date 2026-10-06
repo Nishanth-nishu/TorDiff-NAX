@@ -115,7 +115,13 @@ def build_etkdg(raw_smi, gts, n_csv, mol_idx, cnt):
         for k, s in enumerate(ss):
             mt.append(dict(kind=tag, seed=args.seed, stereo_ok=lgeom.stereo_labels(s) == gt_stereo,
                            mmff_not_converged=int(res[k][0]) if tag.endswith('mmff') else None))
-    cnt['etkdg_mmff_not_converged'] += sum(int(r[0]) for r in res)
+    # FIXES X11: count test-time MMFF outcomes per conformer (MMFFOptimizeMoleculeConfs: 0 converged, 1 not converged
+    # within maxIters, -1 force-field setup failed; the old sum() let -1 cancel +1) and per molecule
+    codes = [int(r[0]) for r in res]
+    cnt['etkdg_mmff_confs'] += len(codes)
+    cnt['etkdg_mmff_not_converged'] += sum(c == 1 for c in codes)
+    cnt['etkdg_mmff_setup_failed'] += sum(c == -1 for c in codes)
+    cnt['etkdg_mmff_mols_with_any_failure'] += int(any(c != 0 for c in codes))
     return {'L_etkdg2L': (seeds, meta), 'L_etkdg2L_mmff': (seeds_mm, meta_mm)}, rows
 
 
@@ -144,7 +150,17 @@ def build_noise(raw_smi, gts, mol_idx, cnt):
 
 
 def build_interp(raw_smi, gts, mol_idx, cnt):
-    """training recipe of standardize_confs.py:71-119 on the test GT conformers (one matched seed per GT conformer)"""
+    """training recipe of standardize_confs.py:71-119 on the test GT conformers (one matched seed per GT conformer).
+
+    FIXES X1 (review_3 S6, review_1): nothing here drops a molecule because of ONE unsafe pair any more.
+      * lambda = 0 / 1 and A5ring / A5acyc do not interpolate: every matched pair is used (no pair_ok filter).
+      * lambda in (0, 1): pair_ok is checked on the grid {0.25, 0.5, 0.75} (research_check_A I1); a GT conformer
+        whose pair is unsafe gets the x_lambda of one of that molecule's SAFE pairs instead (cycling over them, so
+        the seed list keeps L entries); the molecule is dropped from those sets only if it has no safe pair.
+      * embedding: if ETKDG returns fewer than L conformers, it is retried once with useRandomCoords=True; if still
+        short but >= 1, every GT conformer takes its lowest-cost seed (seed reuse allowed; counted as
+        interp_seed_reuse) instead of the one-to-one Hungarian assignment.
+    Counts per set (kept / replaced / dropped) go to the population report."""
     from utils.standardization import get_torsion_angles, get_von_mises_rms, optimize_rotatable_bonds
     n = len(gts)
     mol_rdkit = copy.deepcopy(gts[0])                                    # standardize_confs.py:73
@@ -152,18 +168,28 @@ def build_interp(raw_smi, gts, mol_idx, cnt):
     mol_rdkit.RemoveAllConformers()                                      # :78
     cids = list(AllChem.EmbedMultipleConfs(mol_rdkit, numConfs=n, randomSeed=args.seed))  # :79, seeded here
     if len(cids) != n:
+        cnt['interp_embed_retry'] += 1
+        mol_rdkit.RemoveAllConformers()
+        cids = list(AllChem.EmbedMultipleConfs(mol_rdkit, numConfs=n, randomSeed=args.seed, useRandomCoords=True))
+    m = len(cids)
+    if m == 0:
         cnt['interp_embed_failed'] += 1
         return None
     if rot:
-        cost = np.array([[get_von_mises_rms(gts[i], mol_rdkit, rot, j) for j in range(n)] for i in range(n)])  # :90
+        cost = np.array([[get_von_mises_rms(gts[i], mol_rdkit, rot, cids[j]) for j in range(m)] for i in range(n)])
     else:  # no rotatable bond: no DE in training either (such molecules are not in the training set at all)
-        cost = np.array([[AllChem.AlignMol(Chem.Mol(mol_rdkit, confId=cids[j]), gts[i]) for j in range(n)]
+        cost = np.array([[AllChem.AlignMol(Chem.Mol(mol_rdkit, confId=cids[j]), gts[i]) for j in range(m)]
                          for i in range(n)])
-    _, col = linear_sum_assignment(cost)                                 # :93
+    if m == n:
+        _, col = linear_sum_assignment(cost)                             # :93
+    else:
+        cnt['interp_seed_reuse'] += 1
+        col = cost.argmin(axis=1)
     pairs = []
     for i in range(n):
         single = copy.deepcopy(mol_rdkit)                                # :104
-        [single.RemoveConformer(j) for j in range(n) if j != int(col[i])]  # :105
+        keep = cids[int(col[i])]
+        [single.RemoveConformer(c) for c in cids if c != keep]           # :105
         if rot:
             try:
                 # :106 -- return value DISCARDED on purpose (defect 4): the stored conformer carries the torsions of the
@@ -178,36 +204,51 @@ def build_interp(raw_smi, gts, mol_idx, cnt):
             cnt['interp_graph_mismatch'] += 1
             return None
         al = lgeom.align_pair(single, X, Y)
-        chk = lgeom.pair_check(single, X, al['Y_al'])
+        chk = lgeom.pair_check_grid(single, X, al['Y_al'])
         if not chk['pair_ok']:
-            cnt[f'interp_drop_pair_{chk["reason"]}'] += 1
-            return None
+            cnt[f'interp_unsafe_pair_{chk["reason"]}'] += 1
         pairs.append((X, al, chk))
     base = gts[0]
+    term = lgeom.terminal_atoms(base)
+    pair_ok = [p[2]['pair_ok'] for p in pairs]
+    safe = [i for i, o in enumerate(pair_ok) if o]
     out, rows = {}, []
     for lam in args.lams:
         tag = f'L_lam{lam:.2f}_cyc_ORACLE'
+        srcs = lgeom.seed_sources(pair_ok, interpolates=0.0 < lam < 1.0)  # cycle over the molecule's safe pairs
+        if srcs is None:
+            cnt[f'{tag}:dropped_no_safe_pair'] += 1
+            continue
         seeds, meta = [], []
-        for i, (X, al, chk) in enumerate(pairs):
-            Xl = lgeom.interp_x(X, al['Y_al'], lam, *lgeom.terminal_atoms(base))  # same formula as S4 training
+        n_rep = sum(int(src != i) for i, src in enumerate(srcs))
+        for i, src in enumerate(srcs):
+            X, al, chk = pairs[src]
+            Xl = lgeom.interp_x(X, al['Y_al'], lam, *term)  # same formula as S4 training
             seeds.append(lgeom.with_positions(base, Xl))
-            meta.append(dict(kind=tag, src_gt_idx=i, lam=lam, seed=args.seed, heavy_rmsd=al['heavy_rmsd'],
-                             n_swaps=al['n_swaps'], worst_bond_dev=chk['worst_bond_dev'],
-                             min_nonbonded=chk['min_nonbonded']))
-            rows.append(err_row(base, Xl, al['Y_al'], cond=tag, smiles=raw_smi, k=i, src_gt_idx=i))
+            meta.append(dict(kind=tag, slot=i, src_gt_idx=src, replaced=src != i, lam=lam, seed=args.seed,
+                             heavy_rmsd=al['heavy_rmsd'], n_swaps=al['n_swaps'], pair_ok=chk['pair_ok'],
+                             worst_bond_dev=chk['worst_bond_dev'], min_nonbonded=chk['min_nonbonded']))
+            rows.append(err_row(base, Xl, al['Y_al'], cond=tag, smiles=raw_smi, k=i, src_gt_idx=src))
+        cnt[f'{tag}:kept'] += 1
+        cnt[f'{tag}:replaced_seeds'] += n_rep
+        cnt[f'{tag}:mols_with_replacement'] += int(n_rep > 0)
         out[tag] = (seeds, meta)
     for tag, fn in (('L_A5ring_cyc_ORACLE', lambda X, Y: lgeom.set_internal_subset(base, Y, X)),
                     ('L_A5acyc_cyc_ORACLE', lambda X, Y: lgeom.set_internal_subset(base, X, Y))):
         seeds, meta = [], []
-        for i, (X, al, chk) in enumerate(pairs):
+        for i, (X, al, chk) in enumerate(pairs):  # no pair_ok filter: A5 does not interpolate (FIXES X1)
             Xa = fn(X, al['Y_al'])
-            m = lgeom.with_positions(base, Xa)
-            ok = lgeom.stereo_labels(m) == lgeom.stereo_labels(base, al['Y_al'])
+            mm = lgeom.with_positions(base, Xa)
+            ok = lgeom.stereo_labels(mm) == lgeom.stereo_labels(base, al['Y_al'])
             cnt[f'{tag}_stereo_flip'] += int(not ok)
-            seeds.append(m)
-            meta.append(dict(kind=tag, src_gt_idx=i, seed=args.seed, stereo_ok=ok))
+            seeds.append(mm)
+            meta.append(dict(kind=tag, src_gt_idx=i, seed=args.seed, stereo_ok=ok, pair_ok=chk['pair_ok']))
             rows.append(err_row(base, Xa, al['Y_al'], cond=tag, smiles=raw_smi, k=i, src_gt_idx=i))
+        cnt[f'{tag}:kept'] += 1
         out[tag] = (seeds, meta)
+    cnt['interp_mols_all_pairs_safe'] += int(len(safe) == n)
+    # S4 test-side subset (user ruling 2026-10-06): test molecules with >= 1 pair_ok-safe matched pair
+    out['_s4_subset'] = bool(safe)
     return out, rows
 
 
@@ -231,6 +272,9 @@ def job(item):
             if r is None:
                 continue
             o, rw = r
+            if o.pop('_s4_subset', False):
+                cnt['s4_subset_member'] += 1
+                out['_s4_subset'] = True
             out.update(o)
             rows.extend(rw)
     except Exception as e:
@@ -261,10 +305,17 @@ def main():
         items = items[:args.limit_mols]
     print('molecules:', len(items), dict(pre), flush=True)
     pickles, metas, rows, cnt = defaultdict(dict), defaultdict(dict), [], Counter(pre)
-    it = Pool(args.n_workers).imap(job, items, chunksize=2) if args.n_workers > 1 else map(job, items)
+    s4_subset, mol_counts = [], defaultdict(Counter)
+    pool = Pool(args.n_workers) if args.n_workers > 1 else None
+    it = pool.imap(job, items, chunksize=2) if pool else map(job, items)
     for t, (raw_smi, out, rw, c) in enumerate(it):
         cnt.update(c)
         rows.extend(rw)
+        if out.pop('_s4_subset', False):
+            s4_subset.append(raw_smi)
+        for k_, v_ in c.items():
+            if ':' in k_:
+                mol_counts[k_.split(':')[0]][k_.split(':')[1]] += v_
         for tag, (seeds, meta) in out.items():
             assert all(s.GetNumConformers() == 1 for s in seeds)
             assert np.all(np.isfinite(np.concatenate([lgeom.positions(s) for s in seeds])))
@@ -272,12 +323,22 @@ def main():
             metas[tag][raw_smi] = meta
         if (t + 1) % 100 == 0:
             print(t + 1, dict(cnt), flush=True)
+    if pool:
+        pool.close()
+        pool.join()
+    with open(os.path.join(args.out_dir, 'S4_test_subset.txt'), 'w') as f:
+        f.write('\n'.join(sorted(s4_subset)) + '\n')
     # twin rule: identical key sets for the MMFF pair (F2)
     if 'L_etkdg2L' in pickles:
         assert set(pickles['L_etkdg2L']) == set(pickles['L_etkdg2L_mmff'])
-    fam = [t for t in pickles if t.startswith('L_lam') or t.startswith('L_A5')]
+    # FIXES X1: lambda 0/1 and A5 share one population (all matched molecules); the interpolating lambda sets are a
+    # subset (molecules with >= 1 safe pair)
+    fam = [t for t in pickles if t in ('L_lam0.00_cyc_ORACLE', 'L_lam1.00_cyc_ORACLE') or t.startswith('L_A5')]
     for t in fam:
-        assert set(pickles[t]) == set(pickles[fam[0]]), 'interp/A5 family must share one population'
+        assert set(pickles[t]) == set(pickles[fam[0]]), 'lambda 0/1 and A5 must share one population'
+    for t in pickles:
+        if t.startswith('L_lam') and fam:
+            assert set(pickles[t]) <= set(pickles[fam[0]])
     for tag in pickles:
         with open(os.path.join(args.out_dir, tag + '.pkl'), 'wb') as f:
             pickle.dump(pickles[tag], f)
@@ -285,7 +346,10 @@ def main():
             pickle.dump(metas[tag], f)
         dropped = sorted(set(it_[0] for it_ in items) - set(pickles[tag]))
         with open(os.path.join(args.out_dir, tag + '.population.txt'), 'w') as f:
-            f.write(f'n_molecules {len(pickles[tag])} of {len(items)} candidates; dropped {len(dropped)}\n')
+            f.write(f'n_molecules {len(pickles[tag])} of {len(items)} candidates; dropped {len(dropped)} '
+                    f'({100.0 * len(pickles[tag]) / max(len(items), 1):.1f}% kept)\n')
+            if tag in mol_counts:
+                f.write('set_counts ' + repr(dict(mol_counts[tag])) + '\n')
             f.write('counts ' + repr(dict(cnt)) + '\n')
             f.write('\n'.join(dropped) + '\n')
         print(f'{tag}: {len(pickles[tag])} molecules', flush=True)
