@@ -23,12 +23,13 @@ EVAL_CPUS=8; EVAL_MEM=40000M
 export R2_STRICT=1         # FIXES X3: in-job evaluations must produce eval.pkl + SUMMARY, else the array task fails
 DRY=${DRY_RUN:-0}
 nlines() { grep -cvE '^\s*(#|$)' "$1"; }
-NDRY=0
-sb() {  # sb [VAR=val ...] -- sbatch args... ; prints the job id
+DRYCNT=$(mktemp); echo 0 > "$DRYCNT"; trap 'rm -f "$DRYCNT"' EXIT
+sb() {  # sb [VAR=val ...] -- sbatch args... ; prints the job id (dry run: a distinct fake id per call)
     local envs=()
     while [[ "$1" != "--" ]]; do envs+=("$1"); shift; done; shift
     if [[ "$DRY" == "1" ]]; then
-        NDRY=$((NDRY + 1)); echo "DRY sbatch ${envs[*]} $*" >&2; echo "DRYJOB$NDRY"
+        local k; k=$(( $(cat "$DRYCNT") + 1 )); echo "$k" > "$DRYCNT"
+        echo "DRY sbatch ${envs[*]} $*" >&2; echo "DRYJOB$k"
     else
         env "${envs[@]}" sbatch --parsable "$@"
     fi
