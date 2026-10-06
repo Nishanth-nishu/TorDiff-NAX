@@ -22,3 +22,13 @@ Tallied 2026-10-06. Ranking votes: agent 1 → 2 > 3 > 1; agent 2 → 1 > 2 > 3;
 4. Interpolation seeds and training data must handle the DE optimum the same way (`standardize_confs.py:106`, vote_1 / plan 3).
 5. Plan 2's single inference lane under-states wall-clock (~53 h); the packed schedule (D4) fixes it if it passes (vote_3).
 6. No change to default training behaviour (vote_1 on plan 3).
+
+## User rulings (2026-10-06, after implementation)
+- **S4 gate (pair_ok 92.1% < 98%): run S4 on the safe pairs.** S4 drops pair_ok failures at load (~8% of conformers,
+  ~4% of molecules). Every S4 comparison is also reported on S4's own molecule set, with the controls (CTRL_rematch,
+  B1) re-scored on that subset, so the comparison stays like-for-like. Pairing verification itself is 100%.
+- **D4 packing: PACK=3.** The "exact SUMMARY" criterion was unattainable: an unpacked rerun of round-1 R0 also
+  differs (COV-R 89.0286 vs 89.0293) because round-1 code is not bit-reproducible across processes. Packed deviations
+  are the same size; 1.47x throughput.
+- Note from implementation: measured 6.4 it/s under node load suggests ~14-16 h per 100-epoch run (not 10.7 h), so
+  wall-clock is ~50-60 h. Still within the 4-day job limit.
