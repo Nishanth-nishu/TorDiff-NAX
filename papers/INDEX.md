@@ -49,5 +49,7 @@ Built 2026-09-29. Root: `papers/`. Every entry has a verified URL that was opene
 | 2025_zhu_stol | 2025 | arXiv 2511.12182 | G1 (partial, large molecules) | DFT sets | Fragment diffusion + assembly for large molecules trained only on small ones; an alternative L-sampler for XL. |
 | 2025_nikitin_loqi (md only; PDF blocked) | 2025/26 | ChemRxiv | G1 G2 (Cartesian) | ChEMBL3D | 250M AIMNet2 conformers + stereo-aware diffusion; handles macrocycles and E/Z; foundation-model direction. |
 | 2025_tedoldi_flexiflow | 2025 | arXiv 2511.17249 | none directly | de novo | Joint molecule + multi-conformer flow matching; CREST-referenced coverage sweeps. |
+| 2021_ho_cascaded_diffusion (PDF + fulltext only; added round 2 by research agent A) | 2021 | JMLR 2022, arXiv 2106.15282 | G2 (technique) | — | Cascaded diffusion: a 2nd-stage model trained on GT conditioning fails on 1st-stage samples (train-test mismatch); fixed by Gaussian "conditioning augmentation", optionally amortised over the augmentation level fed as an extra embedding (p. 3, 6, 18). Template for an L-noise-augmented / L-level-conditioned torsion model. |
+| 2023_ning_input_perturbation (PDF + fulltext only; added round 2 by research agent A) | 2023 | ICML 2023, arXiv 2301.11706 | G2 (technique) | — | DDPM-IP: perturb ground-truth inputs during training to simulate inference-time prediction errors (exposure bias) (p. 1, 4). Second precedent for L-noise augmentation. |
 
 **Counts:** 1 core paper + 26 related entries (25 PDFs stored; LoQI note only).
