@@ -250,3 +250,59 @@ bash submit_round2.sh train pass        # or: train fail   (13 or 10 training ru
 ```
 
 Already running: `prep` was done by hand (std mmff 10105 → featurize mmff 10106).
+
+## Fixes (FIXES.md X1–X13, applied 2026-10-07)
+
+| Fix | Commit | Where | What |
+|---|---|---|---|
+| X1 | 9da0295 | `tools/make_l_seed_pickles.py` `build_interp`; `tools/lgeom.py` `pair_check_grid`, `seed_sources` | Molecules are no longer dropped for one unsafe pair. λ0/λ1 and A5 use every matched pair. λ ∈ {0.25, 0.5, 0.75} replace unsafe pairs by the molecule's safe pairs (pair_ok checked on that λ grid); a molecule is dropped only if it has no safe pair. ETKDG retries with random coordinates. Writes per-set kept/replaced/dropped counts and `S4_test_subset.txt`. |
+| X2 | 045dc3a, 981556f | `slurm/submit_round2.sh` (6 CPUs / 30000M train; 8 / 40000M eval); `r2_eval_array`, `build_round2_data`, `smoke_round2`, `featurize_qm9` headers | Every request is ≤ 5000 MB per CPU. Checked by the dry run: all sbatch headers and every generated sbatch command. |
+| X3 | 045dc3a | `slurm/common.sh` `run_evalset`; `ablation_train_array.sbatch` (`R2_STRICT=1`) | Every tag must have eval.pkl + SUMMARY, otherwise it is logged as `EVAL_FAILED` and the task exits non-zero. |
+| X4 | 045dc3a | `common.sh` (default PACK=3; `code=`/`pack=` lines in provenance.txt), `r2_eval_array.sbatch`, `submit_round2.sh` | Packing on by default; provenance records the code commit and PACK. |
+| X5 | 981556f | `slurm/r2_eval_models_head.tsv` | CR ×3 on S1A5. |
+| X6 | 045dc3a | `common.sh:17-20` | WORK/RES come from `$PROJECT` only; the smoke job uses `R2_WORK`/`R2_RES`. On ada, `$WORK` is empty. |
+| X7 | 981556f | `submit_round2.sh` train | B3 runs in its own array with `afterok:$MMFF_JOB` (10106), unless cache_mmff already exists. |
+| X8 | 981556f | `submit_round2.sh` train | One panel job per model, `afterok` on that model's own training task. |
+| X9 | 45cdb96 | `tools/s4_gate.py` | V18 passes if \|diff\| ≤ max(3 × seed SD, 0.003 Å) or the paired bootstrap CI contains 0. |
+| X10 | ad7acda | `tools/analyze_round2.py` (+ `tools/tests/test_analyze_round2.py`) | Pre-declared contrasts and Holm families; secondary on the intersection; COV-R@0.05 exploratory; failure counts; seed SD on every row; hierarchical S2 non-inferiority; S4 subset re-scoring with the limitation note; dose-response against measured L error; MMFF_PRE counts. |
+| X11 | 9da0295, 88eb0a1 | seed builder MMFF codes; `diffusion/sampling.py` `try_mmff` counters + `MMFF_PRE` line in `generate_confs.py` | Per-conformer MMFF outcomes are counted; the old sum let a -1 cancel a +1. try_mmff behaves as before. |
+| X12 | 13e1de6 | `tools/local_structure_analysis.py` `leak_job` | Asserts that each generated conformer keeps its seed's bond lengths (seed order). |
+| X13 | 45cdb96 | `tools/s4_gate.py` docstring | Updated for the pair_ok ruling. |
+
+**Tests.**
+- Local: 16 passed (lgeom 11, seed builder 4, analysis driver 1).
+- Cluster: **30 passed**.
+- Golden noise floors: model_out snapshot-vs-snapshot 7.0e-6 against patched 5.5e-7; generate coordinates 0.87 Å against 0.69 Å. The generate test is weak, because SDE trajectories diverge.
+- Smoke 10180 passed (round-1 path, all 4 training flags, packed S1 sets).
+- Full paired build (10122): PAIRING_CLEAN 99.999%; PAIR_OK 87.7%; cache_paired has 100% of rematch molecules.
+
+**X1 population counts: pending.** Job 10375 (`slurm/x1_rebuild_seeds.sbatch`) was still running at handback. Its log `logs/tordiff_r2_x1seeds_10375.log` prints per-set `n_molecules … (% kept)` and the S4 subset size. The X11 MMFF counts and the determinism check of the etkdg pickles are in the same log. The old build kept 639/997 for every λ/A5 set.
+
+**Dry run** (`DRY_RUN=1 MMFF_JOB=10106 bash submit_round2.sh head | train pass | train fail`):
+
+| phase | jobs |
+|---|---|
+| head | 1 array: 8 tasks %4, 8 CPU / 40000M, PACK=3 |
+| train pass | main array of 10 runs (%4, 6 CPU / 30000M, 3 workers); B3 array of 3 runs (`afterok:10106`); 12 panel jobs, each `afterok:<own training task>` |
+| train fail | 7 + 3 runs; 9 panel jobs; S4 panels skipped |
+
+Every request is ≤ 5000 MB per CPU. The fake-job-id counter in dry-run mode was fixed after this run.
+
+**Estimate at the measured 6.4 it/s.**
+- One training run: 82,895 training molecules / 32 = 2,591 iterations/epoch ≈ 405 s, plus validation ≈ 425 s/epoch, so **≈ 11.8 h per 100 epochs**. Round 1 took 10.6–11.9 h with 8 workers.
+- In-job evaluations: 23 runs × 0.24 h.
+- Head phase: 77 runs; post phase: 49 runs. Packed at 1.47× throughput, that is 0.163 GPU-h per run.
+
+| | gate pass | gate fail |
+|---|---|---|
+| training | 13 × 11.8 = 153.4 GPU-h | 10 × 11.8 = 118 GPU-h |
+| in-job evaluations | 5.5 GPU-h | 4.1 GPU-h |
+| head | 12.6 GPU-h | 12.6 GPU-h |
+| post | 8.0 GPU-h | 6.0 GPU-h |
+| **total** | **≈ 180 GPU-h** | **≈ 141 GPU-h** |
+
+The pass case is above the 175 cap; the overrun is reported rather than trimmed (FIXES).
+
+**Wall clock (gate pass):** about 4 h for the head phase, then 13 training runs on 4 GPUs (4 waves × ~12.3 h); panels fill the last wave. That gives **≈ 50–55 h**. B3 cannot start before featurize 10106, at about 15:00 on 7 Oct.
+
+**Not yet synced to the cluster:** the dry-run id fix (last commit).
