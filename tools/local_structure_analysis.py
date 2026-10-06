@@ -447,8 +447,18 @@ def run_std():
 def leak_job(item):
     """[round2 S0 (e)] code_plan_2 §2.1 item 4 / verify_B §4 R2-0(e): in TORSION space, is generated conformer i
     nearest to its L-source GT conformer (i mod L under --seed_confs_cycle, diffusion/sampling.py:75)?"""
-    key, corrected, gts, gens, n_seed, w = item
+    key, corrected, gts, gens, seed_mols, w = item
+    n_seed = len(seed_mols)
     L = len(gts)
+    # FIXES X12 (research_check_B I7): the statistic assumes generated conformer i was seeded by seed i mod L
+    # (diffusion/sampling.py:75, cycle) and that confs.pkl keeps that order. Torsion updates are rigid rotations, so
+    # every bond length of generated conformer i must equal that of its seed; assert it instead of assuming it.
+    bl = lambda m: np.array([rdMolTransforms.GetBondLength(m.GetConformer(), b.GetBeginAtomIdx(), b.GetEndAtomIdx())
+                             for b in m.GetBonds()])
+    for i, g in enumerate(gens):
+        dev = float(np.abs(bl(g) - bl(seed_mols[i % n_seed])).max())
+        assert dev < 1e-3, f'{key}: generated conformer {i} does not keep the bond lengths of seed {i % n_seed} ' \
+                           f'(max dev {dev:.4f} A): seed order lost, leak test invalid'
     if L < 2 or n_seed != L:
         return [dict(smiles=key, corrected_smiles=corrected, error='L<2' if L < 2 else f'n_seed {n_seed} != L {L}')]
     _, rel_t = relevant_torsions(gts[0])
@@ -509,7 +519,7 @@ def run_leak():
                 w = np.array(ww) / np.nansum(ww) if not np.isnan(ww).any() else None
             except Exception:
                 w = None
-        items.append((key, corrected, gts, gen[corrected], len(seeds[raw_smi]), w))
+        items.append((key, corrected, gts, gen[corrected], seeds[raw_smi], w))
     if args.limit_mols:
         items = items[:args.limit_mols]
     print('molecules:', len(items))
