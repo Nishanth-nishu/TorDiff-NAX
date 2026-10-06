@@ -1,5 +1,7 @@
 #!/bin/bash
-# Round-2 submission (round2/IMPLEMENTATION.md §8). Run on the login node from $PROJECT/slurm:
+# Round-2 submission (round2/IMPLEMENTATION.md §8). /scratch is visible only on gnode118, so run every phase from a
+# shell ON gnode118, e.g.  ssh ada; srun -n 1 -c 1 --mem=4G -t 00:30:00 -A plafnet2 -p plafnet2 -w gnode118 --pty bash
+# then  cd /scratch/nishanth.r/tordiff/slurm  and:
 #   bash submit_round2.sh prep          # CPU: S5 MMFF standardization -> featurize mmff (already started on 2026-10-06)
 #   bash submit_round2.sh head          # GPU: packed evaluation of the existing checkpoints (S1, S1A5, S1CR, V18, S6, S0)
 #   bash submit_round2.sh gate          # S4 gate (DECISION D7) from the head outputs + smoke log; prints PASS / FAIL
@@ -27,13 +29,9 @@ case "${1:-}" in
   gate)
     W=$PROJECT/workdir; R=$PROJECT/results; T=steps20_seed0_gtLcycle
     SMOKE_LOG=${SMOKE_LOG:-$(ls -t $LOGS/tordiff_r2_smoke_*.log | xargs grep -l 'qm9_SMK_S4' | head -1)}
-    srun -n 1 -c 1 --mem=8G -t 00:20:00 -A plafnet2 -p plafnet2 -w gnode118 bash -c "
-      source $PROJECT/slurm/common.sh; activate_env
-      python $PROJECT/tools/s4_gate.py --paired_summary \$QM9_PAIRED/SUMMARY.txt --smoke_log $SMOKE_LOG \
-        --v18 CR=$R/qm9_CTRL_rematch_100ep_e100_s0/S1_lam1.00_cyc_ORACLE/eval.pkl,$R/qm9_CTRL_rematch_100ep_e100_s0/$T/eval.pkl \
-        --sd_files CR=$R/qm9_CTRL_rematch_100ep_e100_s0/$T/eval.pkl,$R/qm9_CTRL_rematch_100ep_e100_s1/$T/eval.pkl,$R/qm9_CTRL_rematch_100ep_e100_s2/$T/eval.pkl \
-        --v18 B1=$R/qm9_B1_train_gtL_e100_s0/S1_lam1.00_cyc_ORACLE/eval.pkl,$R/qm9_B1_train_gtL_e100_s0/$T/eval.pkl \
-        --sd_files B1=$R/qm9_B1_train_gtL_e100_s0/$T/eval.pkl,$R/qm9_B1_train_gtL_e100_s1/$T/eval.pkl,$R/qm9_B1_train_gtL_e100_s2/$T/eval.pkl"
+    # shellcheck disable=SC1091
+    source "$PROJECT/slurm/common.sh"; activate_env
+    python "$PROJECT/tools/s4_gate.py" --paired_summary "$QM9_PAIRED/SUMMARY.txt" --smoke_log "$SMOKE_LOG"       --v18 CR=$R/qm9_CTRL_rematch_100ep_e100_s0/S1_lam1.00_cyc_ORACLE/eval.pkl,$R/qm9_CTRL_rematch_100ep_e100_s0/$T/eval.pkl       --sd_files CR=$R/qm9_CTRL_rematch_100ep_e100_s0/$T/eval.pkl,$R/qm9_CTRL_rematch_100ep_e100_s1/$T/eval.pkl,$R/qm9_CTRL_rematch_100ep_e100_s2/$T/eval.pkl       --v18 B1=$R/qm9_B1_train_gtL_e100_s0/S1_lam1.00_cyc_ORACLE/eval.pkl,$R/qm9_B1_train_gtL_e100_s0/$T/eval.pkl       --sd_files B1=$R/qm9_B1_train_gtL_e100_s0/$T/eval.pkl,$R/qm9_B1_train_gtL_e100_s1/$T/eval.pkl,$R/qm9_B1_train_gtL_e100_s2/$T/eval.pkl
     ;;
   train)
     case "${2:-}" in

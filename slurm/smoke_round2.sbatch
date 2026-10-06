@@ -42,10 +42,11 @@ if [[ "$MODE" == "smoke" ]]; then
     python "$TOOLS/build_paired_pickles.py" --std_dir data/QM9/standardized_pickles_rematch --raw_dir data/QM9/qm9/ \
         --out_dir "$QM9_PAIRED" --files 000.pickle 001.pickle --n_workers 2 | tail -15
     for v in raw paired; do
-        STDARG=""; [[ $v == paired ]] && STDARG="--std_pickles $QM9_PAIRED"
+        STDP=""; [[ $v == paired ]] && STDP="$QM9_PAIRED"   # raw: --std_pickles "" (as featurize_qm9.sbatch)
         [[ -s $QM9_DIR/cache_$v.train ]] || python train.py --log_dir "$WORK/_featurize_$v" --n_epochs 0 $QM9_MODEL_ARGS \
-            --data_dir "$QM9_RAW" $STDARG --split_path "$QM9_SPLIT" --cache "$QM9_DIR/cache_$v" --num_workers 1 \
-            --limit_train_mols 20
+            --data_dir "$QM9_RAW" --std_pickles "$STDP" --split_path "$QM9_SPLIT" --cache "$QM9_DIR/cache_$v" \
+            --num_workers 1 --limit_train_mols 20
+        python -c "import pickle,sys; n=len(pickle.load(open('$QM9_DIR/cache_$v.train','rb'))); print('smoke cache_$v.train', n, 'mols'); sys.exit(0 if n else 1)"
     done
     [[ -s $QM9_SEEDS2/l_error.csv ]] || python "$TOOLS/make_l_seed_pickles.py" --test_csv "$QM9_TEST_CSV" \
         --true_mols "$QM9_TEST_MOLS" --out_dir "$QM9_SEEDS2" --sources etkdg,noise,interp --limit_mols 20 --n_workers 4 | tail -25
