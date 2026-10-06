@@ -48,7 +48,8 @@ class TensorProductConvLayer(torch.nn.Module):
 class TensorProductScoreModel(torch.nn.Module):
     def __init__(self, in_node_features=74, in_edge_features=4, sigma_embed_dim=32, sigma_min=0.01 * np.pi,
                  sigma_max=np.pi, sh_lmax=2, ns=32, nv=8, num_conv_layers=4, max_radius=5, radius_embed_dim=50,
-                 scale_by_sigma=True, use_second_order_repr=True, batch_norm=True, residual=True, parity=True
+                 scale_by_sigma=True, use_second_order_repr=True, batch_norm=True, residual=True, parity=True,
+                 lambda_embed_dim=0
                  ):
         super(TensorProductScoreModel, self).__init__()
         self.in_node_features = in_node_features
@@ -61,15 +62,18 @@ class TensorProductScoreModel(torch.nn.Module):
         self.sh_irreps = o3.Irreps.spherical_harmonics(lmax=sh_lmax)
         self.ns, self.nv = ns, nv
         self.scale_by_sigma = scale_by_sigma
+        # [round2 S4] L-level (lambda) conditioning; 0 = no extra input, identical layer shapes (DECISION D7;
+        # code_plan_2 §5.3; evidence E5/E6 research_A, CDM-style amortised conditioning)
+        self.lambda_embed_dim = lambda_embed_dim
 
         self.node_embedding = nn.Sequential(
-            nn.Linear(in_node_features + sigma_embed_dim, ns),
+            nn.Linear(in_node_features + sigma_embed_dim + lambda_embed_dim, ns),
             nn.ReLU(),
             nn.Linear(ns, ns)
         )
 
         self.edge_embedding = nn.Sequential(
-            nn.Linear(in_edge_features + sigma_embed_dim + radius_embed_dim, ns),
+            nn.Linear(in_edge_features + sigma_embed_dim + lambda_embed_dim + radius_embed_dim, ns),
             nn.ReLU(),
             nn.Linear(ns, ns)
         )
@@ -187,6 +191,12 @@ class TensorProductScoreModel(torch.nn.Module):
 
         node_sigma = torch.log(data.node_sigma / self.sigma_min) / np.log(self.sigma_max / self.sigma_min) * 10000
         node_sigma_emb = get_timestep_embedding(node_sigma, self.sigma_embed_dim)
+        if self.lambda_embed_dim > 0:
+            # [round2 S4] lambda enters exactly where sigma enters (node + edge features); same [0, 1e4] scale as sigma
+            # above. code_plan_2 §5.3
+            assert hasattr(data, 'node_lambda'), 'lambda-conditioned model needs data.node_lambda'
+            node_lam_emb = get_timestep_embedding(data.node_lambda * 10000, self.lambda_embed_dim)
+            node_sigma_emb = torch.cat([node_sigma_emb, node_lam_emb], 1)
 
         edge_sigma_emb = node_sigma_emb[edge_index[0].long()]
         edge_attr = torch.cat([edge_attr, edge_sigma_emb], 1)

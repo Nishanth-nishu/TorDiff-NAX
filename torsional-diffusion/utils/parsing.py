@@ -27,12 +27,21 @@ def parse_train_args():
     parser.add_argument('--limit_train_mols', type=int, default=0, help='Limit to the number of molecules in dataset, 0 uses them all')
     parser.add_argument('--boltzmann_weight', action='store_true', default=False, help='Whether to sample conformers based on B.w.')
     parser.add_argument('--loader_workers', type=int, default=0, help='[ablation-hooks] DataLoader worker processes (0 = original behaviour)')
+    # [round2] training-L options, all default-off (round2/DECISION.md; code_plan_2 §5.1). Names must not collide with
+    # generate_confs.py CLI args because the training yaml is merged into them (generate_confs.py:84-92).
+    parser.add_argument('--l_jitter', type=float, default=0.0, help='[round2 S2] per-axis Cartesian sigma (A) added to ALL atoms of the selected conformer, fresh per sample (0 = off)')
+    parser.add_argument('--l_mix_p_gt', type=float, default=0.0, help='[round2 S3/B1cap] P(use the paired GT L) per sample; needs a paired cache (0 = off)')
+    parser.add_argument('--l_interp', action='store_true', default=False, help='[round2 S4] x = (1-lam) x_rdkit + lam x_gt_aligned, lam ~ U[0,1], fed to the model; needs a paired cache')
+    parser.add_argument('--log_timing', action='store_true', default=False, help='[round2 D5] print per-epoch data-wait time (pure logging)')
+    parser.add_argument('--fail_on_nan', action='store_true', default=False, help='[round2 D9] abort on a non-finite training loss')
+    parser.add_argument('--limit_train_iters', type=int, default=0, help='[round2 D5 measurement] stop each train epoch after this many iterations (0 = off)')
 
     # Feature arguments
     parser.add_argument('--in_node_features', type=int, default=74, help='Dimension of node features: 74 for drugs and xl, 44 for qm9')
     parser.add_argument('--in_edge_features', type=int, default=4, help='Dimension of edge feature (do not change)')
     parser.add_argument('--sigma_embed_dim', type=int, default=32, help='Dimension of sinusoidal embedding of sigma')
     parser.add_argument('--radius_embed_dim', type=int, default=50, help='Dimension of embedding of distances')
+    parser.add_argument('--lambda_embed_dim', type=int, default=0, help='[round2 S4] sinusoidal embedding size of the L level lambda (0 = architecture unchanged)')
     
     # Model arguments
     parser.add_argument('--num_conv_layers', type=int, default=4, help='Number of interaction layers')

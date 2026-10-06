@@ -106,7 +106,7 @@ def sample(conformers, model, sigma_max=np.pi, sigma_min=0.01 * np.pi, steps=20,
            ode=False, likelihood=None, pdb=None, pg_weight_log_0=None, pg_repulsive_weight_log_0=None,
            pg_weight_log_1=None, pg_repulsive_weight_log_1=None, pg_kernel_size_log_0=None,
            pg_kernel_size_log_1=None, pg_langevin_weight_log_0=None, pg_langevin_weight_log_1=None,
-           pg_invariant=False, mol=None):
+           pg_invariant=False, mol=None, l_level=None):
 
     conf_dataset = InferenceDataset(conformers)
     loader = DataLoader(conf_dataset, batch_size=batch_size, shuffle=False)
@@ -166,6 +166,10 @@ def sample(conformers, model, sigma_max=np.pi, sigma_min=0.01 * np.pi, steps=20,
 
         dlogp = torch.zeros(data.num_graphs)
         data_gpu = copy.deepcopy(data).to(device)
+        if l_level is not None:
+            # [round2 S4] constant CLI lambda for every node of the batch; never per-molecule (code_plan_2 V14)
+            data_gpu.node_lambda = float(l_level) * torch.ones(data.num_nodes, device=device)
+            assert torch.unique(data_gpu.node_lambda).numel() == 1
         for sigma_idx, sigma in enumerate(sigma_schedule):
 
             data_gpu.node_sigma = sigma * torch.ones(data.num_nodes, device=device)

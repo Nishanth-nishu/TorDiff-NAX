@@ -49,6 +49,7 @@ parser.add_argument('--seed', type=int, default=None, help='[ablation-hooks] RNG
 parser.add_argument('--sigma_min_inf', type=float, default=None, help='[ablation-hooks] override sigma_min of the inference schedule only (model sigma embedding keeps training values)')
 parser.add_argument('--sigma_max_inf', type=float, default=None, help='[ablation-hooks] override sigma_max of the inference schedule only')
 parser.add_argument('--seed_confs_cycle', action='store_true', default=False, help='[ablation-hooks] with --seed_confs: assign GT local structures round-robin (conformer i <- GT conformer i mod L) instead of random.choice')
+parser.add_argument('--l_level', type=float, default=None, help='[round2 S4] L level lambda in [0,1] fed to a lambda-conditioned model; one CLI scalar for ALL molecules (never derived from GT)')
 args = parser.parse_args()
 
 """
@@ -88,7 +89,7 @@ args.batch_size = batch_size  # override the training one
 # [ablation-hooks] the training yaml contains `likelihood: full` (train-arg default) and `seed`, which silently
 # overrode the CLI upstream: every --ode run then computed the full divergence, and with any likelihood set
 # molecules with 0 rotatable bonds were dropped (counted as model failures by evaluate_confs.py).
-for _k in ('likelihood', 'seed'):
+for _k in ('likelihood', 'seed', 'l_level'):
     args.__dict__[_k] = _cli_args[_k]
 if args.seed is not None:
     random.seed(args.seed); np.random.seed(args.seed); torch.manual_seed(args.seed)
@@ -102,6 +103,13 @@ if not args.no_model:
     model.load_state_dict(state_dict, strict=True)
     model = model.to(device)
     model.eval()
+# [round2 S4] --l_level is required for, and only for, lambda-conditioned models (code_plan_2 §5.4, V14)
+_lam_model = getattr(args, 'lambda_embed_dim', 0) > 0
+if not args.no_model and _lam_model != (args.l_level is not None):
+    raise SystemExit('--l_level is required for, and only for, lambda-conditioned models '
+                     f'(lambda_embed_dim={getattr(args, "lambda_embed_dim", 0)}, l_level={args.l_level})')
+if args.l_level is not None and not 0.0 <= args.l_level <= 1.0:
+    raise SystemExit('--l_level must be in [0, 1]')
 
 test_data = pd.read_csv(args.test_csv).values
 if args.limit_mols:
@@ -152,7 +160,7 @@ def sample_confs(raw_smi, n_confs, smi):
                             pg_kernel_size_log_1=args.pg_kernel_size_log_1,
                             pg_langevin_weight_log_0=args.pg_langevin_weight_log_0,
                             pg_langevin_weight_log_1=args.pg_langevin_weight_log_1,
-                            pg_invariant=args.pg_invariant, mol=mol)
+                            pg_invariant=args.pg_invariant, mol=mol, l_level=args.l_level)
 
     if args.dump_pymol:
         if not osp.isdir(args.dump_pymol):

@@ -15,7 +15,9 @@ def get_model(args):
                                    scale_by_sigma=args.scale_by_sigma,
                                    use_second_order_repr=args.use_second_order_repr,
                                    residual=not args.no_residual, batch_norm=not args.no_batch_norm,
-                                   parity=not getattr(args, 'no_parity', False))
+                                   parity=not getattr(args, 'no_parity', False),
+                                   # [round2 S4] old yamls lack the key -> 0 -> identical architecture (DECISION D7)
+                                   lambda_embed_dim=getattr(args, 'lambda_embed_dim', 0))
 
 
 def get_optimizer_and_scheduler(args, model):

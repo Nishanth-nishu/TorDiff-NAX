@@ -24,8 +24,16 @@ def train(args, model, optimizer, scheduler, train_loader, val_loader):
     print("Starting training...")
     for epoch in range(args.n_epochs):
 
-        train_loss, base_train_loss = train_epoch(model, train_loader, optimizer, device)
+        stats = {}
+        train_loss, base_train_loss = train_epoch(model, train_loader, optimizer, device, stats=stats,
+                                                  fail_on_nan=getattr(args, 'fail_on_nan', False),
+                                                  limit_iters=getattr(args, 'limit_train_iters', 0))
         print("Epoch {}: Training Loss {}  base loss {}".format(epoch, train_loss, base_train_loss))
+        if getattr(args, 'log_timing', False):
+            # [round2 D5] data-wait share of the epoch (plan 3 timer); decides 4 CPUs / 3 workers vs 10 / 8
+            print("Epoch {}: TIMING epoch_time {:.1f}s data_wait {:.1f}s ({:.2f}%) iters {} ({:.2f} it/s)".format(
+                epoch, stats['epoch_time'], stats['data_wait'], 100 * stats['data_wait'] / max(stats['epoch_time'], 1e-9),
+                stats['n_iter'], stats['n_iter'] / max(stats['epoch_time'], 1e-9)), flush=True)
 
         val_loss, base_val_loss = test_epoch(model, val_loader, device)
         print("Epoch {}: Validation Loss {} base loss {}".format(epoch, val_loss, base_val_loss))

@@ -15,18 +15,52 @@ from utils.featurization import dihedral_pattern, featurize_mol, qm9_types, drug
 from utils.torsion import get_transformation_mask, modify_conformer
 
 
+def interp_x_torch(x, y, lam, edge_index):
+    """[round2 S4] x_lam = (1-lam) x + lam y, then every terminal (degree-1) atom is put back on the linearly
+    interpolated bond length along its interpolated bond direction. Same formula as tools/lgeom.py interp_x, which
+    builds the S1 lambda seeds (equality tested in tools/tests/test_round2_model.py). See lgeom.interp_x for why
+    (single-H rotors are L in TD and are never torsion-matched). Endpoints are exact."""
+    z = (1.0 - lam) * x + lam * y
+    src, dst = edge_index
+    deg = torch.bincount(src, minlength=x.shape[0])
+    m = (deg[src] == 1) & (deg[dst] > 1)
+    t, p = src[m], dst[m]
+    if len(t):
+        v = z[t] - z[p]
+        n = v.norm(dim=1)
+        d = (1.0 - lam) * (x[t] - x[p]).norm(dim=1) + lam * (y[t] - y[p]).norm(dim=1)
+        ok = n > 1e-6
+        z[t[ok]] = z[p[ok]] + v[ok] / n[ok, None] * d[ok, None]
+    return z
+
+
 class TorsionNoiseTransform(BaseTransform):
-    def __init__(self, sigma_min=0.01 * np.pi, sigma_max=np.pi, boltzmann_weight=False):
+    def __init__(self, sigma_min=0.01 * np.pi, sigma_max=np.pi, boltzmann_weight=False,
+                 l_jitter=0.0, l_mix_p_gt=0.0, l_interp=False):
         self.sigma_min = sigma_min
         self.sigma_max = sigma_max
         self.boltzmann_weight = boltzmann_weight
+        # [round2] default-off training-L options (DECISION D9 / defect 6: defaults leave the original path untouched)
+        assert not (l_mix_p_gt > 0 and l_interp), 'S3 (--l_mix_p_gt) and S4 (--l_interp) are separate arms'
+        assert 0.0 <= l_mix_p_gt <= 1.0 and l_jitter >= 0.0
+        self.l_jitter, self.l_mix_p_gt, self.l_interp = l_jitter, l_mix_p_gt, l_interp
+        self.needs_gt = l_mix_p_gt > 0 or l_interp
 
     def __call__(self, data):
         # select conformer
-        if self.boltzmann_weight:
-            data.pos = random.choices(data.pos, data.weights, k=1)[0]
+        if not self.needs_gt:
+            # original lines, unchanged (same statements, same RNG calls)
+            if self.boltzmann_weight:
+                data.pos = random.choices(data.pos, data.weights, k=1)[0]
+            else:
+                data.pos = random.choice(data.pos)
         else:
-            data.pos = random.choice(data.pos)
+            self._select_paired_L(data)
+        if self.l_jitter > 0:
+            # [round2 S2] Gaussian jitter of ALL atoms, per axis, fresh at every access (get() deep-copies, :193);
+            # applied before the torsion noise so the score target edge_rotate is unchanged.
+            # code_plan_2 §5.2 / §6 S2; F6 (per-axis sigma); evidence E5, E8-E10 research_A
+            data.pos = data.pos + self.l_jitter * torch.randn_like(data.pos)
 
         try:
             edge_mask, mask_rotate = data.edge_mask, data.mask_rotate
@@ -41,6 +75,29 @@ class TorsionNoiseTransform(BaseTransform):
         data.pos = modify_conformer(data.pos, data.edge_index.T[edge_mask], mask_rotate, torsion_updates)
         data.edge_rotate = torch.tensor(torsion_updates)
         return data
+
+    def _select_paired_L(self, data):
+        # [round2 S3/S4/B1cap] pick a conformer INDEX so that the matched RDKit L (data.pos[k]) and its own GT L
+        # (data.gt_pos[k], Kabsch-aligned + terminal-relabelled offline by tools/build_paired_pickles.py) stay paired.
+        # Equal caps by construction: both halves are the same <=30 conformers. code_plan_2 §5.2; DECISION D1, D6
+        if not (hasattr(data, 'gt_pos') and len(data.gt_pos) == len(data.pos)):
+            raise AssertionError('stale or unpaired cache: --l_mix_p_gt/--l_interp need a cache built from '
+                                 'standardized_pickles_paired')
+        n = len(data.pos)
+        k = random.choices(range(n), data.weights, k=1)[0] if self.boltzmann_weight else random.randrange(n)
+        x, y = data.pos[k], data.gt_pos[k]
+        assert x.shape == y.shape
+        if self.l_interp:
+            # S4: lambda ~ U[0,1] (SHORTLIST S4); unsafe pairs were dropped offline (DECISION D1), so every
+            # midpoint is chemically sane. evidence E5/E6 research_A
+            lam = float(np.random.uniform())
+            data.pos = interp_x_torch(x, y, lam, data.edge_index)
+            data.node_lambda = lam * torch.ones(data.num_nodes)
+        else:
+            # S3 (p=0.5) / B1cap (p=1.0): Bernoulli choice between the two L of the same conformer
+            data.pos = y if np.random.uniform() < self.l_mix_p_gt else x
+        data.l_conf_idx = k  # for tests only
+        del data.gt_pos  # data is a deepcopy (get(), :193); never collate the list
 
     def __repr__(self) -> str:
         return (f'{self.__class__.__name__}(sigma_min={self.sigma_min}, '
@@ -78,6 +135,11 @@ class ConformerDataset(Dataset):
 
         if limit_molecules:
             self.datapoints = self.datapoints[:limit_molecules]
+
+        # [round2] stale-cache guard (code_plan_2 V8): paired training options need gt_pos in EVERY datapoint
+        if getattr(transform, 'needs_gt', False):
+            n_bad = sum(1 for d in self.datapoints if not hasattr(d, 'gt_pos') or len(d.gt_pos) != len(d.pos))
+            assert n_bad == 0, f'{n_bad}/{len(self.datapoints)} datapoints lack paired gt_pos: wrong/stale cache {cache}'
 
 
     def preprocess_datapoints(self, root, split_path, pickle_dir, mode, num_workers, limit_molecules):
@@ -206,6 +268,7 @@ class ConformerDataset(Dataset):
 
         pos = []
         weights = []
+        gt_pos = []  # [round2] paired GT L, only filled from standardized_pickles_paired (code_plan_2 §5.2)
         for conf in confs:
             mol = conf['rd_mol']
 
@@ -221,6 +284,9 @@ class ConformerDataset(Dataset):
 
             pos.append(torch.tensor(mol.GetConformer().GetPositions(), dtype=torch.float))
             weights.append(conf['boltzmannweight'])
+            if 'gt_pos_aligned' in conf:
+                # appended in the SAME iteration as pos, so the 'reacted' filter above keeps the pairing intact
+                gt_pos.append(torch.tensor(conf['gt_pos_aligned'], dtype=torch.float))
             correct_mol = mol
 
             if self.boltzmann_resampler is not None:
@@ -237,6 +303,9 @@ class ConformerDataset(Dataset):
             print(name, len(confs), len(pos), weights)
             normalized_weights = [1 / len(weights)] * len(weights)
         data.canonical_smi, data.mol, data.pos, data.weights = canonical_smi, correct_mol, pos, normalized_weights
+        if gt_pos:
+            assert len(gt_pos) == len(pos) and all(g.shape == p.shape for g, p in zip(gt_pos, pos)), name
+            data.gt_pos = gt_pos
 
         return data
 
@@ -253,7 +322,11 @@ def construct_loader(args, modes=('train', 'val'), boltzmann_resampler=None):
 
     loaders = []
     transform = TorsionNoiseTransform(sigma_min=args.sigma_min, sigma_max=args.sigma_max,
-                                      boltzmann_weight=args.boltzmann_weight)
+                                      boltzmann_weight=args.boltzmann_weight,
+                                      # [round2] default-off (getattr: old pickled args / yamls lack the keys)
+                                      l_jitter=getattr(args, 'l_jitter', 0.0),
+                                      l_mix_p_gt=getattr(args, 'l_mix_p_gt', 0.0),
+                                      l_interp=getattr(args, 'l_interp', False))
     types = qm9_types if args.dataset == 'qm9' else drugs_types
 
     for mode in modes:
