@@ -212,3 +212,7 @@ if args.out:
     with open(f'{args.out}', 'wb') as f:
         pickle.dump(conformer_dict, f)
 print('Generated conformers for', len(conformer_dict), 'molecules')
+if args.pre_mmff:
+    # [round2 FIXES X11] test-time MMFF failures of the --pre_mmff (S5 control) runs
+    from diffusion.sampling import MMFF_STATS
+    print('MMFF_PRE', ' '.join(f'{k}={v}' for k, v in MMFF_STATS.items()))

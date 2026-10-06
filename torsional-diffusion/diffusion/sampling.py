@@ -18,11 +18,22 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 still_frames = 10
 
 
+# [round2 FIXES X11] outcome counters of the --pre_mmff relaxation (pure bookkeeping: try_mmff behaves as before).
+# Per conformer, MMFFOptimizeMoleculeConfs returns 0 (converged), 1 (not converged) or -1 (force-field setup failed).
+MMFF_STATS = {'mols': 0, 'mols_exception': 0, 'confs': 0, 'not_converged': 0, 'setup_failed': 0}
+
+
 def try_mmff(mol):
+    MMFF_STATS['mols'] += 1
     try:
-        AllChem.MMFFOptimizeMoleculeConfs(mol, mmffVariant='MMFF94s')
+        res = AllChem.MMFFOptimizeMoleculeConfs(mol, mmffVariant='MMFF94s')
+        codes = [int(r[0]) for r in res]
+        MMFF_STATS['confs'] += len(codes)
+        MMFF_STATS['not_converged'] += sum(c == 1 for c in codes)
+        MMFF_STATS['setup_failed'] += sum(c == -1 for c in codes)
         return True
     except Exception as e:
+        MMFF_STATS['mols_exception'] += 1
         return False
 
 
