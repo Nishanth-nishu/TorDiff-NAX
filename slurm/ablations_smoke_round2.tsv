@@ -1,0 +1,7 @@
+# Round-2 smoke test (20 molecules, 1 epoch) of every new training flag, run THROUGH the production
+# ablation_train_array.sbatch path (DECISION D9 graft from plan 1) with QM9_DIR/WORK/RES pointed at smoke dirs.
+# Same 7-field format as ablations_train_round2.tsv. GEN/GT_GEN args limit generation to the first 20 test molecules.
+SMK_B6_jit0.04pa | raw    | --limit_train_mols 20 --l_jitter 0.04 --log_timing --fail_on_nan                  | --limit_mols 20 | 2 | 0 | --limit_mols 20
+SMK_S3_mixL_p0.5 | paired | --limit_train_mols 20 --l_mix_p_gt 0.5 --log_timing --fail_on_nan                | --limit_mols 20 | 2 | 0 | --limit_mols 20
+SMK_B1cap_gtL    | paired | --limit_train_mols 20 --l_mix_p_gt 1.0 --log_timing --fail_on_nan                | --limit_mols 20 | 2 | 0 | --limit_mols 20
+SMK_S4_lamcond   | paired | --limit_train_mols 20 --l_interp --lambda_embed_dim 32 --log_timing --fail_on_nan | --limit_mols 20 --l_level 0 | 2 | 0 | --limit_mols 20 --l_level 1

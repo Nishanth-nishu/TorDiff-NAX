@@ -14,8 +14,8 @@ export PROJECT=${PROJECT:-/scratch/nishanth.r/tordiff}
 export REPO=$PROJECT/torsional-diffusion
 export VENV=$PROJECT/venv
 export DATA=$PROJECT/data
-export WORK=$PROJECT/workdir
-export RES=$PROJECT/results
+export WORK=${WORK:-$PROJECT/workdir}      # [round2] overridable for smoke tests (unset = round-1 value)
+export RES=${RES:-$PROJECT/results}
 export TOOLS=$PROJECT/tools
 export LOGS=$PROJECT/logs
 export UPSTREAM_COMMIT=5f713b42d7000307655f272471014c6127ea59be
@@ -38,6 +38,10 @@ export QM9_TEST_CSV=${QM9_TEST_CSV:-$QM9_DIR/test_smiles.csv}
 export QM9_TEST_MOLS=${QM9_TEST_MOLS:-$QM9_DIR/test_mols.pkl}
 export QM9_GT_SEED_CONFS=$QM9_DIR/test_gt_seed_confs.pkl         # built by tools/make_seed_pickles.py
 export QM9_GT_SEED_MOLS=$QM9_DIR/test_gt_seed_mols.pkl
+# [round2] S1 test-time seed pickles (tools/make_l_seed_pickles.py) and the S3/S4/B1cap paired training pickles
+# (tools/build_paired_pickles.py). code_plan_2 §3-4
+export QM9_SEEDS2=${QM9_SEEDS2:-$QM9_DIR/round2_seeds}
+export QM9_PAIRED=${QM9_PAIRED:-$QM9_DIR/standardized_pickles_paired}
 # Architecture of the released qm9_default model: 44 node features, 2nd-order irreps (parser default is 1st order!)
 export QM9_MODEL_ARGS="--dataset qm9 --in_node_features 44 --use_second_order_repr"
 
@@ -98,6 +102,20 @@ gen_eval() {
     local run; run=$(basename "$model_dir")
     local out=$RES/$run/$tag
     mkdir -p "$out"
+    if [[ "${R2_PROVENANCE:-0}" == "1" ]]; then
+        # [round2] stale-output guard (code_plan_2 §5.5 / V10; DECISION D4). Opt-in, so round-1 calls are unchanged.
+        # Provenance is certified from round 2 onward only (vote_1 P2-d): a round-1 dir gets no provenance file.
+        local prov=$out/provenance.txt new
+        new=$( { printf 'model=%s\nargs=%s\n' "$model_dir" "$*"; sha256sum "$model_dir/best_model.pt" | cut -d' ' -f1;
+                 for a in "$@"; do [[ -f $a ]] && sha256sum "$a" | cut -d' ' -f1; done; } )
+        if [[ -s $prov ]]; then
+            [[ "$(cat "$prov")" == "$new" ]] || { echo "ERROR: $out was produced from other inputs (see $prov)"; return 1; }
+        elif [[ -s $out/confs.pkl ]]; then
+            echo "ERROR: $out has outputs but no provenance (round-1 dir?): refusing to reuse it"; return 1
+        else
+            echo "$new" > "$prov"
+        fi
+    fi
     local energy_flag="--no_energy"; [[ "${NO_ENERGY:-1}" == "0" ]] && energy_flag=""
     if [[ ! -s $out/confs.pkl ]]; then
         echo "[gen_eval] generate $run/$tag : $*"
@@ -114,6 +132,26 @@ gen_eval() {
     grep -E '^(SUMMARY|SWEEP)' "$out/evaluate.log" | tee "$out/summary.txt" || echo "no SUMMARY line (see $out/evaluate.log)"
     python "$TOOLS/breakdown.py" --results "$out/eval.pkl" --threshold 0.5 --out "$out/breakdown.csv" \
         > "$out/breakdown.log" 2>&1 || echo "breakdown failed (see $out/breakdown.log)"
+}
+
+# [round2 D4] run_evalset MODEL_DIR SET[,SET...] : every line of $R2_EVALSETS whose SET field matches, packed $PACK
+#   (default 3) gen_eval processes on this job's GPU (plan 3 §2.5). Each process is seeded independently
+#   (generate_confs.py --seed), so packing changes no RNG path; the D4 test checks a packed rerun reproduces round 1.
+run_evalset() {
+    local model_dir=$1 sets=",$2," fail; fail=$(mktemp "$TMPDIR/evalset_fail.XXXX")
+    local S TAG ST SD ARGS
+    while IFS='|' read -r S TAG ST SD ARGS; do
+        S=$(echo "$S" | xargs)
+        [[ "$sets" == *",$S,"* ]] || continue
+        while (( $(jobs -rp | wc -l) >= ${PACK:-3} )); do wait -n || true; done
+        TAG=$(echo "$TAG" | xargs); ST=$(echo "$ST" | xargs); SD=$(echo "$SD" | xargs)
+        # shellcheck disable=SC2046
+        ( OMP_NUM_THREADS=1 EVAL_WORKERS=${EVAL_WORKERS:-2} STEPS=$ST SEED=$SD \
+          gen_eval "$model_dir" "$TAG" $(eval echo "${ARGS:-}") ${GEN_EXTRA:-} || echo "$TAG" >> "$fail" ) &
+    done < <(grep -vE '^\s*(#|$)' "$R2_EVALSETS")
+    wait
+    if [[ -s $fail ]]; then echo "FAILED tags:"; cat "$fail"; rm -f "$fail"; return 1; fi
+    rm -f "$fail"
 }
 
 # train_complete RUN_DIR N_EPOCHS : 0 if the training in RUN_DIR finished. Accepts the .train_done marker, or (runs

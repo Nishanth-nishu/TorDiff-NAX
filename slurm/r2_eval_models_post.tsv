@@ -1,0 +1,15 @@
+# Round-2 packed evaluation, POST-TRAINING phase (round-2 checkpoints). Same format as r2_eval_models_head.tsv.
+# The in-job evaluations of ablation_train_array.sbatch already gave steps20_seed0 (+ gtLcycle where GT_EVAL=2).
+$WORK/qm9_B6_jit0.04pa_e100_s0    | S1
+$WORK/qm9_B6_jit0.04pa_e100_s1    | S1
+$WORK/qm9_B6_jit0.04pa_e100_s2    | S1
+$WORK/qm9_B6_jit0.02pa_e100_s0    | S1
+$WORK/qm9_S3_mixL_p0.5_e100_s0    | S1
+$WORK/qm9_S3_mixL_p0.5_e100_s1    | S1
+$WORK/qm9_B1cap_gtL_e100_s0       | S1
+$WORK/qm9_S4_lamcond_e100_s0      | S4
+$WORK/qm9_S4_lamcond_e100_s1      | S4
+$WORK/qm9_S4_lamcond_e100_s2      | S4
+$WORK/qm9_B3_match_mmff_e100_s0   | S5
+$WORK/qm9_B3_match_mmff_e100_s1   | S5
+$WORK/qm9_B3_match_mmff_e100_s2   | S5

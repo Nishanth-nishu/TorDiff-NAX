@@ -1,0 +1,24 @@
+# Round-2 training arms (round2/code_plan_2.md §6 as amended by round2/DECISION.md). Run through
+# ablation_train_array.sbatch. Fields separated by '|':
+#   NAME | VARIANT | extra train.py args | generate args of the in-job default eval | GT_EVAL | SEED | GT_GEN_ARGS
+# GT_EVAL 2 = gtLcycle only (DECISION D8 trims the non-cycle gtL runs; F3). Panel evaluations of these models run
+# afterwards through r2_eval_array.sbatch (MODELS=r2_eval_models_post.tsv, packed, D4).
+# Line ORDER = waves of 4 (array throttle %4). This table assumes the S4 gate PASSED (DECISION D7: S4 in wave 2);
+# if it fails, submit_round2.sh uses ablations_train_round2_noS4.tsv instead.
+# wave 1 (cache_raw, cache_paired)
+B6_jit0.04pa     | raw    | --l_jitter 0.04 --log_timing --fail_on_nan                  |                | 2 | 0 |
+B6_jit0.04pa     | raw    | --l_jitter 0.04 --log_timing --fail_on_nan                  |                | 2 | 1 |
+B6_jit0.04pa     | raw    | --l_jitter 0.04 --log_timing --fail_on_nan                  |                | 2 | 2 |
+S3_mixL_p0.5     | paired | --l_mix_p_gt 0.5 --log_timing --fail_on_nan                 |                | 2 | 0 |
+# wave 2 (S4 gate passed)
+S4_lamcond       | paired | --l_interp --lambda_embed_dim 32 --log_timing --fail_on_nan | --l_level 0    | 2 | 0 | --l_level 1
+S4_lamcond       | paired | --l_interp --lambda_embed_dim 32 --log_timing --fail_on_nan | --l_level 0    | 2 | 1 | --l_level 1
+S4_lamcond       | paired | --l_interp --lambda_embed_dim 32 --log_timing --fail_on_nan | --l_level 0    | 2 | 2 | --l_level 1
+S3_mixL_p0.5     | paired | --l_mix_p_gt 0.5 --log_timing --fail_on_nan                 |                | 2 | 1 |
+# wave 3 (cache_mmff)
+B3_match_mmff    | mmff   | --log_timing --fail_on_nan                                  | --pre_mmff     | 0 | 0 |
+B3_match_mmff    | mmff   | --log_timing --fail_on_nan                                  | --pre_mmff     | 0 | 1 |
+B3_match_mmff    | mmff   | --log_timing --fail_on_nan                                  | --pre_mmff     | 0 | 2 |
+B1cap_gtL        | paired | --l_mix_p_gt 1.0 --log_timing --fail_on_nan                 |                | 2 | 0 |
+# wave 4 (exploratory, 1 seed; runs next to the post-training packed evaluation)
+B6_jit0.02pa     | raw    | --l_jitter 0.02 --log_timing --fail_on_nan                  |                | 2 | 0 |

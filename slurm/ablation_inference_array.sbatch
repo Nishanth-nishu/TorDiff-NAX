@@ -42,7 +42,7 @@ case "$MODEL" in
   BASE) MODEL_DIR=${MODEL_BASE:-$WORK/qm9_baseline_s0} ;;
   PRE)  MODEL_DIR=$WORK/pretrained/qm9_default ;;
   PRE1) MODEL_DIR=$WORK/pretrained/qm9_1order ;;
-  *)    MODEL_DIR=$MODEL ;;
+  *)    MODEL_DIR=$(eval echo "$MODEL") ;;   # [round2] expand $WORK etc. (code_plan_2 §3.3)
 esac
 echo "[$IDX] $NAME model=$MODEL_DIR steps=$STEPS_ seed=$SEED_ no_energy=$NOE_ args=$ARGS"
 [[ -s "$MODEL_DIR/best_model.pt" ]] || { echo "missing $MODEL_DIR/best_model.pt"; exit 1; }

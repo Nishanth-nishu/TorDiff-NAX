@@ -36,11 +36,13 @@ TABLE=${TABLE:-$PROJECT/slurm/ablations_train.tsv}
 mapfile -t LINES < <(grep -vE '^\s*(#|$)' "$TABLE")
 IDX=${SLURM_ARRAY_TASK_ID:-${IDX:-0}}
 (( IDX < ${#LINES[@]} )) || { echo "index $IDX >= ${#LINES[@]} lines"; exit 1; }
-IFS='|' read -r NAME VARIANT TRAIN_ARGS GEN_ARGS GT_EVAL TSEED <<< "${LINES[$IDX]}"
+IFS='|' read -r NAME VARIANT TRAIN_ARGS GEN_ARGS GT_EVAL TSEED GT_GEN_ARGS <<< "${LINES[$IDX]}"
 trim() { local s="$1"; s="${s#"${s%%[![:space:]]*}"}"; echo "${s%"${s##*[![:space:]]}"}"; }
 NAME=$(trim "$NAME"); VARIANT=$(trim "$VARIANT"); TRAIN_ARGS=$(trim "${TRAIN_ARGS:-}")
 GEN_ARGS=$(trim "${GEN_ARGS:-}"); GT_EVAL=$(trim "${GT_EVAL:-0}")
 N_EPOCHS=${N_EPOCHS:-100}; TSEED=$(trim "${TSEED:-}"); SEED=${TSEED:-${SEED:-0}}
+# [round2] optional 7th field: extra generate args for the GT-L evals (S4 needs --l_level 1); 6-field lines: empty
+GT_GEN_ARGS=$(trim "${GT_GEN_ARGS:-}")
 RUN=qm9_${NAME}_e${N_EPOCHS}_s${SEED}
 
 case "$VARIANT" in
@@ -51,6 +53,7 @@ case "$VARIANT" in
   de50)    STD="$QM9_DIR/standardized_pickles_de50" ;;
   rematch) STD="$QM9_DIR/standardized_pickles_rematch" ;;
   heavy)   STD="$QM9_DIR/standardized_pickles_heavy" ;;
+  paired)  STD="$QM9_PAIRED" ;;   # [round2 S3/S4/B1cap] rematch pickles + aligned GT L (tools/build_paired_pickles.py)
   *) echo "unknown VARIANT $VARIANT"; exit 1 ;;
 esac
 CACHE=$QM9_DIR/cache_$VARIANT
@@ -75,13 +78,16 @@ fi
 
 # shellcheck disable=SC2086
 SEED=0 STEPS=20 gen_eval "$WORK/$RUN" steps20_seed0 $GEN_ARGS
-if [[ "$GT_EVAL" == "1" ]]; then
+# GT_EVAL: 0 none; 1 gtL (random choice) + gtLcycle; 2 gtLcycle only ([round2] D8 trim of non-cycle gtL runs, F3)
+if [[ "$GT_EVAL" == "1" || "$GT_EVAL" == "2" ]]; then
     flock "$QM9_DIR/.seed_pickles.lock" bash -c '[[ -s "$0" && -s "$1" ]] || python "$2/make_seed_pickles.py" \
         --test_csv "$3" --true_mols "$4" --out_gt_confs "$0" --out_gt_mols "$1"' \
         "$QM9_GT_SEED_CONFS" "$QM9_GT_SEED_MOLS" "$TOOLS" "$QM9_TEST_CSV" "$QM9_TEST_MOLS"
-    SEED=0 STEPS=20 gen_eval "$WORK/$RUN" steps20_seed0_gtL --seed_confs "$QM9_GT_SEED_CONFS"
+    # shellcheck disable=SC2086
+    [[ "$GT_EVAL" == "1" ]] && SEED=0 STEPS=20 gen_eval "$WORK/$RUN" steps20_seed0_gtL --seed_confs "$QM9_GT_SEED_CONFS" $GT_GEN_ARGS
     # coupled-L oracle (each GT conformer's own L present; review C4) -- the random-choice run above is the
     # independent-L oracle. Their difference is the model-based estimate of what tau<->L coupling is worth.
-    SEED=0 STEPS=20 gen_eval "$WORK/$RUN" steps20_seed0_gtLcycle --seed_confs "$QM9_GT_SEED_CONFS" --seed_confs_cycle
+    # shellcheck disable=SC2086
+    SEED=0 STEPS=20 gen_eval "$WORK/$RUN" steps20_seed0_gtLcycle --seed_confs "$QM9_GT_SEED_CONFS" --seed_confs_cycle $GT_GEN_ARGS
 fi
 echo "done: $(date)"

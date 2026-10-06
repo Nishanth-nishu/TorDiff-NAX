@@ -34,6 +34,7 @@ case "$VARIANT" in
   de50)    STD="$QM9_DIR/standardized_pickles_de50" ;;
   rematch) STD="$QM9_DIR/standardized_pickles_rematch" ;;
   heavy)   STD="$QM9_DIR/standardized_pickles_heavy" ;;
+  paired)  STD="$QM9_PAIRED" ;;   # [round2] tools/build_paired_pickles.py output -> cache_paired (code_plan_2 §4)
   *) echo "unknown VARIANT"; exit 1 ;;
 esac
 CACHE=$QM9_DIR/cache_$VARIANT
