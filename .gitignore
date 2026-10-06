@@ -1,0 +1,9 @@
+# large / regenerable / third-party
+*.pdf
+papers/related/fulltext/
+papers/core/*.fulltext.txt
+cluster_sync/results/analysis/local_structure_std.csv
+*.pkl
+*.pt
+__pycache__/
+.nested_git_backup/

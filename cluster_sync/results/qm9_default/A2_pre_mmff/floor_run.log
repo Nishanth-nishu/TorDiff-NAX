@@ -1,0 +1,24 @@
+molecules: 935 skipped: 0
+rows with error: 58
+obs_min_rmsd: n=7190 mean=0.1490 median=0.0974 per-molecule-mean=0.1429
+  fraction > 0.05 A: 0.8335
+  fraction > 0.1 A: 0.4880
+  fraction > 0.125 A: 0.3878
+  fraction > 0.25 A: 0.1679
+  fraction > 0.5 A: 0.0357
+  fraction > 0.75 A: 0.0019
+floor_run: n=7190 mean=0.0832 median=0.0526 per-molecule-mean=0.0966
+  fraction > 0.05 A: 0.5268
+  fraction > 0.1 A: 0.2462
+  fraction > 0.125 A: 0.1736
+  fraction > 0.25 A: 0.0473
+  fraction > 0.5 A: 0.0053
+  fraction > 0.75 A: 0.0004
+torsion_headroom: n=7190 mean=0.0658 median=0.0181 per-molecule-mean=0.0463
+  fraction > 0.05 A: 0.2907
+  fraction > 0.1 A: 0.1829
+  fraction > 0.125 A: 0.1559
+  fraction > 0.25 A: 0.0847
+  fraction > 0.5 A: 0.0136
+  fraction > 0.75 A: 0.0004
+wrote /scratch/nishanth.r/tordiff/results/qm9_default/A2_pre_mmff/floor_run.csv

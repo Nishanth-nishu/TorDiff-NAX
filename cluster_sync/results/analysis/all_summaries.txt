@@ -1,0 +1,208 @@
+qm9_B1_train_gtL_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=2.88 COV-R_median=0.00 COV-P_mean=1.97 COV-P_median=0.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=27.51 COV-R_median=0.00 COV-P_mean=19.58 COV-P_median=0.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=61.45 COV-R_median=66.67 COV-P_mean=51.85 COV-P_median=50.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=91.40 COV-R_median=100.00 COV-P_mean=85.03 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=96.40 COV-R_median=100.00 COV-P_mean=92.80 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=98.19 COV-R_median=100.00 COV-P_mean=97.08 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=98.9002 COV-R_median=100.0000 MAT-R_mean=0.0215 MAT-R_median=0.0074 COV-P_mean=98.7418 COV-P_median=100.0000 MAT-P_mean=0.0325 MAT-P_median=0.0130 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=86.90 COV-R_median=100.00 COV-P_mean=85.01 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=92.37 COV-R_median=100.00 COV-P_mean=92.94 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=95.35 COV-R_median=100.00 COV-P_mean=96.99 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtL threshold=0.5000 COV-R_mean=97.9257 COV-R_median=100.0000 MAT-R_mean=0.0374 MAT-R_median=0.0122 COV-P_mean=98.7092 COV-P_median=100.0000 MAT-P_mean=0.0329 MAT-P_median=0.0125 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s0/steps20_seed0 threshold=0.5000 COV-R_mean=82.8005 COV-R_median=100.0000 MAT-R_mean=0.2364 MAT-R_median=0.1929 COV-P_mean=79.3625 COV-P_median=100.0000 MAT-P_mean=0.2806 MAT-P_median=0.2463 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B1_train_gtL_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=2.81 COV-R_median=0.00 COV-P_mean=1.92 COV-P_median=0.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=28.72 COV-R_median=3.13 COV-P_mean=20.91 COV-P_median=1.56
+qm9_B1_train_gtL_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=62.16 COV-R_median=70.00 COV-P_mean=54.27 COV-P_median=50.81
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=91.80 COV-R_median=100.00 COV-P_mean=85.35 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=96.35 COV-R_median=100.00 COV-P_mean=92.91 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=98.10 COV-R_median=100.00 COV-P_mean=96.79 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=99.0491 COV-R_median=100.0000 MAT-R_mean=0.0215 MAT-R_median=0.0069 COV-P_mean=98.6685 COV-P_median=100.0000 MAT-P_mean=0.0332 MAT-P_median=0.0122 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=87.11 COV-R_median=100.00 COV-P_mean=85.51 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=92.33 COV-R_median=100.00 COV-P_mean=93.03 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=95.23 COV-R_median=100.00 COV-P_mean=96.92 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtL threshold=0.5000 COV-R_mean=97.7835 COV-R_median=100.0000 MAT-R_mean=0.0385 MAT-R_median=0.0107 COV-P_mean=98.5638 COV-P_median=100.0000 MAT-P_mean=0.0330 MAT-P_median=0.0118 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s1/steps20_seed0 threshold=0.5000 COV-R_mean=82.0418 COV-R_median=100.0000 MAT-R_mean=0.2361 MAT-R_median=0.1957 COV-P_mean=79.8589 COV-P_median=100.0000 MAT-P_mean=0.2717 MAT-P_median=0.2380 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B1_train_gtL_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=2.58 COV-R_median=0.00 COV-P_mean=1.82 COV-P_median=0.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=27.06 COV-R_median=0.00 COV-P_mean=19.21 COV-P_median=0.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=62.12 COV-R_median=75.00 COV-P_mean=50.61 COV-P_median=50.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=92.63 COV-R_median=100.00 COV-P_mean=86.09 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=96.44 COV-R_median=100.00 COV-P_mean=93.33 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=98.26 COV-R_median=100.00 COV-P_mean=96.90 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=98.9994 COV-R_median=100.0000 MAT-R_mean=0.0206 MAT-R_median=0.0064 COV-P_mean=98.5079 COV-P_median=100.0000 MAT-P_mean=0.0322 MAT-P_median=0.0116 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=87.99 COV-R_median=100.00 COV-P_mean=86.38 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=92.92 COV-R_median=100.00 COV-P_mean=93.51 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=95.60 COV-R_median=100.00 COV-P_mean=97.04 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtL threshold=0.5000 COV-R_mean=98.0290 COV-R_median=100.0000 MAT-R_mean=0.0349 MAT-R_median=0.0114 COV-P_mean=98.6285 COV-P_median=100.0000 MAT-P_mean=0.0319 MAT-P_median=0.0115 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s2/steps20_seed0 threshold=0.5000 COV-R_mean=84.3782 COV-R_median=100.0000 MAT-R_mean=0.2299 MAT-R_median=0.1923 COV-P_mean=79.1114 COV-P_median=100.0000 MAT-P_mean=0.2851 MAT-P_median=0.2565 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B2_DEonly_randpair_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.71 COV-R_median=0.00 COV-P_mean=2.43 COV-P_median=0.00
+qm9_B2_DEonly_randpair_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.42 COV-R_median=20.00 COV-P_mean=25.25 COV-P_median=8.43
+qm9_B2_DEonly_randpair_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.71 COV-R_median=93.10 COV-P_mean=62.75 COV-P_median=72.36
+qm9_B2_DEonly_randpair_e100_s0/steps20_seed0 threshold=0.5000 COV-R_mean=88.7721 COV-R_median=100.0000 MAT-R_mean=0.1815 MAT-R_median=0.1485 COV-P_mean=84.5671 COV-P_median=100.0000 MAT-P_mean=0.2291 MAT-P_median=0.2018 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B2_DEonly_randpair_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.85 COV-R_median=0.00 COV-P_mean=2.52 COV-P_median=0.00
+qm9_B2_DEonly_randpair_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.50 COV-R_median=20.00 COV-P_mean=25.67 COV-P_median=9.09
+qm9_B2_DEonly_randpair_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.64 COV-R_median=91.67 COV-P_mean=62.66 COV-P_median=72.16
+qm9_B2_DEonly_randpair_e100_s1/steps20_seed0 threshold=0.5000 COV-R_mean=88.9011 COV-R_median=100.0000 MAT-R_mean=0.1802 MAT-R_median=0.1475 COV-P_mean=85.0284 COV-P_median=100.0000 MAT-P_mean=0.2278 MAT-P_median=0.2041 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B2_DEonly_randpair_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.88 COV-R_median=0.00 COV-P_mean=2.58 COV-P_median=0.00
+qm9_B2_DEonly_randpair_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.67 COV-R_median=20.00 COV-P_mean=26.02 COV-P_median=9.38
+qm9_B2_DEonly_randpair_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.88 COV-R_median=93.10 COV-P_mean=63.71 COV-P_median=75.00
+qm9_B2_DEonly_randpair_e100_s2/steps20_seed0 threshold=0.5000 COV-R_mean=88.8552 COV-R_median=100.0000 MAT-R_mean=0.1807 MAT-R_median=0.1492 COV-P_mean=84.8491 COV-P_median=100.0000 MAT-P_mean=0.2245 MAT-P_median=0.1978 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B5_match_heavy_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.44 COV-R_median=0.00 COV-P_mean=2.28 COV-P_median=0.00
+qm9_B5_match_heavy_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=33.21 COV-R_median=15.69 COV-P_mean=23.64 COV-P_median=7.11
+qm9_B5_match_heavy_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=71.61 COV-R_median=91.67 COV-P_mean=61.09 COV-P_median=67.53
+qm9_B5_match_heavy_e100_s0/steps20_seed0 threshold=0.5000 COV-R_mean=88.7822 COV-R_median=100.0000 MAT-R_mean=0.1855 MAT-R_median=0.1573 COV-P_mean=84.5653 COV-P_median=100.0000 MAT-P_mean=0.2340 MAT-P_median=0.2086 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B5_match_heavy_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.41 COV-R_median=0.00 COV-P_mean=2.24 COV-P_median=0.00
+qm9_B5_match_heavy_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=34.32 COV-R_median=16.67 COV-P_mean=24.66 COV-P_median=7.69
+qm9_B5_match_heavy_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.43 COV-R_median=92.45 COV-P_mean=62.46 COV-P_median=72.67
+qm9_B5_match_heavy_e100_s1/steps20_seed0 threshold=0.5000 COV-R_mean=88.4908 COV-R_median=100.0000 MAT-R_mean=0.1838 MAT-R_median=0.1554 COV-P_mean=84.6248 COV-P_median=100.0000 MAT-P_mean=0.2304 MAT-P_median=0.2044 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B5_match_heavy_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.45 COV-R_median=0.00 COV-P_mean=2.27 COV-P_median=0.00
+qm9_B5_match_heavy_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=34.50 COV-R_median=18.14 COV-P_mean=24.89 COV-P_median=8.70
+qm9_B5_match_heavy_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.01 COV-R_median=90.00 COV-P_mean=63.26 COV-P_median=74.04
+qm9_B5_match_heavy_e100_s2/steps20_seed0 threshold=0.5000 COV-R_mean=88.3241 COV-R_median=100.0000 MAT-R_mean=0.1842 MAT-R_median=0.1524 COV-P_mean=84.8504 COV-P_median=100.0000 MAT-P_mean=0.2264 MAT-P_median=0.1996 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.72 COV-R_median=0.00 COV-P_mean=2.49 COV-P_median=0.00
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=36.06 COV-R_median=22.22 COV-P_mean=25.98 COV-P_median=10.11
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.00 COV-R_median=93.10 COV-P_mean=63.52 COV-P_median=73.86
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=64.68 COV-R_median=77.78 COV-P_mean=57.32 COV-P_median=52.00
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=78.71 COV-R_median=100.00 COV-P_mean=71.16 COV-P_median=84.77
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.74 COV-R_median=100.00 COV-P_mean=85.16 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=95.8358 COV-R_median=100.0000 MAT-R_mean=0.0810 MAT-R_median=0.0370 COV-P_mean=93.4272 COV-P_median=100.0000 MAT-P_mean=0.1099 MAT-P_median=0.0639 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=63.73 COV-R_median=75.00 COV-P_mean=57.32 COV-P_median=50.00
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=78.24 COV-R_median=100.00 COV-P_mean=71.46 COV-P_median=84.81
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.47 COV-R_median=100.00 COV-P_mean=85.17 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtL threshold=0.5000 COV-R_mean=96.3289 COV-R_median=100.0000 MAT-R_mean=0.0823 MAT-R_median=0.0422 COV-P_mean=93.7189 COV-P_median=100.0000 MAT-P_mean=0.1093 MAT-P_median=0.0632 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0 threshold=0.5000 COV-R_mean=88.9544 COV-R_median=100.0000 MAT-R_mean=0.1791 MAT-R_median=0.1466 COV-P_mean=84.8831 COV-P_median=100.0000 MAT-P_mean=0.2253 MAT-P_median=0.1990 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.92 COV-R_median=0.00 COV-P_mean=2.56 COV-P_median=0.00
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.84 COV-R_median=21.58 COV-P_mean=26.16 COV-P_median=10.00
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.45 COV-R_median=91.35 COV-P_mean=63.31 COV-P_median=75.00
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=65.46 COV-R_median=78.89 COV-P_mean=58.01 COV-P_median=55.90
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=79.33 COV-R_median=100.00 COV-P_mean=71.94 COV-P_median=87.50
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.28 COV-R_median=100.00 COV-P_mean=84.66 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=95.7823 COV-R_median=100.0000 MAT-R_mean=0.0821 MAT-R_median=0.0354 COV-P_mean=93.2068 COV-P_median=100.0000 MAT-P_mean=0.1114 MAT-P_median=0.0611 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=64.40 COV-R_median=75.00 COV-P_mean=57.85 COV-P_median=54.77
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=78.19 COV-R_median=100.00 COV-P_mean=71.86 COV-P_median=85.71
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=88.62 COV-R_median=100.00 COV-P_mean=84.55 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtL threshold=0.5000 COV-R_mean=95.8997 COV-R_median=100.0000 MAT-R_mean=0.0842 MAT-R_median=0.0426 COV-P_mean=93.4863 COV-P_median=100.0000 MAT-P_mean=0.1112 MAT-P_median=0.0607 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0 threshold=0.5000 COV-R_mean=88.6468 COV-R_median=100.0000 MAT-R_mean=0.1815 MAT-R_median=0.1475 COV-P_mean=84.4116 COV-P_median=100.0000 MAT-P_mean=0.2279 MAT-P_median=0.1970 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.65 COV-R_median=0.00 COV-P_mean=2.46 COV-P_median=0.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.61 COV-R_median=20.00 COV-P_mean=25.78 COV-P_median=10.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.93 COV-R_median=92.72 COV-P_mean=63.74 COV-P_median=75.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=64.38 COV-R_median=77.78 COV-P_mean=57.11 COV-P_median=50.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=78.24 COV-R_median=100.00 COV-P_mean=71.04 COV-P_median=84.74
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.60 COV-R_median=100.00 COV-P_mean=85.04 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=95.7308 COV-R_median=100.0000 MAT-R_mean=0.0830 MAT-R_median=0.0374 COV-P_mean=93.2542 COV-P_median=100.0000 MAT-P_mean=0.1115 MAT-P_median=0.0622 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=63.71 COV-R_median=75.00 COV-P_mean=57.12 COV-P_median=50.96
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=77.76 COV-R_median=100.00 COV-P_mean=71.47 COV-P_median=87.50
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=88.74 COV-R_median=100.00 COV-P_mean=84.75 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtL threshold=0.5000 COV-R_mean=95.8194 COV-R_median=100.0000 MAT-R_mean=0.0863 MAT-R_median=0.0435 COV-P_mean=93.3213 COV-P_median=100.0000 MAT-P_mean=0.1124 MAT-P_median=0.0608 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0 threshold=0.5000 COV-R_mean=88.6248 COV-R_median=100.0000 MAT-R_mean=0.1812 MAT-R_median=0.1476 COV-P_mean=84.8229 COV-P_median=100.0000 MAT-P_mean=0.2253 MAT-P_median=0.1961 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_rematch_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.76 COV-R_median=0.00 COV-P_mean=2.48 COV-P_median=0.00
+qm9_CTRL_rematch_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=36.69 COV-R_median=23.08 COV-P_mean=26.57 COV-P_median=10.15
+qm9_CTRL_rematch_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.03 COV-R_median=93.65 COV-P_mean=63.96 COV-P_median=75.00
+qm9_CTRL_rematch_100ep_e100_s0/steps20_seed0 threshold=0.5000 COV-R_mean=88.9465 COV-R_median=100.0000 MAT-R_mean=0.1773 MAT-R_median=0.1445 COV-P_mean=84.9027 COV-P_median=100.0000 MAT-P_mean=0.2230 MAT-P_median=0.1958 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_rematch_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.83 COV-R_median=0.00 COV-P_mean=2.56 COV-P_median=0.00
+qm9_CTRL_rematch_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=36.29 COV-R_median=21.90 COV-P_mean=26.55 COV-P_median=10.00
+qm9_CTRL_rematch_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.01 COV-R_median=91.87 COV-P_mean=63.41 COV-P_median=72.73
+qm9_CTRL_rematch_100ep_e100_s1/steps20_seed0 threshold=0.5000 COV-R_mean=88.6102 COV-R_median=100.0000 MAT-R_mean=0.1800 MAT-R_median=0.1471 COV-P_mean=84.6420 COV-P_median=100.0000 MAT-P_mean=0.2262 MAT-P_median=0.1972 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_rematch_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.80 COV-R_median=0.00 COV-P_mean=2.53 COV-P_median=0.00
+qm9_CTRL_rematch_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=36.27 COV-R_median=22.86 COV-P_mean=26.34 COV-P_median=10.00
+qm9_CTRL_rematch_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.38 COV-R_median=92.63 COV-P_mean=64.23 COV-P_median=75.00
+qm9_CTRL_rematch_100ep_e100_s2/steps20_seed0 threshold=0.5000 COV-R_mean=88.8522 COV-R_median=100.0000 MAT-R_mean=0.1785 MAT-R_median=0.1472 COV-P_mean=85.1443 COV-P_median=100.0000 MAT-P_mean=0.2221 MAT-P_median=0.1951 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/A0_rdkit_etkdg_only/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.05 COV-R_median=0.00 COV-P_mean=2.06 COV-P_median=0.00
+qm9_default/A0_rdkit_etkdg_only/evaluate.log:SWEEP thr=0.100 COV-R_mean=28.61 COV-R_median=3.90 COV-P_mean=23.34 COV-P_median=2.25
+qm9_default/A0_rdkit_etkdg_only/evaluate.log:SWEEP thr=0.250 COV-R_mean=62.96 COV-R_median=71.43 COV-P_mean=60.52 COV-P_median=68.02
+qm9_default/A0_rdkit_etkdg_only threshold=0.5000 COV-R_mean=83.9217 COV-R_median=100.0000 MAT-R_mean=0.2298 MAT-R_median=0.1946 COV-P_mean=85.0368 COV-P_median=100.0000 MAT-P_mean=0.2353 MAT-P_median=0.2069 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/A0_rdkitL_random_tors/evaluate.log:SWEEP thr=0.050 COV-R_mean=2.48 COV-R_median=0.00 COV-P_mean=1.70 COV-P_median=0.00
+qm9_default/A0_rdkitL_random_tors/evaluate.log:SWEEP thr=0.100 COV-R_mean=22.58 COV-R_median=0.00 COV-P_mean=15.82 COV-P_median=0.00
+qm9_default/A0_rdkitL_random_tors/evaluate.log:SWEEP thr=0.250 COV-R_mean=56.74 COV-R_median=63.25 COV-P_mean=43.40 COV-P_median=35.09
+qm9_default/A0_rdkitL_random_tors threshold=0.5000 COV-R_mean=84.8805 COV-R_median=100.0000 MAT-R_mean=0.2422 MAT-R_median=0.2110 COV-P_mean=75.1618 COV-P_median=100.0000 MAT-P_mean=0.3175 MAT-P_median=0.2917 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/A1c_gtL_cycle_model/evaluate.log:SWEEP thr=0.050 COV-R_mean=67.75 COV-R_median=84.62 COV-P_mean=60.71 COV-P_median=66.67
+qm9_default/A1c_gtL_cycle_model/evaluate.log:SWEEP thr=0.100 COV-R_mean=81.23 COV-R_median=100.00 COV-P_mean=74.70 COV-P_median=90.45
+qm9_default/A1c_gtL_cycle_model/evaluate.log:SWEEP thr=0.250 COV-R_mean=90.24 COV-R_median=100.00 COV-P_mean=86.17 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_model_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=67.52 COV-R_median=85.71 COV-P_mean=60.12 COV-P_median=62.50
+qm9_default/A1c_gtL_cycle_model_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=80.93 COV-R_median=100.00 COV-P_mean=74.57 COV-P_median=91.83
+qm9_default/A1c_gtL_cycle_model_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=90.11 COV-R_median=100.00 COV-P_mean=86.41 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_model_seed1 threshold=0.5000 COV-R_mean=96.4178 COV-R_median=100.0000 MAT-R_mean=0.0755 MAT-R_median=0.0317 COV-P_mean=94.0959 COV-P_median=100.0000 MAT-P_mean=0.1012 MAT-P_median=0.0525 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1c_gtL_cycle_model_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=67.39 COV-R_median=84.58 COV-P_mean=60.01 COV-P_median=66.67
+qm9_default/A1c_gtL_cycle_model_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=80.70 COV-R_median=100.00 COV-P_mean=74.01 COV-P_median=89.44
+qm9_default/A1c_gtL_cycle_model_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.66 COV-R_median=100.00 COV-P_mean=86.26 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_model_seed2 threshold=0.5000 COV-R_mean=95.6545 COV-R_median=100.0000 MAT-R_mean=0.0801 MAT-R_median=0.0334 COV-P_mean=94.1512 COV-P_median=100.0000 MAT-P_mean=0.1024 MAT-P_median=0.0583 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1c_gtL_cycle_model threshold=0.5000 COV-R_mean=96.1923 COV-R_median=100.0000 MAT-R_mean=0.0762 MAT-R_median=0.0319 COV-P_mean=94.1744 COV-P_median=100.0000 MAT-P_mean=0.1011 MAT-P_median=0.0526 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1c_gtL_cycle_sanity/evaluate.log:SWEEP thr=0.050 COV-R_mean=99.70 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_sanity/evaluate.log:SWEEP thr=0.100 COV-R_mean=99.70 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_sanity/evaluate.log:SWEEP thr=0.250 COV-R_mean=99.70 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_sanity threshold=0.5000 COV-R_mean=99.7000 COV-R_median=100.0000 MAT-R_mean=0.0000 MAT-R_median=0.0000 COV-P_mean=99.7000 COV-P_median=100.0000 MAT-P_mean=0.0000 MAT-P_median=0.0000 n_evaluated=997 n_model_failures=3 n_additional_failures=0
+qm9_default/A1_gtL_model/evaluate.log:SWEEP thr=0.050 COV-R_mean=66.72 COV-R_median=77.78 COV-P_mean=60.33 COV-P_median=66.67
+qm9_default/A1_gtL_model/evaluate.log:SWEEP thr=0.100 COV-R_mean=80.11 COV-R_median=100.00 COV-P_mean=74.69 COV-P_median=92.72
+qm9_default/A1_gtL_model/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.33 COV-R_median=100.00 COV-P_mean=86.05 COV-P_median=100.00
+qm9_default/A1_gtL_model_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=66.35 COV-R_median=77.78 COV-P_mean=59.96 COV-P_median=62.50
+qm9_default/A1_gtL_model_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=80.28 COV-R_median=100.00 COV-P_mean=74.88 COV-P_median=91.42
+qm9_default/A1_gtL_model_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.66 COV-R_median=100.00 COV-P_mean=86.26 COV-P_median=100.00
+qm9_default/A1_gtL_model_seed1 threshold=0.5000 COV-R_mean=96.3582 COV-R_median=100.0000 MAT-R_mean=0.0790 MAT-R_median=0.0376 COV-P_mean=94.0097 COV-P_median=100.0000 MAT-P_mean=0.1014 MAT-P_median=0.0547 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1_gtL_model_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=66.14 COV-R_median=75.23 COV-P_mean=60.24 COV-P_median=66.67
+qm9_default/A1_gtL_model_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=79.44 COV-R_median=100.00 COV-P_mean=74.39 COV-P_median=91.15
+qm9_default/A1_gtL_model_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=88.72 COV-R_median=100.00 COV-P_mean=86.27 COV-P_median=100.00
+qm9_default/A1_gtL_model_seed2 threshold=0.5000 COV-R_mean=95.7393 COV-R_median=100.0000 MAT-R_mean=0.0839 MAT-R_median=0.0389 COV-P_mean=94.0032 COV-P_median=100.0000 MAT-P_mean=0.1025 MAT-P_median=0.0543 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1_gtL_model threshold=0.5000 COV-R_mean=96.1876 COV-R_median=100.0000 MAT-R_mean=0.0801 MAT-R_median=0.0386 COV-P_mean=94.2341 COV-P_median=100.0000 MAT-P_mean=0.1017 MAT-P_median=0.0514 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1_gtL_random_tors/evaluate.log:SWEEP thr=0.050 COV-R_mean=44.95 COV-R_median=29.02 COV-P_mean=41.90 COV-P_median=12.50
+qm9_default/A1_gtL_random_tors/evaluate.log:SWEEP thr=0.100 COV-R_mean=54.57 COV-R_median=60.00 COV-P_mean=46.96 COV-P_median=30.00
+qm9_default/A1_gtL_random_tors/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.65 COV-R_median=100.00 COV-P_mean=61.67 COV-P_median=75.00
+qm9_default/A1_gtL_random_tors threshold=0.5000 COV-R_mean=92.7779 COV-R_median=100.0000 MAT-R_mean=0.1573 MAT-R_median=0.1000 COV-P_mean=85.3420 COV-P_median=100.0000 MAT-P_mean=0.2191 MAT-P_median=0.1814 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1_gtL_sanity_identity/evaluate.log:SWEEP thr=0.050 COV-R_mean=94.49 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1_gtL_sanity_identity/evaluate.log:SWEEP thr=0.100 COV-R_mean=95.72 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1_gtL_sanity_identity/evaluate.log:SWEEP thr=0.250 COV-R_mean=96.55 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1_gtL_sanity_identity threshold=0.5000 COV-R_mean=98.2591 COV-R_median=100.0000 MAT-R_mean=0.0189 MAT-R_median=0.0000 COV-P_mean=99.7000 COV-P_median=100.0000 MAT-P_mean=0.0000 MAT-P_median=0.0000 n_evaluated=997 n_model_failures=3 n_additional_failures=0
+qm9_default/A2_pre_mmff/evaluate.log:SWEEP thr=0.050 COV-R_mean=17.89 COV-R_median=0.00 COV-P_mean=16.58 COV-P_median=0.00
+qm9_default/A2_pre_mmff/evaluate.log:SWEEP thr=0.100 COV-R_mean=49.96 COV-R_median=50.00 COV-P_mean=45.60 COV-P_median=40.68
+qm9_default/A2_pre_mmff/evaluate.log:SWEEP thr=0.250 COV-R_mean=78.45 COV-R_median=100.00 COV-P_mean=75.83 COV-P_median=94.44
+qm9_default/A2_pre_mmff_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=17.85 COV-R_median=0.00 COV-P_mean=16.42 COV-P_median=0.00
+qm9_default/A2_pre_mmff_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=50.09 COV-R_median=50.00 COV-P_mean=45.73 COV-P_median=40.50
+qm9_default/A2_pre_mmff_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=78.52 COV-R_median=100.00 COV-P_mean=75.24 COV-P_median=91.67
+qm9_default/A2_pre_mmff_seed1 threshold=0.5000 COV-R_mean=88.6921 COV-R_median=100.0000 MAT-R_mean=0.1485 MAT-R_median=0.1198 COV-P_mean=86.4907 COV-P_median=100.0000 MAT-P_mean=0.1676 MAT-P_median=0.1325 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+qm9_default/A2_pre_mmff_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=17.58 COV-R_median=0.00 COV-P_mean=16.29 COV-P_median=0.00
+qm9_default/A2_pre_mmff_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=49.22 COV-R_median=50.00 COV-P_mean=45.38 COV-P_median=42.86
+qm9_default/A2_pre_mmff_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=78.31 COV-R_median=100.00 COV-P_mean=75.40 COV-P_median=93.75
+qm9_default/A2_pre_mmff_seed2 threshold=0.5000 COV-R_mean=88.3790 COV-R_median=100.0000 MAT-R_mean=0.1512 MAT-R_median=0.1202 COV-P_mean=86.4773 COV-P_median=100.0000 MAT-P_mean=0.1685 MAT-P_median=0.1311 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+qm9_default/A2_pre_mmff threshold=0.5000 COV-R_mean=88.9339 COV-R_median=100.0000 MAT-R_mean=0.1507 MAT-R_median=0.1212 COV-P_mean=86.8715 COV-P_median=100.0000 MAT-P_mean=0.1679 MAT-P_median=0.1329 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/A3_post_mmff/evaluate.log:SWEEP thr=0.050 COV-R_mean=15.24 COV-R_median=0.00 COV-P_mean=17.12 COV-P_median=0.00
+qm9_default/A3_post_mmff/evaluate.log:SWEEP thr=0.100 COV-R_mean=43.29 COV-R_median=37.15 COV-P_mean=46.57 COV-P_median=39.83
+qm9_default/A3_post_mmff/evaluate.log:SWEEP thr=0.250 COV-R_mean=71.39 COV-R_median=83.33 COV-P_mean=76.19 COV-P_median=100.00
+qm9_default/A3_post_mmff_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=15.57 COV-R_median=0.00 COV-P_mean=17.40 COV-P_median=0.00
+qm9_default/A3_post_mmff_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=43.71 COV-R_median=37.50 COV-P_mean=47.08 COV-P_median=43.88
+qm9_default/A3_post_mmff_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=71.45 COV-R_median=83.48 COV-P_mean=76.11 COV-P_median=100.00
+qm9_default/A3_post_mmff_seed1 threshold=0.5000 COV-R_mean=85.1617 COV-R_median=100.0000 MAT-R_mean=0.1854 MAT-R_median=0.1472 COV-P_mean=87.2054 COV-P_median=100.0000 MAT-P_mean=0.1630 MAT-P_median=0.1256 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+qm9_default/A3_post_mmff_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=15.46 COV-R_median=0.00 COV-P_mean=17.03 COV-P_median=0.00
+qm9_default/A3_post_mmff_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=43.16 COV-R_median=38.56 COV-P_mean=46.41 COV-P_median=40.00
+qm9_default/A3_post_mmff_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=70.91 COV-R_median=83.33 COV-P_mean=75.53 COV-P_median=100.00
+qm9_default/A3_post_mmff_seed2 threshold=0.5000 COV-R_mean=84.9103 COV-R_median=100.0000 MAT-R_mean=0.1872 MAT-R_median=0.1512 COV-P_mean=87.0142 COV-P_median=100.0000 MAT-P_mean=0.1650 MAT-P_median=0.1287 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+qm9_default/A3_post_mmff threshold=0.5000 COV-R_mean=85.7152 COV-R_median=100.0000 MAT-R_mean=0.1863 MAT-R_median=0.1490 COV-P_mean=87.3408 COV-P_median=100.0000 MAT-P_mean=0.1641 MAT-P_median=0.1242 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/G1_gt_graph_seed_mols/evaluate.log:SWEEP thr=0.050 COV-R_mean=4.27 COV-R_median=0.00 COV-P_mean=2.60 COV-P_median=0.00
+qm9_default/G1_gt_graph_seed_mols/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.76 COV-R_median=25.00 COV-P_mean=27.18 COV-P_median=12.50
+qm9_default/G1_gt_graph_seed_mols/evaluate.log:SWEEP thr=0.250 COV-R_mean=75.27 COV-R_median=100.00 COV-P_mean=64.98 COV-P_median=75.00
+qm9_default/G1_gt_graph_seed_mols_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.63 COV-R_median=0.00 COV-P_mean=2.60 COV-P_median=0.00
+qm9_default/G1_gt_graph_seed_mols_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.25 COV-R_median=25.00 COV-P_mean=26.92 COV-P_median=11.54
+qm9_default/G1_gt_graph_seed_mols_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=74.54 COV-R_median=97.29 COV-P_mean=65.11 COV-P_median=75.00
+qm9_default/G1_gt_graph_seed_mols_seed1 threshold=0.5000 COV-R_mean=88.8958 COV-R_median=100.0000 MAT-R_mean=0.1739 MAT-R_median=0.1456 COV-P_mean=85.6867 COV-P_median=100.0000 MAT-P_mean=0.2173 MAT-P_median=0.1908 n_evaluated=933 n_model_failures=67 n_additional_failures=1
+qm9_default/G1_gt_graph_seed_mols_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=4.24 COV-R_median=0.00 COV-P_mean=2.52 COV-P_median=0.00
+qm9_default/G1_gt_graph_seed_mols_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.76 COV-R_median=25.00 COV-P_mean=27.80 COV-P_median=12.50
+qm9_default/G1_gt_graph_seed_mols_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.78 COV-R_median=94.44 COV-P_mean=64.38 COV-P_median=75.00
+qm9_default/G1_gt_graph_seed_mols_seed2 threshold=0.5000 COV-R_mean=88.6014 COV-R_median=100.0000 MAT-R_mean=0.1777 MAT-R_median=0.1463 COV-P_mean=84.8238 COV-P_median=100.0000 MAT-P_mean=0.2204 MAT-P_median=0.1920 n_evaluated=933 n_model_failures=67 n_additional_failures=1
+qm9_default/G1_gt_graph_seed_mols threshold=0.5000 COV-R_mean=89.3744 COV-R_median=100.0000 MAT-R_mean=0.1732 MAT-R_median=0.1427 COV-P_mean=85.5695 COV-P_median=100.0000 MAT-P_mean=0.2186 MAT-P_median=0.1951 n_evaluated=936 n_model_failures=64 n_additional_failures=1
+qm9_default/R0_base_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.91 COV-R_median=0.00 COV-P_mean=2.62 COV-P_median=0.00
+qm9_default/R0_base_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.66 COV-R_median=25.00 COV-P_mean=27.74 COV-P_median=12.50
+qm9_default/R0_base_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.91 COV-R_median=94.83 COV-P_mean=64.85 COV-P_median=75.00
+qm9_default/R0_base_seed0 threshold=0.5000 COV-R_mean=89.0293 COV-R_median=100.0000 MAT-R_mean=0.1752 MAT-R_median=0.1416 COV-P_mean=85.2463 COV-P_median=100.0000 MAT-P_mean=0.2191 MAT-P_median=0.1896 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/R1_base_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.77 COV-R_median=0.00 COV-P_mean=2.63 COV-P_median=0.00
+qm9_default/R1_base_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=36.94 COV-R_median=25.00 COV-P_mean=27.20 COV-P_median=12.50
+qm9_default/R1_base_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.66 COV-R_median=94.44 COV-P_mean=64.27 COV-P_median=75.00
+qm9_default/R1_base_seed1 threshold=0.5000 COV-R_mean=88.1758 COV-R_median=100.0000 MAT-R_mean=0.1768 MAT-R_median=0.1415 COV-P_mean=84.9938 COV-P_median=100.0000 MAT-P_mean=0.2199 MAT-P_median=0.1898 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+qm9_default/R2_base_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.94 COV-R_median=0.00 COV-P_mean=2.66 COV-P_median=0.00
+qm9_default/R2_base_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.54 COV-R_median=25.00 COV-P_mean=27.26 COV-P_median=12.50
+qm9_default/R2_base_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.90 COV-R_median=100.00 COV-P_mean=63.87 COV-P_median=75.00
+qm9_default/R2_base_seed2 threshold=0.5000 COV-R_mean=88.6612 COV-R_median=100.0000 MAT-R_mean=0.1761 MAT-R_median=0.1454 COV-P_mean=84.8613 COV-P_median=100.0000 MAT-P_mean=0.2218 MAT-P_median=0.1902 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+released/qm9_1order/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.42 COV-R_median=0.00 COV-P_mean=2.33 COV-P_median=0.00
+released/qm9_1order/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.84 COV-R_median=20.00 COV-P_mean=26.09 COV-P_median=10.00
+released/qm9_1order/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.33 COV-R_median=92.58 COV-P_mean=62.79 COV-P_median=71.15
+released/qm9_1order threshold=0.5000 COV-R_mean=88.2280 COV-R_median=100.0000 MAT-R_mean=0.1826 MAT-R_median=0.1501 COV-P_mean=84.4771 COV-P_median=100.0000 MAT-P_mean=0.2255 MAT-P_median=0.1971 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+released/qm9_default/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.59 COV-R_median=0.00 COV-P_mean=2.38 COV-P_median=0.00
+released/qm9_default/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.98 COV-R_median=25.00 COV-P_mean=27.83 COV-P_median=12.50
+released/qm9_default/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.65 COV-R_median=93.53 COV-P_mean=64.41 COV-P_median=75.00
+released/qm9_default threshold=0.5000 COV-R_mean=88.7734 COV-R_median=100.0000 MAT-R_mean=0.1765 MAT-R_median=0.1461 COV-P_mean=84.8482 COV-P_median=100.0000 MAT-P_mean=0.2187 MAT-P_median=0.1933 n_evaluated=931 n_model_failures=69 n_additional_failures=1

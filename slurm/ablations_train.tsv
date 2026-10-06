@@ -1,0 +1,29 @@
+# CORE training ablations (QM9), budgeted plan (notes/ablation_plan_qm9.md section 3). One line per SLURM array index.
+# Fields separated by '|':
+#   NAME | DATA VARIANT (std|raw|nomatch|mmff|de50|rematch|heavy, see featurize_qm9.sbatch) | extra train.py args |
+#   extra generate args for the default evaluation | 1 = also evaluate with ground-truth local structures (--seed_confs,
+#   random and cycle) | SEED (training seed; empty = $SEED env, default 0)
+# Every run uses the baseline recipe ($QM9_MODEL_ARGS, 4 layers, ns32/nv8, sigma [0.0314, 3.14]) for N_EPOCHS=100.
+# CTRL_base_100ep is the control for B1 (std vs raw data); CTRL_rematch_100ep (same recipe, pickles regenerated locally)
+# is the control for B2/B5. Line ORDER = schedule waves of 4 (array throttle %4): SLURM starts array tasks in index
+# order, so lines 0-3 run first, then 4-7, ... Variant caches must exist before their wave starts (else the task fails
+# fast and must be resubmitted with --array=<i>). Deferred lines: ablations_train_deferred.tsv.
+# wave 1 (needs cache_std, cache_raw)
+CTRL_base_100ep     | std     |  |  | 1 | 0
+CTRL_base_100ep     | std     |  |  | 1 | 1
+CTRL_base_100ep     | std     |  |  | 1 | 2
+B1_train_gtL        | raw     |  |  | 1 | 0
+# wave 2 (needs cache_rematch)
+CTRL_rematch_100ep  | rematch |  |  | 0 | 0
+CTRL_rematch_100ep  | rematch |  |  | 0 | 1
+CTRL_rematch_100ep  | rematch |  |  | 0 | 2
+B1_train_gtL        | raw     |  |  | 1 | 1
+# wave 3 (needs cache_nomatch)
+B2_DEonly_randpair  | nomatch |  |  | 0 | 0
+B2_DEonly_randpair  | nomatch |  |  | 0 | 1
+B2_DEonly_randpair  | nomatch |  |  | 0 | 2
+B1_train_gtL        | raw     |  |  | 1 | 2
+# wave 4 (needs cache_heavy); the 4th GPU is kept free as the failure/re-run margin
+B5_match_heavy      | heavy   |  |  | 0 | 0
+B5_match_heavy      | heavy   |  |  | 0 | 1
+B5_match_heavy      | heavy   |  |  | 0 | 2

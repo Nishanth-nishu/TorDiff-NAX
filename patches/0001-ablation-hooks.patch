@@ -1,0 +1,591 @@
+From d0279bb5196bec9e6885d9554821f9861f89f394 Mon Sep 17 00:00:00 2001
+From: FlexiTors prep <mveen3@gmail.com>
+Date: Tue, 29 Sep 2026 01:44:36 +0530
+Subject: [PATCH 1/9] Ablation hooks: seeding, QM9 split/data_dir guards,
+ loader workers, inference schedule override, CLI likelihood not clobbered by
+ yaml, evaluate results dump
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ evaluate_confs.py | 24 ++++++++++++++++++++++++
+ generate_confs.py | 22 ++++++++++++++++++++--
+ train.py          |  6 ++++--
+ utils/dataset.py  | 13 ++++++++++++-
+ utils/parsing.py  |  1 +
+ 5 files changed, 61 insertions(+), 5 deletions(-)
+
+diff --git a/evaluate_confs.py b/evaluate_confs.py
+index a381685..0956b6a 100644
+--- a/evaluate_confs.py
++++ b/evaluate_confs.py
+@@ -16,6 +16,9 @@ parser.add_argument('--limit_mols', type=int, default=0, help='Limit number of m
+ parser.add_argument('--dataset', type=str, default="drugs", help='Dataset: drugs, qm9 and xl')
+ parser.add_argument('--filter_mols', type=str, default=None, help='If set, is path to list of smiles to test')
+ parser.add_argument('--only_alignmol', action='store_true', default=False, help='If set instead of GetBestRMSD, it uses AlignMol (for large molecules)')
++# [ablation-hooks]
++parser.add_argument('--out_results', type=str, default=None, help='[ablation-hooks] pickle path for the per-molecule RMSD matrices + summary')
++parser.add_argument('--report_threshold', type=float, default=None, help='[ablation-hooks] threshold for the one-line summary (default 0.5 for qm9, 0.75 otherwise)')
+ args = parser.parse_args()
+ 
+ """
+@@ -155,3 +158,24 @@ for i, thresh in enumerate(threshold_ranges):
+ 
+ print(len(results), 'conformer sets compared', num_failures, 'model failures', np.isnan(amr_recall).sum(),
+       'additional failures')
++
++# [ablation-hooks] compact summary at the dataset threshold + optional dump of the raw per-molecule RMSD matrices
++report_thr = args.report_threshold if args.report_threshold is not None else (0.5 if args.dataset == 'qm9' else 0.75)
++i_thr = int(np.argmin(np.abs(threshold_ranges - report_thr)))
++_cr = [stat[i_thr] for stat in coverage_recall] + [0] * num_failures
++_cp = [stat[i_thr] for stat in coverage_precision] + [0] * num_failures
++summary = {
++    'threshold': float(threshold_ranges[i_thr]),
++    'COV-R_mean': float(np.mean(_cr) * 100), 'COV-R_median': float(np.median(_cr) * 100),
++    'MAT-R_mean': float(np.nanmean(amr_recall)), 'MAT-R_median': float(np.nanmedian(amr_recall)),
++    'COV-P_mean': float(np.mean(_cp) * 100), 'COV-P_median': float(np.median(_cp) * 100),
++    'MAT-P_mean': float(np.nanmean(amr_precision)), 'MAT-P_median': float(np.nanmedian(amr_precision)),
++    'n_evaluated': len(results), 'n_model_failures': num_failures,
++    'n_additional_failures': int(np.isnan(amr_recall).sum()),
++}
++print('SUMMARY', ' '.join(f'{k}={v:.4f}' if isinstance(v, float) else f'{k}={v}' for k, v in summary.items()))
++if args.out_results:
++    with open(args.out_results, 'wb') as f:
++        pickle.dump({'summary': summary, 'threshold_ranges': threshold_ranges, 'num_failures': num_failures,
++                     'results': results, 'args': vars(args)}, f)
++    print('Saved per-molecule results to', args.out_results)
+diff --git a/generate_confs.py b/generate_confs.py
+index a5b37eb..91aab3e 100644
+--- a/generate_confs.py
++++ b/generate_confs.py
+@@ -44,6 +44,10 @@ parser.add_argument('--pg_langevin_weight_log_1', type=float, default=None)
+ parser.add_argument('--pg_kernel_size_log_0', type=float, default=None)
+ parser.add_argument('--pg_kernel_size_log_1', type=float, default=None)
+ parser.add_argument('--pg_invariant', type=bool, default=False)
++# [ablation-hooks]
++parser.add_argument('--seed', type=int, default=None, help='[ablation-hooks] RNG seed for random/numpy/torch (upstream: unseeded)')
++parser.add_argument('--sigma_min_inf', type=float, default=None, help='[ablation-hooks] override sigma_min of the inference schedule only (model sigma embedding keeps training values)')
++parser.add_argument('--sigma_max_inf', type=float, default=None, help='[ablation-hooks] override sigma_max of the inference schedule only')
+ args = parser.parse_args()
+ 
+ """
+@@ -56,7 +60,9 @@ if args.likelihood:
+ 
+ 
+ def embed_func(mol, numConfs):
+-    AllChem.EmbedMultipleConfs(mol, numConfs=numConfs, numThreads=5)
++    # [ablation-hooks] seeded ETKDG when --seed is given (upstream: randomSeed=-1)
++    AllChem.EmbedMultipleConfs(mol, numConfs=numConfs, numThreads=5,
++                               randomSeed=args.seed if args.seed is not None else -1)
+     return mol
+ 
+ 
+@@ -73,9 +79,21 @@ elif args.seed_mols:
+     with open(args.seed_mols, 'rb') as f:
+         seed_confs = pickle.load(f)
+ 
++_cli_args = dict(args.__dict__)
+ with open(f'{args.model_dir}/model_parameters.yml') as f:
+     args.__dict__.update(yaml.full_load(f))
+ args.batch_size = batch_size  # override the training one
++# [ablation-hooks] the training yaml contains `likelihood: full` (train-arg default) and `seed`, which silently
++# overrode the CLI upstream: every --ode run then computed the full divergence, and with any likelihood set
++# molecules with 0 rotatable bonds were dropped (counted as model failures by evaluate_confs.py).
++for _k in ('likelihood', 'seed'):
++    args.__dict__[_k] = _cli_args[_k]
++if args.seed is not None:
++    random.seed(args.seed); np.random.seed(args.seed); torch.manual_seed(args.seed)
++sigma_max_inf = args.sigma_max_inf if args.sigma_max_inf else args.sigma_max
++sigma_min_inf = args.sigma_min_inf if args.sigma_min_inf else args.sigma_min
++print(f'Inference schedule: sigma_max={sigma_max_inf} sigma_min={sigma_min_inf} steps={args.inference_steps} '
++      f'ode={args.ode} likelihood={args.likelihood}')
+ if not args.no_model:
+     model = get_model(args)
+     state_dict = torch.load(f'{args.model_dir}/{args.ckpt}', map_location=torch.device('cpu'))
+@@ -122,7 +140,7 @@ def sample_confs(raw_smi, n_confs, smi):
+         conformers = perturb_seeds(conformers, pdb)
+ 
+     if not args.no_model and n_rotable_bonds > 0.5:
+-        conformers = sample(conformers, model, args.sigma_max, args.sigma_min, args.inference_steps,
++        conformers = sample(conformers, model, sigma_max_inf, sigma_min_inf, args.inference_steps,
+                             args.batch_size, args.ode, args.likelihood, pdb,
+                             pg_weight_log_0=args.pg_weight_log_0, pg_weight_log_1=args.pg_weight_log_1,
+                             pg_repulsive_weight_log_0=args.pg_repulsive_weight_log_0,
+diff --git a/train.py b/train.py
+index aa51fb4..dfd9849 100644
+--- a/train.py
++++ b/train.py
+@@ -1,4 +1,4 @@
+-import math, os, torch, yaml
++import math, os, random, torch, yaml
+ torch.multiprocessing.set_sharing_strategy('file_system')
+ import numpy as np
+ from rdkit import RDLogger
+@@ -42,7 +42,7 @@ def train(args, model, optimizer, scheduler, train_loader, val_loader):
+             'epoch': epoch,
+             'model': model.state_dict(),
+             'optimizer': optimizer.state_dict(),
+-            'scheduler': scheduler.state_dict(),
++            'scheduler': scheduler.state_dict() if scheduler else None,
+         }, os.path.join(args.log_dir, 'last_model.pt'))
+ 
+     print("Best Validation Loss {} on Epoch {}".format(best_val_loss, best_epoch))
+@@ -79,6 +79,8 @@ def boltzmann_train(args, model, optimizer, train_loader, val_loader, resampler)
+ 
+ if __name__ == '__main__':
+     args = parse_train_args()
++    # [ablation-hooks] args.seed was parsed but never used upstream
++    random.seed(args.seed); np.random.seed(args.seed); torch.manual_seed(args.seed)
+     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+ 
+     # build model
+diff --git a/utils/dataset.py b/utils/dataset.py
+index 40b5a33..c968344 100644
+--- a/utils/dataset.py
++++ b/utils/dataset.py
+@@ -52,6 +52,9 @@ class ConformerDataset(Dataset):
+                  cache=None, pickle_dir=None, boltzmann_resampler=None):
+         # part of the featurisation and filtering code taken from GeoMol https://github.com/PattanaikL/GeoMol
+ 
++        # [ablation-hooks] names are derived as path[len(root):-7], so root MUST end with '/' (GitHub issue #12)
++        if not root.endswith('/'):
++            root = root + '/'
+         super(ConformerDataset, self).__init__(root, transform)
+         self.root = root
+         self.types = types
+@@ -84,6 +87,13 @@ class ConformerDataset(Dataset):
+         if limit_molecules:
+             split = split[:limit_molecules]
+         smiles = np.array(sorted(glob.glob(osp.join(self.root, '*.pickle'))))
++        # [ablation-hooks] guard against split indices beyond the number of raw pickles (GitHub issue #20, QM9)
++        n_oob = int(np.sum(np.asarray(split) >= len(smiles)))
++        if n_oob:
++            print(f'WARNING: {n_oob} split indices >= number of raw pickles ({len(smiles)}); dropping them')
++            split = [i for i in split if i < len(smiles)]
++        if len(smiles) == 0:
++            raise FileNotFoundError(f'No *.pickle files found under data_dir={root!r}')
+         smiles = smiles[split]
+ 
+         self.open_pickles = {}
+@@ -256,7 +266,8 @@ def construct_loader(args, modes=('train', 'val'), boltzmann_resampler=None):
+                                    boltzmann_resampler=boltzmann_resampler)
+         loader = DataLoader(dataset=dataset,
+                             batch_size=args.batch_size,
+-                            shuffle=False if mode == 'test' else True)
++                            shuffle=False if mode == 'test' else True,
++                            num_workers=getattr(args, 'loader_workers', 0))
+         loaders.append(loader)
+ 
+     if len(loaders) == 1:
+diff --git a/utils/parsing.py b/utils/parsing.py
+index 8eb1a4b..5af1f61 100644
+--- a/utils/parsing.py
++++ b/utils/parsing.py
+@@ -26,6 +26,7 @@ def parse_train_args():
+     parser.add_argument('--sigma_max', type=float, default=3.14, help='Maximum sigma used for training')
+     parser.add_argument('--limit_train_mols', type=int, default=0, help='Limit to the number of molecules in dataset, 0 uses them all')
+     parser.add_argument('--boltzmann_weight', action='store_true', default=False, help='Whether to sample conformers based on B.w.')
++    parser.add_argument('--loader_workers', type=int, default=0, help='[ablation-hooks] DataLoader worker processes (0 = original behaviour)')
+ 
+     # Feature arguments
+     parser.add_argument('--in_node_features', type=int, default=74, help='Dimension of node features: 74 for drugs and xl, 44 for qm9')
+-- 
+2.55.0.windows.3
+
+
+From 1d0b4d61501ee799d7ece517553587867dc09236 Mon Sep 17 00:00:00 2001
+From: Your Name <your-email@example.com>
+Date: Tue, 29 Sep 2026 01:47:22 +0530
+Subject: [PATCH 2/9] Avoid degenerate RDKit randomSeed=0
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ generate_confs.py | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/generate_confs.py b/generate_confs.py
+index 91aab3e..6000ba3 100644
+--- a/generate_confs.py
++++ b/generate_confs.py
+@@ -60,9 +60,10 @@ if args.likelihood:
+ 
+ 
+ def embed_func(mol, numConfs):
+-    # [ablation-hooks] seeded ETKDG when --seed is given (upstream: randomSeed=-1)
++    # [ablation-hooks] seeded ETKDG when --seed is given (upstream: randomSeed=-1).
++    # NB: RDKit randomSeed=0 makes ALL conformers identical (degenerate per-conformer seeds), hence the +1.
+     AllChem.EmbedMultipleConfs(mol, numConfs=numConfs, numThreads=5,
+-                               randomSeed=args.seed if args.seed is not None else -1)
++                               randomSeed=args.seed + 1 if args.seed is not None else -1)
+     return mol
+ 
+ 
+-- 
+2.55.0.windows.3
+
+
+From 77cc2adf17d10a195536395d63310fec19f8487f Mon Sep 17 00:00:00 2001
+From: Your Name <your-email@example.com>
+Date: Tue, 29 Sep 2026 02:00:01 +0530
+Subject: [PATCH 3/9] Evaluate: threshold sweep (0.05-1.25 A); model:
+ --no_parity ablation flag
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ diffusion/score_model.py |  4 ++--
+ evaluate_confs.py        | 12 +++++++++++-
+ utils/parsing.py         |  1 +
+ utils/utils.py           |  3 ++-
+ 4 files changed, 16 insertions(+), 4 deletions(-)
+
+diff --git a/diffusion/score_model.py b/diffusion/score_model.py
+index 9b6be07..81a300f 100644
+--- a/diffusion/score_model.py
++++ b/diffusion/score_model.py
+@@ -48,7 +48,7 @@ class TensorProductConvLayer(torch.nn.Module):
+ class TensorProductScoreModel(torch.nn.Module):
+     def __init__(self, in_node_features=74, in_edge_features=4, sigma_embed_dim=32, sigma_min=0.01 * np.pi,
+                  sigma_max=np.pi, sh_lmax=2, ns=32, nv=8, num_conv_layers=4, max_radius=5, radius_embed_dim=50,
+-                 scale_by_sigma=True, use_second_order_repr=True, batch_norm=True, residual=True
++                 scale_by_sigma=True, use_second_order_repr=True, batch_norm=True, residual=True, parity=True
+                  ):
+         super(TensorProductScoreModel, self).__init__()
+         self.in_node_features = in_node_features
+@@ -115,7 +115,7 @@ class TensorProductScoreModel(torch.nn.Module):
+         self.bond_conv = TensorProductConvLayer(
+             in_irreps=self.conv_layers[-1].out_irreps,
+             sh_irreps=self.final_tp.irreps_out,
+-            out_irreps=f'{ns}x0o',
++            out_irreps=f'{ns}x0o' if parity else f'{ns}x0e',  # [ablation-hooks] 0e = parity-invariant ablation
+             n_edge_features=3 * ns,
+             residual=False,
+             batch_norm=batch_norm
+diff --git a/evaluate_confs.py b/evaluate_confs.py
+index 0956b6a..6829990 100644
+--- a/evaluate_confs.py
++++ b/evaluate_confs.py
+@@ -173,7 +173,17 @@ summary = {
+     'n_evaluated': len(results), 'n_model_failures': num_failures,
+     'n_additional_failures': int(np.isnan(amr_recall).sum()),
+ }
+-print('SUMMARY', ' '.join(f'{k}={v:.4f}' if isinstance(v, float) else f'{k}={v}' for k, v in summary.items()))
++print('SUMMARY', ' '.join(f'{k}={v:.4f}' if isinstance(v, float) else f'{k}={v}' for k, v in summary.items() if k != 'sweep'))
++# threshold sweep incl. sub-grid values (QM9 at 0.5 A is saturated; 0.05/0.1/0.25 A are more informative).
++# Same conventions as above: strict <, failures count as 0 coverage.
++sweep = {}
++for thr in (0.05, 0.1, 0.25, 0.5, 0.75, 1.0, 1.25):
++    cr = [float(np.mean(np.min(r['rmsd'], axis=1) < thr)) for r in results.values()] + [0] * num_failures
++    cp = [float(np.mean(np.min(r['rmsd'], axis=0) < thr)) for r in results.values()] + [0] * num_failures
++    sweep[thr] = (100 * np.mean(cr), 100 * np.median(cr), 100 * np.mean(cp), 100 * np.median(cp))
++    print(f'SWEEP thr={thr:.3f} COV-R_mean={sweep[thr][0]:.2f} COV-R_median={sweep[thr][1]:.2f} '
++          f'COV-P_mean={sweep[thr][2]:.2f} COV-P_median={sweep[thr][3]:.2f}')
++summary['sweep'] = sweep
+ if args.out_results:
+     with open(args.out_results, 'wb') as f:
+         pickle.dump({'summary': summary, 'threshold_ranges': threshold_ranges, 'num_failures': num_failures,
+diff --git a/utils/parsing.py b/utils/parsing.py
+index 5af1f61..21f8876 100644
+--- a/utils/parsing.py
++++ b/utils/parsing.py
+@@ -43,6 +43,7 @@ def parse_train_args():
+     parser.add_argument('--no_residual', action='store_true', default=False, help='If set, it removes residual connection')
+     parser.add_argument('--no_batch_norm', action='store_true', default=False, help='If set, it removes the batch norm')
+     parser.add_argument('--use_second_order_repr', action='store_true', default=False, help='Whether to use only up to first order representations or also second')
++    parser.add_argument('--no_parity', action='store_true', default=False, help='[ablation-hooks] parity-INVARIANT torsion head (0e instead of 0o outputs); reproduces TD Table 8 "no parity equivariance"')
+ 
+     # Boltzmann training arguments
+     parser.add_argument('--boltzmann_training', action='store_true', default=False, help='Set to true for torsional Boltzmann training')
+diff --git a/utils/utils.py b/utils/utils.py
+index ddc04d2..83fb3fa 100644
+--- a/utils/utils.py
++++ b/utils/utils.py
+@@ -14,7 +14,8 @@ def get_model(args):
+                                    max_radius=args.max_radius, radius_embed_dim=args.radius_embed_dim,
+                                    scale_by_sigma=args.scale_by_sigma,
+                                    use_second_order_repr=args.use_second_order_repr,
+-                                   residual=not args.no_residual, batch_norm=not args.no_batch_norm)
++                                   residual=not args.no_residual, batch_norm=not args.no_batch_norm,
++                                   parity=not getattr(args, 'no_parity', False))
+ 
+ 
+ def get_optimizer_and_scheduler(args, model):
+-- 
+2.55.0.windows.3
+
+
+From c8d2dc4807b4c7ecb1b168ddec9e53a7e7c76517 Mon Sep 17 00:00:00 2001
+From: Your Name <your-email@example.com>
+Date: Tue, 29 Sep 2026 02:13:05 +0530
+Subject: [PATCH 4/9] Generate: --seed_confs_cycle (round-robin GT local
+ structures)
+
+With --seed_confs, conformer i takes the local structure of GT conformer
+i mod L instead of random.choice. Gives a coupled-L oracle (each target's
+own L is present) to contrast with the default independent-L oracle, and
+makes the no-model/no-random sanity check exact (COV-R 100, AMR 0).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ diffusion/sampling.py | 7 +++++--
+ generate_confs.py     | 4 +++-
+ 2 files changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/diffusion/sampling.py b/diffusion/sampling.py
+index 5d490b2..3cfc75e 100644
+--- a/diffusion/sampling.py
++++ b/diffusion/sampling.py
+@@ -43,7 +43,8 @@ def get_seed(smi, seed_confs=None, dataset='drugs'):
+     return mol, data
+ 
+ 
+-def embed_seeds(mol, data, n_confs, single_conf=False, smi=None, embed_func=None, seed_confs=None, pdb=None, mmff=False):
++def embed_seeds(mol, data, n_confs, single_conf=False, smi=None, embed_func=None, seed_confs=None, pdb=None, mmff=False,
++                seed_confs_cycle=False):
+     if not seed_confs:
+         embed_num_confs = n_confs if not single_conf else 1
+         try:
+@@ -63,7 +64,9 @@ def embed_seeds(mol, data, n_confs, single_conf=False, smi=None, embed_func=None
+         if single_conf:
+             seed_mol = copy.deepcopy(mol)
+         elif seed_confs:
+-            seed_mol = random.choice(seed_confs[smi])
++            # [ablation-hooks] cycle=True: conformer i gets the local structure of GT conformer i mod L (each GT L used
++            # ~K/L times: 'coupled-L oracle'); default random.choice = 'perfect independent L sampler'
++            seed_mol = seed_confs[smi][i % len(seed_confs[smi])] if seed_confs_cycle else random.choice(seed_confs[smi])
+         else:
+             seed_mol = copy.deepcopy(mol)
+             [seed_mol.RemoveConformer(j) for j in range(n_confs) if j != i]
+diff --git a/generate_confs.py b/generate_confs.py
+index 6000ba3..57c11cb 100644
+--- a/generate_confs.py
++++ b/generate_confs.py
+@@ -48,6 +48,7 @@ parser.add_argument('--pg_invariant', type=bool, default=False)
+ parser.add_argument('--seed', type=int, default=None, help='[ablation-hooks] RNG seed for random/numpy/torch (upstream: unseeded)')
+ parser.add_argument('--sigma_min_inf', type=float, default=None, help='[ablation-hooks] override sigma_min of the inference schedule only (model sigma embedding keeps training values)')
+ parser.add_argument('--sigma_max_inf', type=float, default=None, help='[ablation-hooks] override sigma_max of the inference schedule only')
++parser.add_argument('--seed_confs_cycle', action='store_true', default=False, help='[ablation-hooks] with --seed_confs: assign GT local structures round-robin (conformer i <- GT conformer i mod L) instead of random.choice')
+ args = parser.parse_args()
+ 
+ """
+@@ -129,7 +130,8 @@ def sample_confs(raw_smi, n_confs, smi):
+     n_rotable_bonds = int(data.edge_mask.sum())
+     if args.seed_confs:
+         conformers, pdb = embed_seeds(mol, data, n_confs, single_conf=args.single_conf, smi=raw_smi,
+-                                      pdb=args.dump_pymol, seed_confs=seed_confs)
++                                      pdb=args.dump_pymol, seed_confs=seed_confs,
++                                      seed_confs_cycle=args.seed_confs_cycle)
+     else:
+         conformers, pdb = embed_seeds(mol, data, n_confs, single_conf=args.single_conf,
+                                       pdb=args.dump_pymol, embed_func=embed_func, mmff=args.pre_mmff)
+-- 
+2.55.0.windows.3
+
+
+From 49a4811adefcb26c6f21ebcbc8551ffa7f43fcd2 Mon Sep 17 00:00:00 2001
+From: Your Name <your-email@example.com>
+Date: Tue, 29 Sep 2026 02:13:43 +0530
+Subject: [PATCH 5/9] Standardize: --heavy_objective (heavy-atom RMSD for
+ conformer matching)
+
+Upstream DE optimises the H-inclusive RMSD, so the stored heavy-atom
+matching RMSD overestimates the torsion-only floor and the heavy-atom
+torsion targets carry H-driven noise. Flag enables the matched ablation.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ standardize_confs.py     |  3 ++-
+ utils/standardization.py | 12 +++++++++---
+ 2 files changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/standardize_confs.py b/standardize_confs.py
+index 797eb2a..eebd62f 100644
+--- a/standardize_confs.py
++++ b/standardize_confs.py
+@@ -17,6 +17,7 @@ parser.add_argument('--max_iter', type=int, default=15, help='Maximum number of
+ parser.add_argument('--confs_per_mol', type=int, default=30, help='Maximum number of conformers to take for each molecule')
+ parser.add_argument('--mmff', action='store_true', default=False, help='Whether to relax seed conformers with MMFF before matching')
+ parser.add_argument('--no_match', action='store_true', default=False, help='Whether to skip conformer matching')
++parser.add_argument('--heavy_objective', action='store_true', default=False, help='[ablation-hooks] DE optimises the heavy-atom RMSD (evaluation metric) instead of the H-inclusive RMSD')
+ parser.add_argument('--boltzmann', choices=['top', 'resample'], default=None, help='If set, specifies a different conformer selection policy')
+ args = parser.parse_args()
+ 
+@@ -103,7 +104,7 @@ def conformer_match(name, confs):
+             mol_rdkit_single = copy.deepcopy(mol_rdkit)
+             [mol_rdkit_single.RemoveConformer(j) for j in range(n_confs) if j != conf_id]
+             optimize_rotatable_bonds(mol_rdkit_single, mol, rotable_bonds,
+-                                     popsize=args.popsize, maxiter=args.max_iter)
++                                     popsize=args.popsize, maxiter=args.max_iter, heavy_only=args.heavy_objective)
+             rmsd = AllChem.AlignMol(REMOVE_HS(mol_rdkit_single), REMOVE_HS(mol))
+             long_term_log['confs_success'] += 1
+ 
+diff --git a/utils/standardization.py b/utils/standardization.py
+index cea742c..30e3f05 100644
+--- a/utils/standardization.py
++++ b/utils/standardization.py
+@@ -27,8 +27,9 @@ def apply_changes(mol, values, rotable_bonds, conf_id):
+ 
+ 
+ def optimize_rotatable_bonds(mol, true_mol, rotable_bonds, probe_id=-1, ref_id=-1, seed=0, popsize=15, maxiter=500,
+-                             mutation=(0.5, 1), recombination=0.8):
+-    opt = OptimizeConformer(mol, true_mol, rotable_bonds, seed=seed, probe_id=probe_id, ref_id=ref_id)
++                             mutation=(0.5, 1), recombination=0.8, heavy_only=False):
++    opt = OptimizeConformer(mol, true_mol, rotable_bonds, seed=seed, probe_id=probe_id, ref_id=ref_id,
++                            heavy_only=heavy_only)
+     max_bound = [np.pi] * len(opt.rotable_bonds)
+     min_bound = [-np.pi] * len(opt.rotable_bonds)
+     bounds = (min_bound, max_bound)
+@@ -44,7 +45,7 @@ def optimize_rotatable_bonds(mol, true_mol, rotable_bonds, probe_id=-1, ref_id=-
+ 
+ 
+ class OptimizeConformer:
+-    def __init__(self, mol, true_mol, rotable_bonds, probe_id=-1, ref_id=-1, seed=None):
++    def __init__(self, mol, true_mol, rotable_bonds, probe_id=-1, ref_id=-1, seed=None, heavy_only=False):
+         super(OptimizeConformer, self).__init__()
+         if seed:
+             np.random.seed(seed)
+@@ -53,10 +54,15 @@ class OptimizeConformer:
+         self.true_mol = true_mol
+         self.probe_id = probe_id
+         self.ref_id = ref_id
++        # [ablation-hooks] heavy_only: optimise the heavy-atom RMSD (the evaluation metric) instead of the
++        # H-inclusive one (upstream); atoms share indices between probe and reference (same GEOM graph)
++        self.atom_map = [(a.GetIdx(), a.GetIdx()) for a in mol.GetAtoms() if a.GetAtomicNum() > 1] if heavy_only else None
+ 
+     def score_conformation(self, values):
+         for i, r in enumerate(self.rotable_bonds):
+             SetDihedral(self.mol.GetConformer(self.probe_id), r, values[i])
++        if self.atom_map:
++            return RMSD(self.mol, self.true_mol, self.probe_id, self.ref_id, atomMap=self.atom_map)
+         return RMSD(self.mol, self.true_mol, self.probe_id, self.ref_id)
+ 
+ 
+-- 
+2.55.0.windows.3
+
+
+From 621897754c7a750c74a031fc05466d76f3255226 Mon Sep 17 00:00:00 2001
+From: FlexiTors prep <mveen3@gmail.com>
+Date: Tue, 29 Sep 2026 02:19:29 +0530
+Subject: [PATCH 6/9] Evaluate: SUMMARY at the exact --report_threshold (no
+ snapping to the 0.125 grid)
+
+The SUMMARY line picked the nearest value of np.arange(0, 2.5, .125), so e.g.
+--report_threshold 0.1 silently reported COV at 0.125 A. Coverage is now computed
+at exactly the requested threshold from the per-molecule RMSD matrices, with the
+same conventions as upstream (strict <, model failures = 0 coverage). Results at
+0.5 / 0.75 A are unchanged. Found by review/metric_verification.md (tests in
+review/tests/test_metrics.py).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ evaluate_confs.py | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/evaluate_confs.py b/evaluate_confs.py
+index 6829990..90d0987 100644
+--- a/evaluate_confs.py
++++ b/evaluate_confs.py
+@@ -161,11 +161,12 @@ print(len(results), 'conformer sets compared', num_failures, 'model failures', n
+ 
+ # [ablation-hooks] compact summary at the dataset threshold + optional dump of the raw per-molecule RMSD matrices
+ report_thr = args.report_threshold if args.report_threshold is not None else (0.5 if args.dataset == 'qm9' else 0.75)
+-i_thr = int(np.argmin(np.abs(threshold_ranges - report_thr)))
+-_cr = [stat[i_thr] for stat in coverage_recall] + [0] * num_failures
+-_cp = [stat[i_thr] for stat in coverage_precision] + [0] * num_failures
++# computed at EXACTLY report_thr from the RMSD matrices (upstream grid is np.arange(0, 2.5, .125): snapping to the
++# nearest grid value silently turned e.g. --report_threshold 0.1 into 0.125). Identical to the printed block at 0.5/0.75.
++_cr = [float(np.mean(np.min(r['rmsd'], axis=1) < report_thr)) for r in results.values()] + [0] * num_failures
++_cp = [float(np.mean(np.min(r['rmsd'], axis=0) < report_thr)) for r in results.values()] + [0] * num_failures
+ summary = {
+-    'threshold': float(threshold_ranges[i_thr]),
++    'threshold': float(report_thr),
+     'COV-R_mean': float(np.mean(_cr) * 100), 'COV-R_median': float(np.median(_cr) * 100),
+     'MAT-R_mean': float(np.nanmean(amr_recall)), 'MAT-R_median': float(np.nanmedian(amr_recall)),
+     'COV-P_mean': float(np.mean(_cp) * 100), 'COV-P_median': float(np.median(_cp) * 100),
+-- 
+2.55.0.windows.3
+
+
+From 392e6f4fdc8185605a83dbf9dae70da8f63ec346 Mon Sep 17 00:00:00 2001
+From: tordiff <tordiff@localhost>
+Date: Thu, 1 Oct 2026 22:05:42 +0530
+Subject: [PATCH 7/9] Likelihood: log_det_jac returns 0 for molecules with 0
+ rotatable bonds (empty Jacobian crashed SVD)
+
+---
+ diffusion/likelihood.py | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/diffusion/likelihood.py b/diffusion/likelihood.py
+index f831472..1331740 100644
+--- a/diffusion/likelihood.py
++++ b/diffusion/likelihood.py
+@@ -92,6 +92,8 @@ def log_det_jac(data):
+         dx = dx - np.cross(omega, pos)
+         jac.append(dx.flatten())
+     jac = np.array(jac)
++    if jac.ndim < 2 or jac.shape[0] == 0:  # [ablation-hooks] 0 rotatable bonds: empty Jacobian, log det = 0
++        return 0.0
+     _, D, _ = np.linalg.svd(jac)
+     return np.sum(np.log(D))
+ 
+-- 
+2.55.0.windows.3
+
+
+From 04a799e32d3fc50e3da2857bc220e3e0d8a65d56 Mon Sep 17 00:00:00 2001
+From: tordiff <tordiff@localhost>
+Date: Thu, 1 Oct 2026 22:57:52 +0530
+Subject: [PATCH 8/9] Seeds: reject multi-fragment GT seed mols like the SMILES
+ path does (mask_rotate assertion on C=C1C(=O)C=NN1C.N)
+
+---
+ diffusion/sampling.py | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/diffusion/sampling.py b/diffusion/sampling.py
+index 3cfc75e..b31f24b 100644
+--- a/diffusion/sampling.py
++++ b/diffusion/sampling.py
+@@ -32,6 +32,12 @@ def get_seed(smi, seed_confs=None, dataset='drugs'):
+             print("smile not in seeds", smi)
+             return None, None
+         mol = seed_confs[smi][0]
++        # [ablation-hooks] same rejection as featurize_mol_from_smiles ('.' in smiles): a multi-fragment graph makes
++        # every bond look rotatable and breaks mask_rotate (AssertionError in modify_conformer)
++        from rdkit import Chem
++        if len(Chem.GetMolFrags(mol)) > 1:
++            print("multi-fragment seed mol", smi)
++            return None, None
+         data = featurize_mol(mol, dataset)
+ 
+     else:
+-- 
+2.55.0.windows.3
+
+
+From e809b450b73e60eb1a094b0b14dfb2b4cd80a08a Mon Sep 17 00:00:00 2001
+From: tordiff <tordiff@localhost>
+Date: Thu, 1 Oct 2026 23:26:40 +0530
+Subject: [PATCH 9/9] Generate: guard RemoveAllConformers when --seed_mols seed
+ is None
+
+---
+ generate_confs.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/generate_confs.py b/generate_confs.py
+index 57c11cb..a3fa14a 100644
+--- a/generate_confs.py
++++ b/generate_confs.py
+@@ -120,7 +120,7 @@ def sample_confs(raw_smi, n_confs, smi):
+         mol, data = get_seed(raw_smi, seed_confs=seed_confs, dataset=args.dataset)
+     elif args.seed_mols:
+         mol, data = get_seed(smi, seed_confs=seed_confs, dataset=args.dataset)
+-        mol.RemoveAllConformers()
++        if mol: mol.RemoveAllConformers()  # [ablation-hooks] get_seed may return None (missing/multi-fragment seed)
+     else:
+         mol, data = get_seed(smi, dataset=args.dataset)
+     if not mol:
+-- 
+2.55.0.windows.3
+

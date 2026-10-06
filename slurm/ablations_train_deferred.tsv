@@ -1,0 +1,15 @@
+# DEFERRED training ablations: not in the 4-day / 330 GPU-h budget (notes/ablation_plan_qm9.md "Deferred").
+# Same format as ablations_train.tsv. Run with:
+#   TABLE=$PROJECT/slurm/ablations_train_deferred.tsv sbatch --array=0-11%4 ablation_train_array.sbatch
+B3_match_mmff       | mmff    |                                   | --pre_mmff | 0 | 0
+E_train_sigmin_0.005pi | std  | --sigma_min 0.0157                |            | 0 | 0
+E_train_sigmax_0.5pi   | std  | --sigma_max 1.57                  |            | 0 | 0
+F_layers2           | std     | --num_conv_layers 2               |            | 0 | 0
+F_layers3           | std     | --num_conv_layers 3               |            | 0 | 0
+F_layers6           | std     | --num_conv_layers 6               |            | 0 | 0
+F_width_16_4        | std     | --ns 16 --nv 4                    |            | 0 | 0
+F_width_64_16       | std     | --ns 64 --nv 16                   |            | 0 | 0
+F_radius3           | std     | --max_radius 3.0                  |            | 0 | 0
+F_radius7           | std     | --max_radius 7.0                  |            | 0 | 0
+G_no_parity         | std     | --no_parity                       |            | 0 | 0
+B4_match_de50       | de50    |                                   |            | 0 | 0

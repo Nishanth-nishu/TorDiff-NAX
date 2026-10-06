@@ -1,0 +1,14 @@
+reference: CTRL_base_gtLc (3 file(s)); molecules in universe: 996
+COV in %, MAT in A; diff = arm - ref; p_holm only over primary endpoints
+    arm     metric   n     ref  arm_value    diff   ci_lo   ci_hi  p_boot  ref_replicate_sd  primary  n_ref_files  n_arm_files  p_holm
+B1_gtLc      MAT-R 996  0.0820     0.0212 -0.0608 -0.0668 -0.0551     0.0            0.0010     True            3            3     0.0
+B1_gtLc      MAT-P 996  0.1109     0.0326 -0.0783 -0.0852 -0.0715     0.0            0.0009    False            3            3     NaN
+B1_gtLc  COV-R@0.5 996 96.1677    99.3804  3.2127  2.5502  3.9448     0.0            0.0527     True            3            3     0.0
+B1_gtLc  COV-P@0.5 996 93.6707    99.0355  5.3648  4.5090  6.2380     0.0            0.1165    False            3            3     NaN
+B1_gtLc COV-R@0.05 996 65.1040    92.3143 27.2102 25.3725 29.1143     0.0            0.5600    False            3            3     NaN
+B1_gtLc COV-P@0.05 996 57.7103    85.8347 28.1245 26.3812 29.8544     0.0            0.4768    False            3            3     NaN
+B1_gtLc  COV-R@0.1 996 79.0746    96.7820 17.7075 16.1947 19.2937     0.0            0.5509    False            3            3     NaN
+B1_gtLc  COV-P@0.1 996 71.6652    93.3856 21.7204 20.1294 23.3318     0.0            0.4899    False            3            3     NaN
+B1_gtLc COV-R@0.25 996 89.9011    98.5794  8.6783  7.6397  9.8022     0.0            0.2370    False            3            3     NaN
+B1_gtLc COV-P@0.25 996 85.2973    97.3127 12.0154 10.7885 13.2796     0.0            0.2631    False            3            3     NaN
+wrote /scratch/nishanth.r/tordiff/results/analysis/paired_B1_vs_CTRLbase_gtLcycle.md

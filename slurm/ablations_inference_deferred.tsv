@@ -1,0 +1,22 @@
+# DEFERRED inference ablations: not in the 4-day / 330 GPU-h budget (notes/ablation_plan_qm9.md "Deferred").
+# Same format as ablations_inference.tsv. Run with:
+#   TABLE=$PROJECT/slurm/ablations_inference_deferred.tsv sbatch --array=0-17%4 ablation_inference_array.sbatch
+# BASE lines need our own 250-epoch baseline (train_qm9_baseline.sbatch, also deferred) or MODEL_BASE=<released dir>.
+P1_released_1order       | PRE1 | 20  | 0 | 1 |
+C_steps5                 | PRE  | 5   | 0 | 1 |
+C_steps10                | PRE  | 10  | 0 | 1 |
+C_steps50                | PRE  | 50  | 0 | 1 |
+C_steps100               | PRE  | 100 | 0 | 1 |
+D_ode_steps20            | PRE  | 20  | 0 | 1 | --ode
+D_ode_steps50            | PRE  | 50  | 0 | 1 | --ode
+E_inf_sigmin_0.005pi     | PRE  | 20  | 0 | 1 | --sigma_min_inf 0.0157
+E_inf_sigmin_0.05pi      | PRE  | 20  | 0 | 1 | --sigma_min_inf 0.157
+E_inf_sigmax_0.5pi       | PRE  | 20  | 0 | 1 | --sigma_max_inf 1.57
+H_pool_sde_seed11        | PRE  | 20  | 11 | 0 |
+H_pool_sde_seed12        | PRE  | 20  | 12 | 0 |
+H_pool_sde_seed13        | PRE  | 20  | 13 | 0 |
+H_pool_sde_seed14        | PRE  | 20  | 14 | 0 |
+H_pool_odelik_seed21     | PRE  | 20  | 21 | 0 | --ode --likelihood full
+H_pool_odelik_seed22     | PRE  | 20  | 22 | 0 | --ode --likelihood full
+H_pool_odelik_seed23     | PRE  | 20  | 23 | 0 | --ode --likelihood full
+H_pool_odelik_seed24     | PRE  | 20  | 24 | 0 | --ode --likelihood full

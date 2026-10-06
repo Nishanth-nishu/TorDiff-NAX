@@ -1,0 +1,58 @@
+molecules: 1000
+rows with error: 57
+floor_rmsd: n=7554 mean=0.1569 median=0.0880 per-molecule-mean=0.1681
+  fraction > 0.05 A: 0.9097
+  fraction > 0.1 A: 0.4220
+  fraction > 0.125 A: 0.3258
+  fraction > 0.25 A: 0.1356
+  fraction > 0.5 A: 0.0327
+  fraction > 0.75 A: 0.0090
+floor_best: n=7554 mean=0.0987 median=0.0606 per-molecule-mean=0.1146
+  fraction > 0.05 A: 0.6684
+  fraction > 0.1 A: 0.1916
+  fraction > 0.125 A: 0.1240
+  fraction > 0.25 A: 0.0314
+  fraction > 0.5 A: 0.0066
+  fraction > 0.75 A: 0.0042
+floor_best_sym: n=7554 mean=0.0986 median=0.0606 per-molecule-mean=0.1145
+  fraction > 0.05 A: 0.6684
+  fraction > 0.1 A: 0.1916
+  fraction > 0.125 A: 0.1240
+  fraction > 0.25 A: 0.0314
+  fraction > 0.5 A: 0.0066
+  fraction > 0.75 A: 0.0042
+floor_gtother: n=7329 mean=0.0269 median=0.0133 per-molecule-mean=0.0265
+  fraction > 0.05 A: 0.0831
+  fraction > 0.1 A: 0.0366
+  fraction > 0.125 A: 0.0302
+  fraction > 0.25 A: 0.0198
+  fraction > 0.5 A: 0.0026
+  fraction > 0.75 A: 0.0005
+angle_oracle_rmsd: n=7554 mean=0.0885 median=0.0482 per-molecule-mean=0.1059
+  fraction > 0.05 A: 0.4797
+  fraction > 0.1 A: 0.1591
+  fraction > 0.125 A: 0.1067
+  fraction > 0.25 A: 0.0319
+  fraction > 0.5 A: 0.0070
+  fraction > 0.75 A: 0.0042
+local_oracle_rmsd: n=7554 mean=0.0735 median=0.0290 per-molecule-mean=0.0978
+  fraction > 0.05 A: 0.3730
+  fraction > 0.1 A: 0.1458
+  fraction > 0.125 A: 0.1019
+  fraction > 0.25 A: 0.0316
+  fraction > 0.5 A: 0.0070
+  fraction > 0.75 A: 0.0042
+transplant_rmsd_best: n=7554 mean=0.1064 median=0.0680 per-molecule-mean=0.1206
+  fraction > 0.05 A: 0.7894
+  fraction > 0.1 A: 0.2265
+  fraction > 0.125 A: 0.1448
+  fraction > 0.25 A: 0.0356
+  fraction > 0.5 A: 0.0070
+  fraction > 0.75 A: 0.0045
+bond_rmsd_assigned: mean=0.0360
+angle_rmsd_assigned: mean=3.8821
+bond_rmsd_gtgt: mean=0.0040
+angle_rmsd_gtgt: mean=1.6735
+stereo_match rate (seeds embedded from the GT graph): 0.9993380990203865
+stereo_match_best rate (seeds embedded from the GT graph): 1.0
+wrote /scratch/nishanth.r/tordiff/results/analysis/local_structure_test.csv

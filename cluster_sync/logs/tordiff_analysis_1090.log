@@ -1,0 +1,384 @@
+==================== diagnostics ====================
+date        : Sat Oct  3 07:47:58 PM IST 2026
+host        : gnode118
+job         : tordiff_analysis id=1090 array=n/a
+partition   : plafnet2  cpus=16  gpus=none
+PROJECT     : /scratch/nishanth.r/tordiff
+/dev/mapper/ada-lv_scratch  3.5T  199G  3.3T   6% /scratch
+ada5:/home2/nishanth.r   50G   25G   26G  50% /home2/nishanth.r
+No devices were found
+nvidia-smi not available
+=====================================================
+reference: R0 (3 file(s)); molecules in universe: 996
+COV in %, MAT in A; diff = arm - ref; p_holm only over primary endpoints
+     arm     metric   n     ref  arm_value     diff    ci_lo    ci_hi  p_boot  ref_replicate_sd  primary  n_ref_files  n_arm_files  p_holm
+A0_rdkit      MAT-R 927  0.1763     0.2298   0.0535   0.0461   0.0613  0.0000            0.0008     True            3            1  0.0000
+A0_rdkit      MAT-P 927  0.2206     0.2355   0.0149   0.0089   0.0213  0.0000            0.0014    False            3            1     NaN
+A0_rdkit  COV-R@0.5 996 88.9780    84.2587  -4.7193  -5.7911  -3.6717  0.0000            0.4298     True            3            1  0.0000
+A0_rdkit  COV-P@0.5 996 85.3753    85.3784   0.0030  -0.9435   0.9537  0.9696            0.1964    False            3            1     NaN
+A0_rdkit COV-R@0.05 996  3.8862     3.0639  -0.8223  -1.3246  -0.3051  0.0020            0.0916    False            3            1     NaN
+A0_rdkit COV-P@0.05 996  2.6474     2.0732  -0.5742  -0.9150  -0.2399  0.0004            0.0218    False            3            1     NaN
+A0_rdkit  COV-R@0.1 996 37.5286    28.7232  -8.8054 -10.2305  -7.3153  0.0000            0.3869    False            3            1     NaN
+A0_rdkit  COV-P@0.1 996 27.5080    23.4373  -4.0708  -5.2012  -2.9041  0.0000            0.3002    False            3            1     NaN
+A0_rdkit COV-R@0.25 996 74.1181    63.2118 -10.9064 -12.4526  -9.3723  0.0000            0.1433    False            3            1     NaN
+A0_rdkit COV-P@0.25 996 64.5864    60.7605  -3.8259  -5.1634  -2.4743  0.0000            0.4965    False            3            1     NaN
+ A0_rand      MAT-R 927  0.1763     0.2422   0.0660   0.0595   0.0724  0.0000            0.0008     True            3            1  0.0000
+ A0_rand      MAT-P 927  0.2206     0.3177   0.0971   0.0893   0.1049  0.0000            0.0014    False            3            1     NaN
+ A0_rand  COV-R@0.5 996 88.9780    85.2214  -3.7566  -4.8785  -2.6658  0.0000            0.4298     True            3            1  0.0000
+ A0_rand  COV-P@0.5 996 85.3753    75.4636  -9.9117 -11.1247  -8.6736  0.0000            0.1964    False            3            1     NaN
+ A0_rand COV-R@0.05 996  3.8862     2.4922  -1.3940  -2.0327  -0.7994  0.0000            0.0916    False            3            1     NaN
+ A0_rand COV-P@0.05 996  2.6474     1.7072  -0.9402  -1.3878  -0.5452  0.0000            0.0218    False            3            1     NaN
+ A0_rand  COV-R@0.1 996 37.5286    22.6723 -14.8562 -16.5171 -13.1834  0.0000            0.3869    False            3            1     NaN
+ A0_rand  COV-P@0.1 996 27.5080    15.8839 -11.6242 -12.9487 -10.2943  0.0000            0.3002    False            3            1     NaN
+ A0_rand COV-R@0.25 996 74.1181    56.9636 -17.1545 -19.0338 -15.3298  0.0000            0.1433    False            3            1     NaN
+ A0_rand COV-P@0.25 996 64.5864    43.5728 -21.0136 -22.6423 -19.3492  0.0000            0.4965    False            3            1     NaN
+      A1      MAT-R 927  0.1763     0.0837  -0.0926  -0.0990  -0.0863  0.0000            0.0008     True            3            3  0.0000
+      A1      MAT-P 927  0.2206     0.1048  -0.1158  -0.1228  -0.1089  0.0000            0.0014    False            3            3     NaN
+      A1  COV-R@0.5 996 88.9780    96.4809   7.5029   5.8835   9.1826  0.0000            0.4298     True            3            3  0.0000
+      A1  COV-P@0.5 996 85.3753    94.4602   9.0848   7.5255  10.7116  0.0000            0.1964    False            3            3     NaN
+      A1 COV-R@0.05 996  3.8862    66.6686  62.7824  60.6222  64.9474  0.0000            0.0916    False            3            3     NaN
+      A1 COV-P@0.05 996  2.6474    60.4180  57.7706  55.4196  60.1168  0.0000            0.0218    False            3            3     NaN
+      A1  COV-R@0.1 996 37.5286    80.2637  42.7352  40.4763  45.0318  0.0000            0.3869    False            3            3     NaN
+      A1  COV-P@0.1 996 27.5080    74.9542  47.4461  45.2398  49.7213  0.0000            0.3002    False            3            3     NaN
+      A1 COV-R@0.25 996 74.1181    89.5969  15.4788  13.6247  17.3922  0.0000            0.1433    False            3            3     NaN
+      A1 COV-P@0.25 996 64.5864    86.5391  21.9527  20.0296  23.9470  0.0000            0.4965    False            3            3     NaN
+     A1c      MAT-R 927  0.1763     0.0800  -0.0963  -0.1028  -0.0897  0.0000            0.0008     True            3            3  0.0000
+     A1c      MAT-P 927  0.2206     0.1046  -0.1160  -0.1230  -0.1091  0.0000            0.0014    False            3            3     NaN
+     A1c  COV-R@0.5 996 88.9780    96.4741   7.4961   5.9274   9.1388  0.0000            0.4298     True            3            3  0.0000
+     A1c  COV-P@0.5 996 85.3753    94.5186   9.1433   7.5853  10.8200  0.0000            0.1964    False            3            3     NaN
+     A1c COV-R@0.05 996  3.8862    67.8258  63.9395  61.7171  66.1954  0.0000            0.0916    False            3            3     NaN
+     A1c COV-P@0.05 996  2.6474    60.5228  57.8754  55.5437  60.1179  0.0000            0.0218    False            3            3     NaN
+     A1c  COV-R@0.1 996 37.5286    81.2791  43.7506  41.5217  46.0440  0.0000            0.3869    False            3            3     NaN
+     A1c  COV-P@0.1 996 27.5080    74.7223  47.2143  45.1040  49.3537  0.0000            0.3002    False            3            3     NaN
+     A1c COV-R@0.25 996 74.1181    90.3616  16.2435  14.3279  18.1785  0.0000            0.1433    False            3            3     NaN
+     A1c COV-P@0.25 996 64.5864    86.6252  22.0388  20.0047  24.0450  0.0000            0.4965    False            3            3     NaN
+      A2      MAT-R 927  0.1763     0.1501  -0.0262  -0.0311  -0.0214  0.0000            0.0008     True            3            3  0.0000
+      A2      MAT-P 927  0.2206     0.1680  -0.0526  -0.0580  -0.0473  0.0000            0.0014    False            3            3     NaN
+      A2  COV-R@0.5 996 88.9780    89.0244   0.0464  -0.4564   0.5627  0.8560            0.4298     True            3            3  1.0000
+      A2  COV-P@0.5 996 85.3753    86.9610   1.5857   0.9726   2.2132  0.0000            0.1964    False            3            3     NaN
+      A2 COV-R@0.05 996  3.8862    17.8448  13.9585  12.2248  15.6929  0.0000            0.0916    False            3            3     NaN
+      A2 COV-P@0.05 996  2.6474    16.4943  13.8469  12.1717  15.6294  0.0000            0.0218    False            3            3     NaN
+      A2  COV-R@0.1 996 37.5286    49.9553  12.4267  10.1234  14.7883  0.0000            0.3869    False            3            3     NaN
+      A2  COV-P@0.1 996 27.5080    45.7536  18.2456  15.9766  20.4009  0.0000            0.3002    False            3            3     NaN
+      A2 COV-R@0.25 996 74.1181    78.7451   4.6270   3.2838   5.9673  0.0000            0.1433    False            3            3     NaN
+      A2 COV-P@0.25 996 64.5864    75.7905  11.2041   9.7198  12.7298  0.0000            0.4965    False            3            3     NaN
+      A3      MAT-R 927  0.1763     0.1861   0.0098   0.0032   0.0164  0.0048            0.0008     True            3            3  0.0192
+      A3      MAT-P 927  0.2206     0.1639  -0.0567  -0.0627  -0.0505  0.0000            0.0014    False            3            3     NaN
+      A3  COV-R@0.5 996 88.9780    85.6048  -3.3732  -4.1466  -2.5826  0.0000            0.4298     True            3            3  0.0000
+      A3  COV-P@0.5 996 85.3753    87.5370   2.1617   1.4408   2.8898  0.0000            0.1964    False            3            3     NaN
+      A3 COV-R@0.05 996  3.8862    15.4830  11.5967   9.8287  13.4006  0.0000            0.0916    False            3            3     NaN
+      A3 COV-P@0.05 996  2.6474    17.2536  14.6062  12.6837  16.5170  0.0000            0.0218    False            3            3     NaN
+      A3  COV-R@0.1 996 37.5286    43.5570   6.0285   3.5164   8.4740  0.0000            0.3869    False            3            3     NaN
+      A3  COV-P@0.1 996 27.5080    46.8700  19.3620  16.8890  21.7561  0.0000            0.3002    False            3            3     NaN
+      A3 COV-R@0.25 996 74.1181    71.5366  -2.5815  -4.2587  -0.9178  0.0016            0.1433    False            3            3     NaN
+      A3 COV-P@0.25 996 64.5864    76.2464  11.6600   9.9499  13.4032  0.0000            0.4965    False            3            3     NaN
+      G1      MAT-R 922  0.1753     0.1755   0.0001  -0.0035   0.0038  0.9964            0.0008     True            3            3  1.0000
+      G1      MAT-P 922  0.2197     0.2196  -0.0001  -0.0033   0.0031  0.9604            0.0014    False            3            3     NaN
+      G1  COV-R@0.5 996 88.9780    89.3144   0.3364  -0.3554   1.0483  0.3348            0.4298     True            3            3  1.0000
+      G1  COV-P@0.5 996 85.3753    85.7028   0.3275  -0.3943   1.0727  0.3900            0.1964    False            3            3     NaN
+      G1 COV-R@0.05 996  3.8862     4.0618   0.1756  -0.3472   0.6713  0.5060            0.0916    False            3            3     NaN
+      G1 COV-P@0.05 996  2.6474     2.5844  -0.0631  -0.3956   0.2544  0.7368            0.0218    False            3            3     NaN
+      G1  COV-R@0.1 996 37.5286    37.7404   0.2119  -0.9361   1.4328  0.7108            0.3869    False            3            3     NaN
+      G1  COV-P@0.1 996 27.5080    27.4095  -0.0985  -0.8924   0.7216  0.8064            0.3002    False            3            3     NaN
+      G1 COV-R@0.25 996 74.1181    74.8303   0.7122  -0.3610   1.7813  0.1956            0.1433    False            3            3     NaN
+      G1 COV-P@0.25 996 64.5864    65.0824   0.4960  -0.4180   1.3940  0.3008            0.4965    False            3            3     NaN
+wrote /scratch/nishanth.r/tordiff/results/analysis/paired_vs_R0_qm9_default.md
+reference: A1 (3 file(s)); molecules in universe: 996
+COV in %, MAT in A; diff = arm - ref; p_holm only over primary endpoints
+arm     metric   n     ref  arm_value    diff   ci_lo   ci_hi  p_boot  ref_replicate_sd  primary  n_ref_files  n_arm_files  p_holm
+A1c      MAT-R 996  0.0810     0.0772 -0.0037 -0.0063 -0.0013  0.0020            0.0026     True            3            3   0.004
+A1c      MAT-P 996  0.1019     0.1016 -0.0003 -0.0016  0.0010  0.6140            0.0006    False            3            3     NaN
+A1c  COV-R@0.5 996 96.4809    96.4741 -0.0068 -0.3634  0.3336  0.9680            0.3209     True            3            3   0.968
+A1c  COV-P@0.5 996 94.4602    94.5186  0.0584 -0.1620  0.2713  0.5952            0.1320    False            3            3     NaN
+A1c COV-R@0.05 996 66.6686    67.8258  1.1572  0.5321  1.7580  0.0000            0.2938    False            3            3     NaN
+A1c COV-P@0.05 996 60.4180    60.5228  0.1048 -0.2523  0.4689  0.5728            0.1935    False            3            3     NaN
+A1c  COV-R@0.1 996 80.2637    81.2791  1.0154  0.4489  1.5973  0.0000            0.4419    False            3            3     NaN
+A1c  COV-P@0.1 996 74.9542    74.7223 -0.2318 -0.5431  0.0979  0.1624            0.2445    False            3            3     NaN
+A1c COV-R@0.25 996 89.5969    90.3616  0.7647  0.2638  1.2580  0.0032            0.4803    False            3            3     NaN
+A1c COV-P@0.25 996 86.5391    86.6252  0.0861 -0.2145  0.3790  0.5832            0.1212    False            3            3     NaN
+wrote /scratch/nishanth.r/tordiff/results/analysis/paired_A1c_vs_A1_qm9_default.md
+reference: CTRL_base (3 file(s)); molecules in universe: 935
+COV in %, MAT in A; diff = arm - ref; p_holm only over primary endpoints
+         arm     metric   n     ref  arm_value     diff    ci_lo    ci_hi  p_boot  ref_replicate_sd  primary  n_ref_files  n_arm_files  p_holm
+          B1      MAT-R 934  0.1806     0.2342   0.0536   0.0469   0.0600  0.0000            0.0013     True            3            3  0.0000
+          B1      MAT-P 934  0.2262     0.2791   0.0529   0.0468   0.0592  0.0000            0.0015    False            3            3     NaN
+          B1  COV-R@0.5 935 94.9112    88.8487  -6.0625  -7.2169  -4.9309  0.0000            0.1971     True            3            3  0.0000
+          B1  COV-P@0.5 935 90.5945    84.9671  -5.6274  -6.7361  -4.5872  0.0000            0.2744    False            3            3     NaN
+          B1 COV-R@0.05 935  4.0271     2.9492  -1.0779  -1.5779  -0.6607  0.0000            0.1514    False            3            3     NaN
+          B1 COV-P@0.05 935  2.6775     2.0368  -0.6407  -0.9475  -0.3734  0.0000            0.0580    False            3            3     NaN
+          B1  COV-R@0.1 935 38.3278    29.6931  -8.6347  -9.7629  -7.5774  0.0000            0.2391    False            3            3     NaN
+          B1  COV-P@0.1 935 27.7800    21.2835  -6.4966  -7.4138  -5.6137  0.0000            0.2049    False            3            3     NaN
+          B1 COV-R@0.25 935 77.8564    66.2148 -11.6416 -13.0295 -10.2588  0.0000            0.3193    False            3            3     NaN
+          B1 COV-P@0.25 935 67.9382    55.8736 -12.0646 -13.3034 -10.8219  0.0000            0.2299    False            3            3     NaN
+CTRL_rematch      MAT-R 934  0.1806     0.1786  -0.0020  -0.0033  -0.0007  0.0024            0.0013     True            3            3  0.0048
+CTRL_rematch      MAT-P 934  0.2262     0.2237  -0.0024  -0.0036  -0.0013  0.0000            0.0015    False            3            3     NaN
+CTRL_rematch  COV-R@0.5 935 94.9112    94.9764   0.0652  -0.2488   0.3745  0.6612            0.1971     True            3            3  0.6612
+CTRL_rematch  COV-P@0.5 935 90.5945    90.7983   0.2037  -0.0422   0.4566  0.1004            0.2744    False            3            3     NaN
+CTRL_rematch COV-R@0.05 935  4.0271     4.0589   0.0319  -0.0964   0.1701  0.6308            0.1514    False            3            3     NaN
+CTRL_rematch COV-P@0.05 935  2.6775     2.7004   0.0230  -0.0477   0.0991  0.5600            0.0580    False            3            3     NaN
+CTRL_rematch  COV-R@0.1 935 38.3278    38.9455   0.6177   0.1907   1.0674  0.0048            0.2391    False            3            3     NaN
+CTRL_rematch  COV-P@0.1 935 27.7800    28.3301   0.5501   0.2666   0.8410  0.0000            0.2049    False            3            3     NaN
+CTRL_rematch COV-R@0.25 935 77.8564    78.2220   0.3655  -0.0289   0.7690  0.0684            0.3193    False            3            3     NaN
+CTRL_rematch COV-P@0.25 935 67.9382    68.3081   0.3699   0.0722   0.6647  0.0128            0.2299    False            3            3     NaN
+wrote /scratch/nishanth.r/tordiff/results/analysis/paired_B1_vs_CTRLbase.md
+reference: CTRL_rematch (3 file(s)); molecules in universe: 935
+COV in %, MAT in A; diff = arm - ref; p_holm only over primary endpoints
+arm     metric   n     ref  arm_value    diff   ci_lo   ci_hi  p_boot  ref_replicate_sd  primary  n_ref_files  n_arm_files  p_holm
+ B2      MAT-R 934  0.1786     0.1808  0.0021  0.0006  0.0037  0.0096            0.0013     True            3            3  0.0288
+ B2      MAT-P 934  0.2237     0.2271  0.0034  0.0020  0.0048  0.0000            0.0022    False            3            3     NaN
+ B2  COV-R@0.5 935 94.9764    95.0191  0.0426 -0.2992  0.3812  0.8268            0.1855     True            3            3  0.8268
+ B2  COV-P@0.5 935 90.7983    90.7111 -0.0872 -0.3492  0.1744  0.5164            0.2687    False            3            3     NaN
+ B2 COV-R@0.05 935  4.0589     4.0753  0.0164 -0.1091  0.1378  0.8208            0.0363    False            3            3     NaN
+ B2 COV-P@0.05 935  2.7004     2.6845 -0.0159 -0.0803  0.0495  0.6440            0.0411    False            3            3     NaN
+ B2  COV-R@0.1 935 38.9455    38.0001 -0.9454 -1.4197 -0.4619  0.0000            0.2520    False            3            3     NaN
+ B2  COV-P@0.1 935 28.3301    27.4308 -0.8992 -1.2503 -0.5756  0.0000            0.1347    False            3            3     NaN
+ B2 COV-R@0.25 935 78.2220    77.7999 -0.4221 -0.8810  0.0330  0.0684            0.2250    False            3            3     NaN
+ B2 COV-P@0.25 935 68.3081    67.4205 -0.8876 -1.2472 -0.5168  0.0000            0.4469    False            3            3     NaN
+ B5      MAT-R 934  0.1786     0.1845  0.0058  0.0038  0.0080  0.0000            0.0013     True            3            3  0.0000
+ B5      MAT-P 934  0.2237     0.2303  0.0065  0.0046  0.0085  0.0000            0.0022    False            3            3     NaN
+ B5  COV-R@0.5 935 94.9764    94.6870 -0.2894 -0.7097  0.1069  0.1624            0.1855     True            3            3  0.3248
+ B5  COV-P@0.5 935 90.7983    90.5670 -0.2312 -0.6127  0.1463  0.2376            0.2687    False            3            3     NaN
+ B5 COV-R@0.05 935  4.0589     3.6713 -0.3877 -0.7369 -0.0951  0.0056            0.0363    False            3            3     NaN
+ B5 COV-P@0.05 935  2.7004     2.4193 -0.2812 -0.5328 -0.0809  0.0024            0.0411    False            3            3     NaN
+ B5  COV-R@0.1 935 38.9455    36.3753 -2.5701 -3.4327 -1.7857  0.0000            0.2520    False            3            3     NaN
+ B5  COV-P@0.1 935 28.3301    26.0921 -2.2380 -2.8640 -1.6517  0.0000            0.1347    False            3            3     NaN
+ B5 COV-R@0.25 935 78.2220    77.0242 -1.1978 -1.7658 -0.6702  0.0000            0.2250    False            3            3     NaN
+ B5 COV-P@0.25 935 68.3081    66.5983 -1.7098 -2.2650 -1.1884  0.0000            0.4469    False            3            3     NaN
+wrote /scratch/nishanth.r/tordiff/results/analysis/paired_B_vs_CTRLrematch.md
+reference: CTRL_base_gtL (3 file(s)); molecules in universe: 996
+COV in %, MAT in A; diff = arm - ref; p_holm only over primary endpoints
+   arm     metric   n     ref  arm_value    diff   ci_lo   ci_hi  p_boot  ref_replicate_sd  primary  n_ref_files  n_arm_files  p_holm
+B1_gtL      MAT-R 996  0.0842     0.0369 -0.0473 -0.0531 -0.0417     0.0            0.0020     True            3            3     0.0
+B1_gtL      MAT-P 996  0.1109     0.0326 -0.0784 -0.0853 -0.0715     0.0            0.0016    False            3            3     NaN
+B1_gtL  COV-R@0.5 996 96.4016    98.3060  1.9044  1.2372  2.5970     0.0            0.2750     True            3            3     0.0
+B1_gtL  COV-P@0.5 996 93.8843    99.0299  5.1456  4.3055  6.0215     0.0            0.2006    False            3            3     NaN
+B1_gtL COV-R@0.05 996 64.2025    87.6854 23.4829 21.7686 25.2571     0.0            0.3964    False            3            3     NaN
+B1_gtL COV-P@0.05 996 57.6601    85.9750 28.3150 26.5416 30.0742     0.0            0.3810    False            3            3     NaN
+B1_gtL  COV-R@0.1 996 78.3786    92.9113 14.5327 13.0749 16.0063     0.0            0.2681    False            3            3     NaN
+B1_gtL  COV-P@0.1 996 71.8828    93.5336 21.6508 20.0366 23.3018     0.0            0.2266    False            3            3     NaN
+B1_gtL COV-R@0.25 996 89.3014    95.7769  6.4755  5.4619  7.5272     0.0            0.4625    False            3            3     NaN
+B1_gtL COV-P@0.25 996 85.1642    97.3726 12.2084 10.9654 13.4425     0.0            0.3209    False            3            3     NaN
+wrote /scratch/nishanth.r/tordiff/results/analysis/paired_B1_vs_CTRLbase_gtL.md
+reference: CTRL_base_gtLc (3 file(s)); molecules in universe: 996
+COV in %, MAT in A; diff = arm - ref; p_holm only over primary endpoints
+    arm     metric   n     ref  arm_value    diff   ci_lo   ci_hi  p_boot  ref_replicate_sd  primary  n_ref_files  n_arm_files  p_holm
+B1_gtLc      MAT-R 996  0.0820     0.0212 -0.0608 -0.0668 -0.0551     0.0            0.0010     True            3            3     0.0
+B1_gtLc      MAT-P 996  0.1109     0.0326 -0.0783 -0.0852 -0.0715     0.0            0.0009    False            3            3     NaN
+B1_gtLc  COV-R@0.5 996 96.1677    99.3804  3.2127  2.5502  3.9448     0.0            0.0527     True            3            3     0.0
+B1_gtLc  COV-P@0.5 996 93.6707    99.0355  5.3648  4.5090  6.2380     0.0            0.1165    False            3            3     NaN
+B1_gtLc COV-R@0.05 996 65.1040    92.3143 27.2102 25.3725 29.1143     0.0            0.5600    False            3            3     NaN
+B1_gtLc COV-P@0.05 996 57.7103    85.8347 28.1245 26.3812 29.8544     0.0            0.4768    False            3            3     NaN
+B1_gtLc  COV-R@0.1 996 79.0746    96.7820 17.7075 16.1947 19.2937     0.0            0.5509    False            3            3     NaN
+B1_gtLc  COV-P@0.1 996 71.6652    93.3856 21.7204 20.1294 23.3318     0.0            0.4899    False            3            3     NaN
+B1_gtLc COV-R@0.25 996 89.9011    98.5794  8.6783  7.6397  9.8022     0.0            0.2370    False            3            3     NaN
+B1_gtLc COV-P@0.25 996 85.2973    97.3127 12.0154 10.7885 13.2796     0.0            0.2631    False            3            3     NaN
+wrote /scratch/nishanth.r/tordiff/results/analysis/paired_B1_vs_CTRLbase_gtLcycle.md
+qm9_B1_train_gtL_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=2.88 COV-R_median=0.00 COV-P_mean=1.97 COV-P_median=0.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=27.51 COV-R_median=0.00 COV-P_mean=19.58 COV-P_median=0.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=61.45 COV-R_median=66.67 COV-P_mean=51.85 COV-P_median=50.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=91.40 COV-R_median=100.00 COV-P_mean=85.03 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=96.40 COV-R_median=100.00 COV-P_mean=92.80 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=98.19 COV-R_median=100.00 COV-P_mean=97.08 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=98.9002 COV-R_median=100.0000 MAT-R_mean=0.0215 MAT-R_median=0.0074 COV-P_mean=98.7418 COV-P_median=100.0000 MAT-P_mean=0.0325 MAT-P_median=0.0130 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=86.90 COV-R_median=100.00 COV-P_mean=85.01 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=92.37 COV-R_median=100.00 COV-P_mean=92.94 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=95.35 COV-R_median=100.00 COV-P_mean=96.99 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s0/steps20_seed0_gtL threshold=0.5000 COV-R_mean=97.9257 COV-R_median=100.0000 MAT-R_mean=0.0374 MAT-R_median=0.0122 COV-P_mean=98.7092 COV-P_median=100.0000 MAT-P_mean=0.0329 MAT-P_median=0.0125 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s0/steps20_seed0 threshold=0.5000 COV-R_mean=82.8005 COV-R_median=100.0000 MAT-R_mean=0.2364 MAT-R_median=0.1929 COV-P_mean=79.3625 COV-P_median=100.0000 MAT-P_mean=0.2806 MAT-P_median=0.2463 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B1_train_gtL_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=2.81 COV-R_median=0.00 COV-P_mean=1.92 COV-P_median=0.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=28.72 COV-R_median=3.13 COV-P_mean=20.91 COV-P_median=1.56
+qm9_B1_train_gtL_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=62.16 COV-R_median=70.00 COV-P_mean=54.27 COV-P_median=50.81
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=91.80 COV-R_median=100.00 COV-P_mean=85.35 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=96.35 COV-R_median=100.00 COV-P_mean=92.91 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=98.10 COV-R_median=100.00 COV-P_mean=96.79 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=99.0491 COV-R_median=100.0000 MAT-R_mean=0.0215 MAT-R_median=0.0069 COV-P_mean=98.6685 COV-P_median=100.0000 MAT-P_mean=0.0332 MAT-P_median=0.0122 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=87.11 COV-R_median=100.00 COV-P_mean=85.51 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=92.33 COV-R_median=100.00 COV-P_mean=93.03 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=95.23 COV-R_median=100.00 COV-P_mean=96.92 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s1/steps20_seed0_gtL threshold=0.5000 COV-R_mean=97.7835 COV-R_median=100.0000 MAT-R_mean=0.0385 MAT-R_median=0.0107 COV-P_mean=98.5638 COV-P_median=100.0000 MAT-P_mean=0.0330 MAT-P_median=0.0118 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s1/steps20_seed0 threshold=0.5000 COV-R_mean=82.0418 COV-R_median=100.0000 MAT-R_mean=0.2361 MAT-R_median=0.1957 COV-P_mean=79.8589 COV-P_median=100.0000 MAT-P_mean=0.2717 MAT-P_median=0.2380 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B1_train_gtL_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=2.58 COV-R_median=0.00 COV-P_mean=1.82 COV-P_median=0.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=27.06 COV-R_median=0.00 COV-P_mean=19.21 COV-P_median=0.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=62.12 COV-R_median=75.00 COV-P_mean=50.61 COV-P_median=50.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=92.63 COV-R_median=100.00 COV-P_mean=86.09 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=96.44 COV-R_median=100.00 COV-P_mean=93.33 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=98.26 COV-R_median=100.00 COV-P_mean=96.90 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=98.9994 COV-R_median=100.0000 MAT-R_mean=0.0206 MAT-R_median=0.0064 COV-P_mean=98.5079 COV-P_median=100.0000 MAT-P_mean=0.0322 MAT-P_median=0.0116 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=87.99 COV-R_median=100.00 COV-P_mean=86.38 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=92.92 COV-R_median=100.00 COV-P_mean=93.51 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=95.60 COV-R_median=100.00 COV-P_mean=97.04 COV-P_median=100.00
+qm9_B1_train_gtL_e100_s2/steps20_seed0_gtL threshold=0.5000 COV-R_mean=98.0290 COV-R_median=100.0000 MAT-R_mean=0.0349 MAT-R_median=0.0114 COV-P_mean=98.6285 COV-P_median=100.0000 MAT-P_mean=0.0319 MAT-P_median=0.0115 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_B1_train_gtL_e100_s2/steps20_seed0 threshold=0.5000 COV-R_mean=84.3782 COV-R_median=100.0000 MAT-R_mean=0.2299 MAT-R_median=0.1923 COV-P_mean=79.1114 COV-P_median=100.0000 MAT-P_mean=0.2851 MAT-P_median=0.2565 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B2_DEonly_randpair_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.71 COV-R_median=0.00 COV-P_mean=2.43 COV-P_median=0.00
+qm9_B2_DEonly_randpair_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.42 COV-R_median=20.00 COV-P_mean=25.25 COV-P_median=8.43
+qm9_B2_DEonly_randpair_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.71 COV-R_median=93.10 COV-P_mean=62.75 COV-P_median=72.36
+qm9_B2_DEonly_randpair_e100_s0/steps20_seed0 threshold=0.5000 COV-R_mean=88.7721 COV-R_median=100.0000 MAT-R_mean=0.1815 MAT-R_median=0.1485 COV-P_mean=84.5671 COV-P_median=100.0000 MAT-P_mean=0.2291 MAT-P_median=0.2018 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B2_DEonly_randpair_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.85 COV-R_median=0.00 COV-P_mean=2.52 COV-P_median=0.00
+qm9_B2_DEonly_randpair_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.50 COV-R_median=20.00 COV-P_mean=25.67 COV-P_median=9.09
+qm9_B2_DEonly_randpair_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.64 COV-R_median=91.67 COV-P_mean=62.66 COV-P_median=72.16
+qm9_B2_DEonly_randpair_e100_s1/steps20_seed0 threshold=0.5000 COV-R_mean=88.9011 COV-R_median=100.0000 MAT-R_mean=0.1802 MAT-R_median=0.1475 COV-P_mean=85.0284 COV-P_median=100.0000 MAT-P_mean=0.2278 MAT-P_median=0.2041 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B2_DEonly_randpair_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.88 COV-R_median=0.00 COV-P_mean=2.58 COV-P_median=0.00
+qm9_B2_DEonly_randpair_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.67 COV-R_median=20.00 COV-P_mean=26.02 COV-P_median=9.38
+qm9_B2_DEonly_randpair_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.88 COV-R_median=93.10 COV-P_mean=63.71 COV-P_median=75.00
+qm9_B2_DEonly_randpair_e100_s2/steps20_seed0 threshold=0.5000 COV-R_mean=88.8552 COV-R_median=100.0000 MAT-R_mean=0.1807 MAT-R_median=0.1492 COV-P_mean=84.8491 COV-P_median=100.0000 MAT-P_mean=0.2245 MAT-P_median=0.1978 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B5_match_heavy_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.44 COV-R_median=0.00 COV-P_mean=2.28 COV-P_median=0.00
+qm9_B5_match_heavy_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=33.21 COV-R_median=15.69 COV-P_mean=23.64 COV-P_median=7.11
+qm9_B5_match_heavy_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=71.61 COV-R_median=91.67 COV-P_mean=61.09 COV-P_median=67.53
+qm9_B5_match_heavy_e100_s0/steps20_seed0 threshold=0.5000 COV-R_mean=88.7822 COV-R_median=100.0000 MAT-R_mean=0.1855 MAT-R_median=0.1573 COV-P_mean=84.5653 COV-P_median=100.0000 MAT-P_mean=0.2340 MAT-P_median=0.2086 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B5_match_heavy_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.41 COV-R_median=0.00 COV-P_mean=2.24 COV-P_median=0.00
+qm9_B5_match_heavy_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=34.32 COV-R_median=16.67 COV-P_mean=24.66 COV-P_median=7.69
+qm9_B5_match_heavy_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.43 COV-R_median=92.45 COV-P_mean=62.46 COV-P_median=72.67
+qm9_B5_match_heavy_e100_s1/steps20_seed0 threshold=0.5000 COV-R_mean=88.4908 COV-R_median=100.0000 MAT-R_mean=0.1838 MAT-R_median=0.1554 COV-P_mean=84.6248 COV-P_median=100.0000 MAT-P_mean=0.2304 MAT-P_median=0.2044 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_B5_match_heavy_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.45 COV-R_median=0.00 COV-P_mean=2.27 COV-P_median=0.00
+qm9_B5_match_heavy_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=34.50 COV-R_median=18.14 COV-P_mean=24.89 COV-P_median=8.70
+qm9_B5_match_heavy_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.01 COV-R_median=90.00 COV-P_mean=63.26 COV-P_median=74.04
+qm9_B5_match_heavy_e100_s2/steps20_seed0 threshold=0.5000 COV-R_mean=88.3241 COV-R_median=100.0000 MAT-R_mean=0.1842 MAT-R_median=0.1524 COV-P_mean=84.8504 COV-P_median=100.0000 MAT-P_mean=0.2264 MAT-P_median=0.1996 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.72 COV-R_median=0.00 COV-P_mean=2.49 COV-P_median=0.00
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=36.06 COV-R_median=22.22 COV-P_mean=25.98 COV-P_median=10.11
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.00 COV-R_median=93.10 COV-P_mean=63.52 COV-P_median=73.86
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=64.68 COV-R_median=77.78 COV-P_mean=57.32 COV-P_median=52.00
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=78.71 COV-R_median=100.00 COV-P_mean=71.16 COV-P_median=84.77
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.74 COV-R_median=100.00 COV-P_mean=85.16 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=95.8358 COV-R_median=100.0000 MAT-R_mean=0.0810 MAT-R_median=0.0370 COV-P_mean=93.4272 COV-P_median=100.0000 MAT-P_mean=0.1099 MAT-P_median=0.0639 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=63.73 COV-R_median=75.00 COV-P_mean=57.32 COV-P_median=50.00
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=78.24 COV-R_median=100.00 COV-P_mean=71.46 COV-P_median=84.81
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.47 COV-R_median=100.00 COV-P_mean=85.17 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0_gtL threshold=0.5000 COV-R_mean=96.3289 COV-R_median=100.0000 MAT-R_mean=0.0823 MAT-R_median=0.0422 COV-P_mean=93.7189 COV-P_median=100.0000 MAT-P_mean=0.1093 MAT-P_median=0.0632 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s0/steps20_seed0 threshold=0.5000 COV-R_mean=88.9544 COV-R_median=100.0000 MAT-R_mean=0.1791 MAT-R_median=0.1466 COV-P_mean=84.8831 COV-P_median=100.0000 MAT-P_mean=0.2253 MAT-P_median=0.1990 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.92 COV-R_median=0.00 COV-P_mean=2.56 COV-P_median=0.00
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.84 COV-R_median=21.58 COV-P_mean=26.16 COV-P_median=10.00
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.45 COV-R_median=91.35 COV-P_mean=63.31 COV-P_median=75.00
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=65.46 COV-R_median=78.89 COV-P_mean=58.01 COV-P_median=55.90
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=79.33 COV-R_median=100.00 COV-P_mean=71.94 COV-P_median=87.50
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.28 COV-R_median=100.00 COV-P_mean=84.66 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=95.7823 COV-R_median=100.0000 MAT-R_mean=0.0821 MAT-R_median=0.0354 COV-P_mean=93.2068 COV-P_median=100.0000 MAT-P_mean=0.1114 MAT-P_median=0.0611 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=64.40 COV-R_median=75.00 COV-P_mean=57.85 COV-P_median=54.77
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=78.19 COV-R_median=100.00 COV-P_mean=71.86 COV-P_median=85.71
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=88.62 COV-R_median=100.00 COV-P_mean=84.55 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0_gtL threshold=0.5000 COV-R_mean=95.8997 COV-R_median=100.0000 MAT-R_mean=0.0842 MAT-R_median=0.0426 COV-P_mean=93.4863 COV-P_median=100.0000 MAT-P_mean=0.1112 MAT-P_median=0.0607 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s1/steps20_seed0 threshold=0.5000 COV-R_mean=88.6468 COV-R_median=100.0000 MAT-R_mean=0.1815 MAT-R_median=0.1475 COV-P_mean=84.4116 COV-P_median=100.0000 MAT-P_mean=0.2279 MAT-P_median=0.1970 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.65 COV-R_median=0.00 COV-P_mean=2.46 COV-P_median=0.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.61 COV-R_median=20.00 COV-P_mean=25.78 COV-P_median=10.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.93 COV-R_median=92.72 COV-P_mean=63.74 COV-P_median=75.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.050 COV-R_mean=64.38 COV-R_median=77.78 COV-P_mean=57.11 COV-P_median=50.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.100 COV-R_mean=78.24 COV-R_median=100.00 COV-P_mean=71.04 COV-P_median=84.74
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtLcycle/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.60 COV-R_median=100.00 COV-P_mean=85.04 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtLcycle threshold=0.5000 COV-R_mean=95.7308 COV-R_median=100.0000 MAT-R_mean=0.0830 MAT-R_median=0.0374 COV-P_mean=93.2542 COV-P_median=100.0000 MAT-P_mean=0.1115 MAT-P_median=0.0622 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.050 COV-R_mean=63.71 COV-R_median=75.00 COV-P_mean=57.12 COV-P_median=50.96
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.100 COV-R_mean=77.76 COV-R_median=100.00 COV-P_mean=71.47 COV-P_median=87.50
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtL/evaluate.log:SWEEP thr=0.250 COV-R_mean=88.74 COV-R_median=100.00 COV-P_mean=84.75 COV-P_median=100.00
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0_gtL threshold=0.5000 COV-R_mean=95.8194 COV-R_median=100.0000 MAT-R_mean=0.0863 MAT-R_median=0.0435 COV-P_mean=93.3213 COV-P_median=100.0000 MAT-P_mean=0.1124 MAT-P_median=0.0608 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_CTRL_base_100ep_e100_s2/steps20_seed0 threshold=0.5000 COV-R_mean=88.6248 COV-R_median=100.0000 MAT-R_mean=0.1812 MAT-R_median=0.1476 COV-P_mean=84.8229 COV-P_median=100.0000 MAT-P_mean=0.2253 MAT-P_median=0.1961 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_rematch_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.76 COV-R_median=0.00 COV-P_mean=2.48 COV-P_median=0.00
+qm9_CTRL_rematch_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=36.69 COV-R_median=23.08 COV-P_mean=26.57 COV-P_median=10.15
+qm9_CTRL_rematch_100ep_e100_s0/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.03 COV-R_median=93.65 COV-P_mean=63.96 COV-P_median=75.00
+qm9_CTRL_rematch_100ep_e100_s0/steps20_seed0 threshold=0.5000 COV-R_mean=88.9465 COV-R_median=100.0000 MAT-R_mean=0.1773 MAT-R_median=0.1445 COV-P_mean=84.9027 COV-P_median=100.0000 MAT-P_mean=0.2230 MAT-P_median=0.1958 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_rematch_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.83 COV-R_median=0.00 COV-P_mean=2.56 COV-P_median=0.00
+qm9_CTRL_rematch_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=36.29 COV-R_median=21.90 COV-P_mean=26.55 COV-P_median=10.00
+qm9_CTRL_rematch_100ep_e100_s1/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.01 COV-R_median=91.87 COV-P_mean=63.41 COV-P_median=72.73
+qm9_CTRL_rematch_100ep_e100_s1/steps20_seed0 threshold=0.5000 COV-R_mean=88.6102 COV-R_median=100.0000 MAT-R_mean=0.1800 MAT-R_median=0.1471 COV-P_mean=84.6420 COV-P_median=100.0000 MAT-P_mean=0.2262 MAT-P_median=0.1972 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_CTRL_rematch_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.80 COV-R_median=0.00 COV-P_mean=2.53 COV-P_median=0.00
+qm9_CTRL_rematch_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=36.27 COV-R_median=22.86 COV-P_mean=26.34 COV-P_median=10.00
+qm9_CTRL_rematch_100ep_e100_s2/steps20_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.38 COV-R_median=92.63 COV-P_mean=64.23 COV-P_median=75.00
+qm9_CTRL_rematch_100ep_e100_s2/steps20_seed0 threshold=0.5000 COV-R_mean=88.8522 COV-R_median=100.0000 MAT-R_mean=0.1785 MAT-R_median=0.1472 COV-P_mean=85.1443 COV-P_median=100.0000 MAT-P_mean=0.2221 MAT-P_median=0.1951 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/A0_rdkit_etkdg_only/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.05 COV-R_median=0.00 COV-P_mean=2.06 COV-P_median=0.00
+qm9_default/A0_rdkit_etkdg_only/evaluate.log:SWEEP thr=0.100 COV-R_mean=28.61 COV-R_median=3.90 COV-P_mean=23.34 COV-P_median=2.25
+qm9_default/A0_rdkit_etkdg_only/evaluate.log:SWEEP thr=0.250 COV-R_mean=62.96 COV-R_median=71.43 COV-P_mean=60.52 COV-P_median=68.02
+qm9_default/A0_rdkit_etkdg_only threshold=0.5000 COV-R_mean=83.9217 COV-R_median=100.0000 MAT-R_mean=0.2298 MAT-R_median=0.1946 COV-P_mean=85.0368 COV-P_median=100.0000 MAT-P_mean=0.2353 MAT-P_median=0.2069 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/A0_rdkitL_random_tors/evaluate.log:SWEEP thr=0.050 COV-R_mean=2.48 COV-R_median=0.00 COV-P_mean=1.70 COV-P_median=0.00
+qm9_default/A0_rdkitL_random_tors/evaluate.log:SWEEP thr=0.100 COV-R_mean=22.58 COV-R_median=0.00 COV-P_mean=15.82 COV-P_median=0.00
+qm9_default/A0_rdkitL_random_tors/evaluate.log:SWEEP thr=0.250 COV-R_mean=56.74 COV-R_median=63.25 COV-P_mean=43.40 COV-P_median=35.09
+qm9_default/A0_rdkitL_random_tors threshold=0.5000 COV-R_mean=84.8805 COV-R_median=100.0000 MAT-R_mean=0.2422 MAT-R_median=0.2110 COV-P_mean=75.1618 COV-P_median=100.0000 MAT-P_mean=0.3175 MAT-P_median=0.2917 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/A1c_gtL_cycle_model/evaluate.log:SWEEP thr=0.050 COV-R_mean=67.75 COV-R_median=84.62 COV-P_mean=60.71 COV-P_median=66.67
+qm9_default/A1c_gtL_cycle_model/evaluate.log:SWEEP thr=0.100 COV-R_mean=81.23 COV-R_median=100.00 COV-P_mean=74.70 COV-P_median=90.45
+qm9_default/A1c_gtL_cycle_model/evaluate.log:SWEEP thr=0.250 COV-R_mean=90.24 COV-R_median=100.00 COV-P_mean=86.17 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_model_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=67.52 COV-R_median=85.71 COV-P_mean=60.12 COV-P_median=62.50
+qm9_default/A1c_gtL_cycle_model_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=80.93 COV-R_median=100.00 COV-P_mean=74.57 COV-P_median=91.83
+qm9_default/A1c_gtL_cycle_model_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=90.11 COV-R_median=100.00 COV-P_mean=86.41 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_model_seed1 threshold=0.5000 COV-R_mean=96.4178 COV-R_median=100.0000 MAT-R_mean=0.0755 MAT-R_median=0.0317 COV-P_mean=94.0959 COV-P_median=100.0000 MAT-P_mean=0.1012 MAT-P_median=0.0525 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1c_gtL_cycle_model_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=67.39 COV-R_median=84.58 COV-P_mean=60.01 COV-P_median=66.67
+qm9_default/A1c_gtL_cycle_model_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=80.70 COV-R_median=100.00 COV-P_mean=74.01 COV-P_median=89.44
+qm9_default/A1c_gtL_cycle_model_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.66 COV-R_median=100.00 COV-P_mean=86.26 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_model_seed2 threshold=0.5000 COV-R_mean=95.6545 COV-R_median=100.0000 MAT-R_mean=0.0801 MAT-R_median=0.0334 COV-P_mean=94.1512 COV-P_median=100.0000 MAT-P_mean=0.1024 MAT-P_median=0.0583 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1c_gtL_cycle_model threshold=0.5000 COV-R_mean=96.1923 COV-R_median=100.0000 MAT-R_mean=0.0762 MAT-R_median=0.0319 COV-P_mean=94.1744 COV-P_median=100.0000 MAT-P_mean=0.1011 MAT-P_median=0.0526 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1c_gtL_cycle_sanity/evaluate.log:SWEEP thr=0.050 COV-R_mean=99.70 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_sanity/evaluate.log:SWEEP thr=0.100 COV-R_mean=99.70 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_sanity/evaluate.log:SWEEP thr=0.250 COV-R_mean=99.70 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1c_gtL_cycle_sanity threshold=0.5000 COV-R_mean=99.7000 COV-R_median=100.0000 MAT-R_mean=0.0000 MAT-R_median=0.0000 COV-P_mean=99.7000 COV-P_median=100.0000 MAT-P_mean=0.0000 MAT-P_median=0.0000 n_evaluated=997 n_model_failures=3 n_additional_failures=0
+qm9_default/A1_gtL_model/evaluate.log:SWEEP thr=0.050 COV-R_mean=66.72 COV-R_median=77.78 COV-P_mean=60.33 COV-P_median=66.67
+qm9_default/A1_gtL_model/evaluate.log:SWEEP thr=0.100 COV-R_mean=80.11 COV-R_median=100.00 COV-P_mean=74.69 COV-P_median=92.72
+qm9_default/A1_gtL_model/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.33 COV-R_median=100.00 COV-P_mean=86.05 COV-P_median=100.00
+qm9_default/A1_gtL_model_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=66.35 COV-R_median=77.78 COV-P_mean=59.96 COV-P_median=62.50
+qm9_default/A1_gtL_model_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=80.28 COV-R_median=100.00 COV-P_mean=74.88 COV-P_median=91.42
+qm9_default/A1_gtL_model_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=89.66 COV-R_median=100.00 COV-P_mean=86.26 COV-P_median=100.00
+qm9_default/A1_gtL_model_seed1 threshold=0.5000 COV-R_mean=96.3582 COV-R_median=100.0000 MAT-R_mean=0.0790 MAT-R_median=0.0376 COV-P_mean=94.0097 COV-P_median=100.0000 MAT-P_mean=0.1014 MAT-P_median=0.0547 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1_gtL_model_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=66.14 COV-R_median=75.23 COV-P_mean=60.24 COV-P_median=66.67
+qm9_default/A1_gtL_model_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=79.44 COV-R_median=100.00 COV-P_mean=74.39 COV-P_median=91.15
+qm9_default/A1_gtL_model_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=88.72 COV-R_median=100.00 COV-P_mean=86.27 COV-P_median=100.00
+qm9_default/A1_gtL_model_seed2 threshold=0.5000 COV-R_mean=95.7393 COV-R_median=100.0000 MAT-R_mean=0.0839 MAT-R_median=0.0389 COV-P_mean=94.0032 COV-P_median=100.0000 MAT-P_mean=0.1025 MAT-P_median=0.0543 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1_gtL_model threshold=0.5000 COV-R_mean=96.1876 COV-R_median=100.0000 MAT-R_mean=0.0801 MAT-R_median=0.0386 COV-P_mean=94.2341 COV-P_median=100.0000 MAT-P_mean=0.1017 MAT-P_median=0.0514 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1_gtL_random_tors/evaluate.log:SWEEP thr=0.050 COV-R_mean=44.95 COV-R_median=29.02 COV-P_mean=41.90 COV-P_median=12.50
+qm9_default/A1_gtL_random_tors/evaluate.log:SWEEP thr=0.100 COV-R_mean=54.57 COV-R_median=60.00 COV-P_mean=46.96 COV-P_median=30.00
+qm9_default/A1_gtL_random_tors/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.65 COV-R_median=100.00 COV-P_mean=61.67 COV-P_median=75.00
+qm9_default/A1_gtL_random_tors threshold=0.5000 COV-R_mean=92.7779 COV-R_median=100.0000 MAT-R_mean=0.1573 MAT-R_median=0.1000 COV-P_mean=85.3420 COV-P_median=100.0000 MAT-P_mean=0.2191 MAT-P_median=0.1814 n_evaluated=996 n_model_failures=4 n_additional_failures=0
+qm9_default/A1_gtL_sanity_identity/evaluate.log:SWEEP thr=0.050 COV-R_mean=94.49 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1_gtL_sanity_identity/evaluate.log:SWEEP thr=0.100 COV-R_mean=95.72 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1_gtL_sanity_identity/evaluate.log:SWEEP thr=0.250 COV-R_mean=96.55 COV-R_median=100.00 COV-P_mean=99.70 COV-P_median=100.00
+qm9_default/A1_gtL_sanity_identity threshold=0.5000 COV-R_mean=98.2591 COV-R_median=100.0000 MAT-R_mean=0.0189 MAT-R_median=0.0000 COV-P_mean=99.7000 COV-P_median=100.0000 MAT-P_mean=0.0000 MAT-P_median=0.0000 n_evaluated=997 n_model_failures=3 n_additional_failures=0
+qm9_default/A2_pre_mmff/evaluate.log:SWEEP thr=0.050 COV-R_mean=17.89 COV-R_median=0.00 COV-P_mean=16.58 COV-P_median=0.00
+qm9_default/A2_pre_mmff/evaluate.log:SWEEP thr=0.100 COV-R_mean=49.96 COV-R_median=50.00 COV-P_mean=45.60 COV-P_median=40.68
+qm9_default/A2_pre_mmff/evaluate.log:SWEEP thr=0.250 COV-R_mean=78.45 COV-R_median=100.00 COV-P_mean=75.83 COV-P_median=94.44
+qm9_default/A2_pre_mmff_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=17.85 COV-R_median=0.00 COV-P_mean=16.42 COV-P_median=0.00
+qm9_default/A2_pre_mmff_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=50.09 COV-R_median=50.00 COV-P_mean=45.73 COV-P_median=40.50
+qm9_default/A2_pre_mmff_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=78.52 COV-R_median=100.00 COV-P_mean=75.24 COV-P_median=91.67
+qm9_default/A2_pre_mmff_seed1 threshold=0.5000 COV-R_mean=88.6921 COV-R_median=100.0000 MAT-R_mean=0.1485 MAT-R_median=0.1198 COV-P_mean=86.4907 COV-P_median=100.0000 MAT-P_mean=0.1676 MAT-P_median=0.1325 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+qm9_default/A2_pre_mmff_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=17.58 COV-R_median=0.00 COV-P_mean=16.29 COV-P_median=0.00
+qm9_default/A2_pre_mmff_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=49.22 COV-R_median=50.00 COV-P_mean=45.38 COV-P_median=42.86
+qm9_default/A2_pre_mmff_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=78.31 COV-R_median=100.00 COV-P_mean=75.40 COV-P_median=93.75
+qm9_default/A2_pre_mmff_seed2 threshold=0.5000 COV-R_mean=88.3790 COV-R_median=100.0000 MAT-R_mean=0.1512 MAT-R_median=0.1202 COV-P_mean=86.4773 COV-P_median=100.0000 MAT-P_mean=0.1685 MAT-P_median=0.1311 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+qm9_default/A2_pre_mmff threshold=0.5000 COV-R_mean=88.9339 COV-R_median=100.0000 MAT-R_mean=0.1507 MAT-R_median=0.1212 COV-P_mean=86.8715 COV-P_median=100.0000 MAT-P_mean=0.1679 MAT-P_median=0.1329 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/A3_post_mmff/evaluate.log:SWEEP thr=0.050 COV-R_mean=15.24 COV-R_median=0.00 COV-P_mean=17.12 COV-P_median=0.00
+qm9_default/A3_post_mmff/evaluate.log:SWEEP thr=0.100 COV-R_mean=43.29 COV-R_median=37.15 COV-P_mean=46.57 COV-P_median=39.83
+qm9_default/A3_post_mmff/evaluate.log:SWEEP thr=0.250 COV-R_mean=71.39 COV-R_median=83.33 COV-P_mean=76.19 COV-P_median=100.00
+qm9_default/A3_post_mmff_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=15.57 COV-R_median=0.00 COV-P_mean=17.40 COV-P_median=0.00
+qm9_default/A3_post_mmff_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=43.71 COV-R_median=37.50 COV-P_mean=47.08 COV-P_median=43.88
+qm9_default/A3_post_mmff_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=71.45 COV-R_median=83.48 COV-P_mean=76.11 COV-P_median=100.00
+qm9_default/A3_post_mmff_seed1 threshold=0.5000 COV-R_mean=85.1617 COV-R_median=100.0000 MAT-R_mean=0.1854 MAT-R_median=0.1472 COV-P_mean=87.2054 COV-P_median=100.0000 MAT-P_mean=0.1630 MAT-P_median=0.1256 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+qm9_default/A3_post_mmff_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=15.46 COV-R_median=0.00 COV-P_mean=17.03 COV-P_median=0.00
+qm9_default/A3_post_mmff_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=43.16 COV-R_median=38.56 COV-P_mean=46.41 COV-P_median=40.00
+qm9_default/A3_post_mmff_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=70.91 COV-R_median=83.33 COV-P_mean=75.53 COV-P_median=100.00
+qm9_default/A3_post_mmff_seed2 threshold=0.5000 COV-R_mean=84.9103 COV-R_median=100.0000 MAT-R_mean=0.1872 MAT-R_median=0.1512 COV-P_mean=87.0142 COV-P_median=100.0000 MAT-P_mean=0.1650 MAT-P_median=0.1287 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+qm9_default/A3_post_mmff threshold=0.5000 COV-R_mean=85.7152 COV-R_median=100.0000 MAT-R_mean=0.1863 MAT-R_median=0.1490 COV-P_mean=87.3408 COV-P_median=100.0000 MAT-P_mean=0.1641 MAT-P_median=0.1242 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/G1_gt_graph_seed_mols/evaluate.log:SWEEP thr=0.050 COV-R_mean=4.27 COV-R_median=0.00 COV-P_mean=2.60 COV-P_median=0.00
+qm9_default/G1_gt_graph_seed_mols/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.76 COV-R_median=25.00 COV-P_mean=27.18 COV-P_median=12.50
+qm9_default/G1_gt_graph_seed_mols/evaluate.log:SWEEP thr=0.250 COV-R_mean=75.27 COV-R_median=100.00 COV-P_mean=64.98 COV-P_median=75.00
+qm9_default/G1_gt_graph_seed_mols_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.63 COV-R_median=0.00 COV-P_mean=2.60 COV-P_median=0.00
+qm9_default/G1_gt_graph_seed_mols_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.25 COV-R_median=25.00 COV-P_mean=26.92 COV-P_median=11.54
+qm9_default/G1_gt_graph_seed_mols_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=74.54 COV-R_median=97.29 COV-P_mean=65.11 COV-P_median=75.00
+qm9_default/G1_gt_graph_seed_mols_seed1 threshold=0.5000 COV-R_mean=88.8958 COV-R_median=100.0000 MAT-R_mean=0.1739 MAT-R_median=0.1456 COV-P_mean=85.6867 COV-P_median=100.0000 MAT-P_mean=0.2173 MAT-P_median=0.1908 n_evaluated=933 n_model_failures=67 n_additional_failures=1
+qm9_default/G1_gt_graph_seed_mols_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=4.24 COV-R_median=0.00 COV-P_mean=2.52 COV-P_median=0.00
+qm9_default/G1_gt_graph_seed_mols_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.76 COV-R_median=25.00 COV-P_mean=27.80 COV-P_median=12.50
+qm9_default/G1_gt_graph_seed_mols_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.78 COV-R_median=94.44 COV-P_mean=64.38 COV-P_median=75.00
+qm9_default/G1_gt_graph_seed_mols_seed2 threshold=0.5000 COV-R_mean=88.6014 COV-R_median=100.0000 MAT-R_mean=0.1777 MAT-R_median=0.1463 COV-P_mean=84.8238 COV-P_median=100.0000 MAT-P_mean=0.2204 MAT-P_median=0.1920 n_evaluated=933 n_model_failures=67 n_additional_failures=1
+qm9_default/G1_gt_graph_seed_mols threshold=0.5000 COV-R_mean=89.3744 COV-R_median=100.0000 MAT-R_mean=0.1732 MAT-R_median=0.1427 COV-P_mean=85.5695 COV-P_median=100.0000 MAT-P_mean=0.2186 MAT-P_median=0.1951 n_evaluated=936 n_model_failures=64 n_additional_failures=1
+qm9_default/R0_base_seed0/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.91 COV-R_median=0.00 COV-P_mean=2.62 COV-P_median=0.00
+qm9_default/R0_base_seed0/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.66 COV-R_median=25.00 COV-P_mean=27.74 COV-P_median=12.50
+qm9_default/R0_base_seed0/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.91 COV-R_median=94.83 COV-P_mean=64.85 COV-P_median=75.00
+qm9_default/R0_base_seed0 threshold=0.5000 COV-R_mean=89.0293 COV-R_median=100.0000 MAT-R_mean=0.1752 MAT-R_median=0.1416 COV-P_mean=85.2463 COV-P_median=100.0000 MAT-P_mean=0.2191 MAT-P_median=0.1896 n_evaluated=935 n_model_failures=65 n_additional_failures=1
+qm9_default/R1_base_seed1/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.77 COV-R_median=0.00 COV-P_mean=2.63 COV-P_median=0.00
+qm9_default/R1_base_seed1/evaluate.log:SWEEP thr=0.100 COV-R_mean=36.94 COV-R_median=25.00 COV-P_mean=27.20 COV-P_median=12.50
+qm9_default/R1_base_seed1/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.66 COV-R_median=94.44 COV-P_mean=64.27 COV-P_median=75.00
+qm9_default/R1_base_seed1 threshold=0.5000 COV-R_mean=88.1758 COV-R_median=100.0000 MAT-R_mean=0.1768 MAT-R_median=0.1415 COV-P_mean=84.9938 COV-P_median=100.0000 MAT-P_mean=0.2199 MAT-P_median=0.1898 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+qm9_default/R2_base_seed2/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.94 COV-R_median=0.00 COV-P_mean=2.66 COV-P_median=0.00
+qm9_default/R2_base_seed2/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.54 COV-R_median=25.00 COV-P_mean=27.26 COV-P_median=12.50
+qm9_default/R2_base_seed2/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.90 COV-R_median=100.00 COV-P_mean=63.87 COV-P_median=75.00
+qm9_default/R2_base_seed2 threshold=0.5000 COV-R_mean=88.6612 COV-R_median=100.0000 MAT-R_mean=0.1761 MAT-R_median=0.1454 COV-P_mean=84.8613 COV-P_median=100.0000 MAT-P_mean=0.2218 MAT-P_median=0.1902 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+released/qm9_1order/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.42 COV-R_median=0.00 COV-P_mean=2.33 COV-P_median=0.00
+released/qm9_1order/evaluate.log:SWEEP thr=0.100 COV-R_mean=35.84 COV-R_median=20.00 COV-P_mean=26.09 COV-P_median=10.00
+released/qm9_1order/evaluate.log:SWEEP thr=0.250 COV-R_mean=72.33 COV-R_median=92.58 COV-P_mean=62.79 COV-P_median=71.15
+released/qm9_1order threshold=0.5000 COV-R_mean=88.2280 COV-R_median=100.0000 MAT-R_mean=0.1826 MAT-R_median=0.1501 COV-P_mean=84.4771 COV-P_median=100.0000 MAT-P_mean=0.2255 MAT-P_median=0.1971 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+released/qm9_default/evaluate.log:SWEEP thr=0.050 COV-R_mean=3.59 COV-R_median=0.00 COV-P_mean=2.38 COV-P_median=0.00
+released/qm9_default/evaluate.log:SWEEP thr=0.100 COV-R_mean=37.98 COV-R_median=25.00 COV-P_mean=27.83 COV-P_median=12.50
+released/qm9_default/evaluate.log:SWEEP thr=0.250 COV-R_mean=73.65 COV-R_median=93.53 COV-P_mean=64.41 COV-P_median=75.00
+released/qm9_default threshold=0.5000 COV-R_mean=88.7734 COV-R_median=100.0000 MAT-R_mean=0.1765 MAT-R_median=0.1461 COV-P_mean=84.8482 COV-P_median=100.0000 MAT-P_mean=0.2187 MAT-P_median=0.1933 n_evaluated=931 n_model_failures=69 n_additional_failures=1
+done: Sat Oct  3 07:51:31 PM IST 2026

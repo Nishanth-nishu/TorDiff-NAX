@@ -1,0 +1,32 @@
+# CORE inference-only ablations on the RELEASED qm9_default checkpoint (budgeted plan, notes/ablation_plan_qm9.md
+# section 3). One line per SLURM array index (comments/blank lines ignored). Fields separated by '|':
+#   NAME | MODEL | STEPS | SEED | NO_ENERGY(1/0) | extra generate_confs.py args
+# MODEL: PRE (= released qm9_default), PRE1 (= released qm9_1order), BASE (= $MODEL_BASE, default $WORK/qm9_baseline_s0),
+#        or an absolute path. Paths in args are relative to the repo root; $VARS are expanded.
+# Results land in $RES/qm9_default/<NAME>/ (analysis_qm9.sbatch default MODEL_RUN=qm9_default).
+# R0 on PRE is the reproduction check against TD Table 7 (the former P0 line). Seed-s lines share ETKDG seed s+1 with
+# R<s>, so every arm is paired per molecule with R<s> on the same RDKit local structures.
+# Deferred lines (steps, ODE, sigma, 1st-order irreps, H pools): ablations_inference_deferred.tsv.
+R0_base_seed0            | PRE  | 20  | 0 | 1 |
+R1_base_seed1            | PRE  | 20  | 1 | 1 |
+R2_base_seed2            | PRE  | 20  | 2 | 1 |
+A0_rdkit_etkdg_only      | PRE  | 20  | 0 | 1 | --no_model --no_random
+A0_rdkitL_random_tors    | PRE  | 20  | 0 | 1 | --no_model
+A1_gtL_model             | PRE  | 20  | 0 | 1 | --seed_confs $QM9_GT_SEED_CONFS
+A1_gtL_model_seed1       | PRE  | 20  | 1 | 1 | --seed_confs $QM9_GT_SEED_CONFS
+A1_gtL_model_seed2       | PRE  | 20  | 2 | 1 | --seed_confs $QM9_GT_SEED_CONFS
+A1_gtL_sanity_identity   | PRE  | 20  | 0 | 1 | --seed_confs $QM9_GT_SEED_CONFS --no_model --no_random
+A1_gtL_random_tors       | PRE  | 20  | 0 | 1 | --seed_confs $QM9_GT_SEED_CONFS --no_model
+A1c_gtL_cycle_model      | PRE  | 20  | 0 | 1 | --seed_confs $QM9_GT_SEED_CONFS --seed_confs_cycle
+A1c_gtL_cycle_model_seed1 | PRE | 20  | 1 | 1 | --seed_confs $QM9_GT_SEED_CONFS --seed_confs_cycle
+A1c_gtL_cycle_model_seed2 | PRE | 20  | 2 | 1 | --seed_confs $QM9_GT_SEED_CONFS --seed_confs_cycle
+A1c_gtL_cycle_sanity     | PRE  | 20  | 0 | 1 | --seed_confs $QM9_GT_SEED_CONFS --seed_confs_cycle --no_model --no_random
+A2_pre_mmff              | PRE  | 20  | 0 | 1 | --pre_mmff
+A2_pre_mmff_seed1        | PRE  | 20  | 1 | 1 | --pre_mmff
+A2_pre_mmff_seed2        | PRE  | 20  | 2 | 1 | --pre_mmff
+A3_post_mmff             | PRE  | 20  | 0 | 1 | --post_mmff
+A3_post_mmff_seed1       | PRE  | 20  | 1 | 1 | --post_mmff
+A3_post_mmff_seed2       | PRE  | 20  | 2 | 1 | --post_mmff
+G1_gt_graph_seed_mols    | PRE  | 20  | 0 | 1 | --seed_mols $QM9_GT_SEED_MOLS
+G1_gt_graph_seed_mols_seed1 | PRE | 20 | 1 | 1 | --seed_mols $QM9_GT_SEED_MOLS
+G1_gt_graph_seed_mols_seed2 | PRE | 20 | 2 | 1 | --seed_mols $QM9_GT_SEED_MOLS
