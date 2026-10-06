@@ -3,7 +3,8 @@
 #   NAME | VARIANT | extra train.py args | generate args of the in-job default eval | GT_EVAL | SEED | GT_GEN_ARGS
 # GT_EVAL 2 = gtLcycle only (DECISION D8 trims the non-cycle gtL runs; F3). Panel evaluations of these models run
 # afterwards through r2_eval_array.sbatch (MODELS=r2_eval_models_post.tsv, packed, D4).
-# Line ORDER = waves of 4 (array throttle %4). This table assumes the S4 gate PASSED (DECISION D7: S4 in wave 2);
+# Line ORDER = priority within the main array (throttle %4). submit_round2.sh moves the B3 lines into their own array
+# with afterok on the MMFF featurize job (FIXES X7) and releases each post-training panel per model (FIXES X8). This table assumes the S4 gate PASSED (DECISION D7: S4 in wave 2);
 # if it fails, submit_round2.sh uses ablations_train_round2_noS4.tsv instead.
 # wave 1 (cache_raw, cache_paired)
 B6_jit0.04pa     | raw    | --l_jitter 0.04 --log_timing --fail_on_nan                  |                | 2 | 0 |

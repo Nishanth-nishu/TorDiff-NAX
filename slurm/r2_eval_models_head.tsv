@@ -2,12 +2,13 @@
 #   MODEL_DIR ($VARS expanded; PRE = released qm9_default) | comma-separated eval sets of r2_evalsets.tsv
 # DECISION D3 + D8 trimmed matrix (IMPLEMENTATION.md §6): B1 x3 and CR x3 on the 8 S1core conditions (CR never cut;
 # CR is the F4 control of the S1 dose-response and of S3/S4); CR also gets gtLcycle (GT-end control + V18 anchor),
-# lambda=1.00 (V18) and --pre_mmff (S5 control). CB only s0 as the round-1 cross-check. Total 71 runs.
+# lambda=1.00 (V18) and --pre_mmff (S5 control); FIXES X5: CR x3 also on the A5 ring / acyclic oracles (the F5
+# "B1 - CTRL per condition" rule needs a control there). CB only s0 as the round-1 cross-check. Total 77 runs.
 $WORK/qm9_B1_train_gtL_e100_s0        | S1core,S1A5,V18
-$WORK/qm9_CTRL_rematch_100ep_e100_s0  | S1CR,S1core
+$WORK/qm9_CTRL_rematch_100ep_e100_s0  | S1CR,S1core,S1A5
 $WORK/qm9_B1_train_gtL_e100_s1        | S1core,S1A5
-$WORK/qm9_CTRL_rematch_100ep_e100_s1  | S1CR,S1core
+$WORK/qm9_CTRL_rematch_100ep_e100_s1  | S1CR,S1core,S1A5
 $WORK/qm9_B1_train_gtL_e100_s2        | S1core,S1A5
-$WORK/qm9_CTRL_rematch_100ep_e100_s2  | S1CR,S1core
+$WORK/qm9_CTRL_rematch_100ep_e100_s2  | S1CR,S1core,S1A5
 $WORK/qm9_CTRL_base_100ep_e100_s0     | S1panel
 PRE                                   | S0
