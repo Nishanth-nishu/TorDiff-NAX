@@ -4,7 +4,7 @@
 #SBATCH --account=plafnet2
 #SBATCH --nodelist=gnode118
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=40G
+#SBATCH --mem=40000M   # [round2 FIXES X2] <= 5000 MB per CPU (plafnet2 MaxMemPerCPU)
 #SBATCH --time=06:00:00
 #SBATCH --output=/scratch/nishanth.r/tordiff/logs/%x_%j.log
 #

@@ -14,8 +14,10 @@ export PROJECT=${PROJECT:-/scratch/nishanth.r/tordiff}
 export REPO=$PROJECT/torsional-diffusion
 export VENV=$PROJECT/venv
 export DATA=$PROJECT/data
-export WORK=${WORK:-$PROJECT/workdir}      # [round2] overridable for smoke tests (unset = round-1 value)
-export RES=${RES:-$PROJECT/results}
+# [round2 FIXES X6] WORK/RES derive only from $PROJECT; the smoke job redirects them with the dedicated R2_WORK/R2_RES
+# names (a site-wide $WORK in the login environment, exported by sbatch, could otherwise send outputs to $HOME)
+export WORK=${R2_WORK:-$PROJECT/workdir}
+export RES=${R2_RES:-$PROJECT/results}
 export TOOLS=$PROJECT/tools
 export LOGS=$PROJECT/logs
 export UPSTREAM_COMMIT=5f713b42d7000307655f272471014c6127ea59be
@@ -106,8 +108,10 @@ gen_eval() {
         # [round2] stale-output guard (code_plan_2 §5.5 / V10; DECISION D4). Opt-in, so round-1 calls are unchanged.
         # Provenance is certified from round 2 onward only (vote_1 P2-d): a round-1 dir gets no provenance file.
         local prov=$out/provenance.txt new
+        # FIXES X4: also the code version of the TD checkout and the packing level
         new=$( { printf 'model=%s\nargs=%s\n' "$model_dir" "$*"; sha256sum "$model_dir/best_model.pt" | cut -d' ' -f1;
-                 for a in "$@"; do [[ -f $a ]] && sha256sum "$a" | cut -d' ' -f1; done; } )
+                 for a in "$@"; do [[ -f $a ]] && sha256sum "$a" | cut -d' ' -f1; done;
+                 printf 'code=%s\npack=%s\n' "$(git -C "$REPO" rev-parse HEAD 2>/dev/null)" "${PACK:-1}"; } )
         if [[ -s $prov ]]; then
             [[ "$(cat "$prov")" == "$new" ]] || { echo "ERROR: $out was produced from other inputs (see $prov)"; return 1; }
         elif [[ -s $out/confs.pkl ]]; then
@@ -135,23 +139,36 @@ gen_eval() {
 }
 
 # [round2 D4] run_evalset MODEL_DIR SET[,SET...] : every line of $R2_EVALSETS whose SET field matches, packed $PACK
-#   (default 1: DECISION D4 test not passed, see IMPLEMENTATION.md §5) gen_eval processes on this job's GPU (plan 3 §2.5). Each process is seeded independently
-#   (generate_confs.py --seed), so packing changes no RNG path; the D4 test checks a packed rerun reproduces round 1.
+#   (default 3: user ruling 2026-10-06 / FIXES X4) gen_eval processes on this job's GPU (plan 3 §2.5). Each process is
+#   seeded independently (generate_confs.py --seed), so packing changes no RNG path.
+#   FIXES X3: gen_eval swallows generate/evaluate failures (it ends with `breakdown || echo`, and a command on the left
+#   of || runs without set -e), so after all processes end every scheduled tag must have eval.pkl and a SUMMARY line;
+#   otherwise the tag is logged as FAILED and run_evalset returns 1 (the array task then exits non-zero).
 run_evalset() {
     local model_dir=$1 sets=",$2," fail; fail=$(mktemp "$TMPDIR/evalset_fail.XXXX")
-    local S TAG ST SD ARGS
+    local S TAG ST SD ARGS tags=() run; run=$(basename "$model_dir")
     while IFS='|' read -r S TAG ST SD ARGS; do
         S=$(echo "$S" | xargs)
         [[ "$sets" == *",$S,"* ]] || continue
-        while (( $(jobs -rp | wc -l) >= ${PACK:-1} )); do wait -n || true; done
-        TAG=$(echo "$TAG" | xargs); ST=$(echo "$ST" | xargs); SD=$(echo "$SD" | xargs)
+        while (( $(jobs -rp | wc -l) >= ${PACK:-3} )); do wait -n || true; done
+        TAG=$(echo "$TAG" | xargs); ST=$(echo "$ST" | xargs); SD=$(echo "$SD" | xargs); tags+=("$TAG")
         # shellcheck disable=SC2046
         ( OMP_NUM_THREADS=1 EVAL_WORKERS=${EVAL_WORKERS:-2} STEPS=$ST SEED=$SD \
           gen_eval "$model_dir" "$TAG" $(eval echo "${ARGS:-}") ${GEN_EXTRA:-} || echo "$TAG" >> "$fail" ) &
     done < <(grep -vE '^\s*(#|$)' "$R2_EVALSETS")
     wait
-    if [[ -s $fail ]]; then echo "FAILED tags:"; cat "$fail"; rm -f "$fail"; return 1; fi
+    local t
+    for t in "${tags[@]}"; do
+        if [[ ! -s $RES/$run/$t/eval.pkl ]] || ! grep -q '^SUMMARY' "$RES/$run/$t/summary.txt" 2>/dev/null; then
+            grep -qx "$t" "$fail" || echo "$t" >> "$fail"
+        fi
+    done
+    if [[ -s $fail ]]; then
+        echo "FAILED tags ($run; see $RES/$run/<tag>/{generate,evaluate}.log):"; sed 's/^/  EVAL_FAILED /' "$fail"
+        rm -f "$fail"; return 1
+    fi
     rm -f "$fail"
+    echo "run_evalset $run: all ${#tags[@]} tags have eval.pkl + SUMMARY"
 }
 
 # train_complete RUN_DIR N_EPOCHS : 0 if the training in RUN_DIR finished. Accepts the .train_done marker, or (runs

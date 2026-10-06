@@ -5,7 +5,7 @@
 #SBATCH --nodelist=gnode118
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=12
-#SBATCH --mem=64G
+#SBATCH --mem=60000M
 #SBATCH --time=06:00:00
 #SBATCH --output=/scratch/nishanth.r/tordiff/logs/%x_%j.log
 #
@@ -35,7 +35,8 @@ if [[ "$MODE" == "smoke" ]]; then
            QM9_TEST_CSV=data/QM9_smoke/test_smiles.csv QM9_TEST_MOLS=data/QM9_smoke/test_mols.pkl \
            QM9_GT_SEED_CONFS=data/QM9_smoke/test_gt_seed_confs.pkl QM9_GT_SEED_MOLS=data/QM9_smoke/test_gt_seed_mols.pkl \
            QM9_PAIRED=data/QM9_smoke/standardized_pickles_paired QM9_SEEDS2=data/QM9_smoke/round2_seeds \
-           WORK=$PROJECT/workdir_r2smoke RES=$PROJECT/results_r2smoke
+           R2_WORK=$PROJECT/workdir_r2smoke R2_RES=$PROJECT/results_r2smoke WORK=$PROJECT/workdir_r2smoke \
+           RES=$PROJECT/results_r2smoke
     mkdir -p "$WORK" "$RES"
     case "$QM9_DIR" in *smoke*) ;; *) echo "refusing: smoke must not touch production caches (V9)"; exit 1 ;; esac
     # paired pickles from the first rematch file only (the first 20 split molecules live there)

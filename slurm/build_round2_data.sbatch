@@ -4,7 +4,7 @@
 #SBATCH --account=plafnet2
 #SBATCH --nodelist=gnode118
 #SBATCH --cpus-per-task=12
-#SBATCH --mem=60G
+#SBATCH --mem=60000M
 #SBATCH --time=1-00:00:00
 #SBATCH --output=/scratch/nishanth.r/tordiff/logs/%x_%j.log
 #

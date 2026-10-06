@@ -90,4 +90,12 @@ if [[ "$GT_EVAL" == "1" || "$GT_EVAL" == "2" ]]; then
     # shellcheck disable=SC2086
     SEED=0 STEPS=20 gen_eval "$WORK/$RUN" steps20_seed0_gtLcycle --seed_confs "$QM9_GT_SEED_CONFS" --seed_confs_cycle $GT_GEN_ARGS
 fi
+if [[ "${R2_STRICT:-0}" == "1" ]]; then
+    # [round2 FIXES X3] gen_eval swallows generate/evaluate failures: fail the array task if an in-job eval is missing
+    want=(steps20_seed0); [[ "$GT_EVAL" == "1" ]] && want+=(steps20_seed0_gtL)
+    [[ "$GT_EVAL" == "1" || "$GT_EVAL" == "2" ]] && want+=(steps20_seed0_gtLcycle)
+    for t in "${want[@]}"; do
+        [[ -s $RES/$RUN/$t/eval.pkl ]] && grep -q '^SUMMARY' "$RES/$RUN/$t/summary.txt" || { echo "EVAL_FAILED $RUN/$t"; exit 3; }
+    done
+fi
 echo "done: $(date)"
