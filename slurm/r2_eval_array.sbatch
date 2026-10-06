@@ -10,8 +10,8 @@
 #SBATCH --output=/scratch/nishanth.r/tordiff/logs/%x_%A_%a.log
 #
 # [round2 D4] Packed evaluation (plan 3 §2.5 graft): one array task per line of $MODELS (r2_eval_models_*.tsv); the
-# task runs every condition of its eval sets (r2_evalsets.tsv) with $PACK (default 3) concurrent gen_eval processes on
-# its one GPU. Provenance guard on (R2_PROVENANCE=1). Submit with --array=0-<n-1>%<k> (see submit_round2.sh).
+# task runs every condition of its eval sets (r2_evalsets.tsv) with $PACK concurrent gen_eval processes on
+# its one GPU (default PACK=1: D4). Provenance guard on (R2_PROVENANCE=1). Submit with --array=0-<n-1>%<k> (see submit_round2.sh).
 PROJECT=/scratch/nishanth.r/tordiff
 # shellcheck disable=SC1091
 source "$PROJECT/slurm/common.sh"
@@ -40,7 +40,7 @@ for p in $(grep -vE '^\s*(#|$)' "$R2_EVALSETS" | awk -F'|' -v s=",$SETS," '{g=$1
            | grep -o '\$QM9_[A-Z0-9_]*/[^ ]*\|\$QM9_GT_SEED_CONFS' | sort -u); do
     f=$(eval echo "$p"); [[ -s "$f" ]] || { echo "ERROR: missing $f"; exit 1; }
 done
-echo "[$IDX] model=$MODEL_DIR sets=$SETS pack=${PACK:-3}"
+echo "[$IDX] model=$MODEL_DIR sets=$SETS pack=${PACK:-1}"
 T0=$(date +%s)
 run_evalset "$MODEL_DIR" "$SETS"
 echo "done: $(date)  wall $(( $(date +%s) - T0 )) s"

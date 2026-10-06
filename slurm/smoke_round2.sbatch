@@ -59,9 +59,9 @@ if [[ "$MODE" == "smoke" ]]; then
     export R2_PROVENANCE=1 R2_EVALSETS=$PROJECT/slurm/r2_evalsets.tsv GEN_EXTRA="--limit_mols 20" PACK=3
     T0=$(date +%s)
     ln -sfn "$PROJECT/workdir/pretrained/qm9_default" "$WORK/pretrained_link"
-    run_evalset "$WORK/pretrained_link" "S1,S1A5,S1CR" || echo "SMOKE_EVAL_FAILED released"
+    run_evalset "$WORK/pretrained_link" "S1core,S1x,S1A5,S1CR" || echo "SMOKE_EVAL_FAILED released"
     echo "[smoke] packed S1 on released model: $(( $(date +%s) - T0 )) s"
-    run_evalset "$WORK/qm9_SMK_S4_lamcond_e1_s0" "S4" || echo "SMOKE_EVAL_FAILED S4"
+    run_evalset "$WORK/qm9_SMK_S4_lamcond_e1_s0" "S4core,S4x" || echo "SMOKE_EVAL_FAILED S4"
     for t in "$RES"/pretrained_link/*/summary.txt "$RES"/qm9_SMK_S4_lamcond_e1_s0/*/summary.txt; do
         echo "$t: $(head -1 "$t")"; done
 fi

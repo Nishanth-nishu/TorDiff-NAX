@@ -135,7 +135,7 @@ gen_eval() {
 }
 
 # [round2 D4] run_evalset MODEL_DIR SET[,SET...] : every line of $R2_EVALSETS whose SET field matches, packed $PACK
-#   (default 3) gen_eval processes on this job's GPU (plan 3 §2.5). Each process is seeded independently
+#   (default 1: DECISION D4 test not passed, see IMPLEMENTATION.md §5) gen_eval processes on this job's GPU (plan 3 §2.5). Each process is seeded independently
 #   (generate_confs.py --seed), so packing changes no RNG path; the D4 test checks a packed rerun reproduces round 1.
 run_evalset() {
     local model_dir=$1 sets=",$2," fail; fail=$(mktemp "$TMPDIR/evalset_fail.XXXX")
@@ -143,7 +143,7 @@ run_evalset() {
     while IFS='|' read -r S TAG ST SD ARGS; do
         S=$(echo "$S" | xargs)
         [[ "$sets" == *",$S,"* ]] || continue
-        while (( $(jobs -rp | wc -l) >= ${PACK:-3} )); do wait -n || true; done
+        while (( $(jobs -rp | wc -l) >= ${PACK:-1} )); do wait -n || true; done
         TAG=$(echo "$TAG" | xargs); ST=$(echo "$ST" | xargs); SD=$(echo "$SD" | xargs)
         # shellcheck disable=SC2046
         ( OMP_NUM_THREADS=1 EVAL_WORKERS=${EVAL_WORKERS:-2} STEPS=$ST SEED=$SD \

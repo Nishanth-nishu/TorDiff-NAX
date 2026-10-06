@@ -1,15 +1,13 @@
-# Round-2 packed evaluation, HEAD phase (existing checkpoints; runs while/before training). One array task per line.
+# Round-2 evaluation, HEAD phase (existing checkpoints; runs before training). One array task per line.
 #   MODEL_DIR ($VARS expanded; PRE = released qm9_default) | comma-separated eval sets of r2_evalsets.tsv
-# DECISION D3: CB + B1 on all 11 S1 conditions, CR on the 9 shared ones + its gtLcycle / V18 / pre_mmff extras; CR also
-# gets S1A5 because the D4 packing test passed (see round2/IMPLEMENTATION.md). Never cut CR runs.
-$WORK/qm9_B1_train_gtL_e100_s0        | S1,S1A5,V18
-$WORK/qm9_CTRL_rematch_100ep_e100_s0  | S1CR,S1,S1A5
-$WORK/qm9_CTRL_base_100ep_e100_s0     | S1,S1A5
-$WORK/qm9_B1_train_gtL_e100_s1        | S1,S1A5
-$WORK/qm9_CTRL_rematch_100ep_e100_s1  | S1CR,S1,S1A5
-$WORK/qm9_CTRL_base_100ep_e100_s1     | S1,S1A5
-$WORK/qm9_B1_train_gtL_e100_s2        | S1,S1A5
-$WORK/qm9_CTRL_rematch_100ep_e100_s2  | S1CR,S1,S1A5
-$WORK/qm9_CTRL_base_100ep_e100_s2     | S1,S1A5
-PRE                                   | S0,S6
-$WORK/qm9_B1_train_gtL_e100_s0        | S6B1
+# DECISION D3 + D8 trimmed matrix (IMPLEMENTATION.md §6): B1 x3 and CR x3 on the 8 S1core conditions (CR never cut;
+# CR is the F4 control of the S1 dose-response and of S3/S4); CR also gets gtLcycle (GT-end control + V18 anchor),
+# lambda=1.00 (V18) and --pre_mmff (S5 control). CB only s0 as the round-1 cross-check. Total 71 runs.
+$WORK/qm9_B1_train_gtL_e100_s0        | S1core,S1A5,V18
+$WORK/qm9_CTRL_rematch_100ep_e100_s0  | S1CR,S1core
+$WORK/qm9_B1_train_gtL_e100_s1        | S1core,S1A5
+$WORK/qm9_CTRL_rematch_100ep_e100_s1  | S1CR,S1core
+$WORK/qm9_B1_train_gtL_e100_s2        | S1core,S1A5
+$WORK/qm9_CTRL_rematch_100ep_e100_s2  | S1CR,S1core
+$WORK/qm9_CTRL_base_100ep_e100_s0     | S1panel
+PRE                                   | S0

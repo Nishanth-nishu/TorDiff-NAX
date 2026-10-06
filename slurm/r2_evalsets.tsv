@@ -2,16 +2,30 @@
 #   SET | TAG (= result dir name $RES/<model run>/<TAG>) | STEPS | SEED | extra generate_confs.py args ($VARS expanded)
 # Oracle rule (SHORTLIST endpoints): any condition built from test-set GT L ends in _ORACLE.
 # All seed-pickle conditions use --seed_confs_cycle (F3). Pickles: tools/make_l_seed_pickles.py -> $QM9_SEEDS2.
-# --- S1: the 9 shared conditions (models CB, B1, CR and every round-2 trained arm)
-S1   | S1_etkdg2L                 | 20 | 0 | --seed_confs $QM9_SEEDS2/L_etkdg2L.pkl --seed_confs_cycle
-S1   | S1_etkdg2L_mmff            | 20 | 0 | --seed_confs $QM9_SEEDS2/L_etkdg2L_mmff.pkl --seed_confs_cycle
-S1   | S1_noise0.01pa_cyc_ORACLE  | 20 | 0 | --seed_confs $QM9_SEEDS2/L_noise0.01pa_cyc_ORACLE.pkl --seed_confs_cycle
-S1   | S1_noise0.02pa_cyc_ORACLE  | 20 | 0 | --seed_confs $QM9_SEEDS2/L_noise0.02pa_cyc_ORACLE.pkl --seed_confs_cycle
-S1   | S1_noise0.04pa_cyc_ORACLE  | 20 | 0 | --seed_confs $QM9_SEEDS2/L_noise0.04pa_cyc_ORACLE.pkl --seed_confs_cycle
-S1   | S1_lam0.00_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.00_cyc_ORACLE.pkl --seed_confs_cycle
-S1   | S1_lam0.25_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.25_cyc_ORACLE.pkl --seed_confs_cycle
-S1   | S1_lam0.50_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.50_cyc_ORACLE.pkl --seed_confs_cycle
-S1   | S1_lam0.75_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.75_cyc_ORACLE.pkl --seed_confs_cycle
+# --- S1 conditions. Sets (DECISION D3/D8 trimmed matrix, IMPLEMENTATION.md §6):
+#   S1core  = 8 conditions (all but noise 0.01)          -> B1 x3, CR x3
+#   S1panel = 6 conditions (no lam 0.25/0.75)            -> CB s0, B6 x3, S3 x2
+#   S1panel4= 4 conditions (etkdg, mmff, noise .04, lam .5) -> B1cap
+#   S1x     = noise 0.01 (D8 trim; only if the budget allows)
+S1core| S1_etkdg2L                 | 20 | 0 | --seed_confs $QM9_SEEDS2/L_etkdg2L.pkl --seed_confs_cycle
+S1panel| S1_etkdg2L                 | 20 | 0 | --seed_confs $QM9_SEEDS2/L_etkdg2L.pkl --seed_confs_cycle
+S1panel4| S1_etkdg2L                 | 20 | 0 | --seed_confs $QM9_SEEDS2/L_etkdg2L.pkl --seed_confs_cycle
+S1core| S1_etkdg2L_mmff            | 20 | 0 | --seed_confs $QM9_SEEDS2/L_etkdg2L_mmff.pkl --seed_confs_cycle
+S1panel| S1_etkdg2L_mmff            | 20 | 0 | --seed_confs $QM9_SEEDS2/L_etkdg2L_mmff.pkl --seed_confs_cycle
+S1panel4| S1_etkdg2L_mmff            | 20 | 0 | --seed_confs $QM9_SEEDS2/L_etkdg2L_mmff.pkl --seed_confs_cycle
+S1x  | S1_noise0.01pa_cyc_ORACLE  | 20 | 0 | --seed_confs $QM9_SEEDS2/L_noise0.01pa_cyc_ORACLE.pkl --seed_confs_cycle
+S1core| S1_noise0.02pa_cyc_ORACLE  | 20 | 0 | --seed_confs $QM9_SEEDS2/L_noise0.02pa_cyc_ORACLE.pkl --seed_confs_cycle
+S1panel| S1_noise0.02pa_cyc_ORACLE  | 20 | 0 | --seed_confs $QM9_SEEDS2/L_noise0.02pa_cyc_ORACLE.pkl --seed_confs_cycle
+S1core| S1_noise0.04pa_cyc_ORACLE  | 20 | 0 | --seed_confs $QM9_SEEDS2/L_noise0.04pa_cyc_ORACLE.pkl --seed_confs_cycle
+S1panel| S1_noise0.04pa_cyc_ORACLE  | 20 | 0 | --seed_confs $QM9_SEEDS2/L_noise0.04pa_cyc_ORACLE.pkl --seed_confs_cycle
+S1panel4| S1_noise0.04pa_cyc_ORACLE  | 20 | 0 | --seed_confs $QM9_SEEDS2/L_noise0.04pa_cyc_ORACLE.pkl --seed_confs_cycle
+S1core| S1_lam0.00_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.00_cyc_ORACLE.pkl --seed_confs_cycle
+S1panel| S1_lam0.00_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.00_cyc_ORACLE.pkl --seed_confs_cycle
+S1core| S1_lam0.25_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.25_cyc_ORACLE.pkl --seed_confs_cycle
+S1core| S1_lam0.50_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.50_cyc_ORACLE.pkl --seed_confs_cycle
+S1panel| S1_lam0.50_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.50_cyc_ORACLE.pkl --seed_confs_cycle
+S1panel4| S1_lam0.50_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.50_cyc_ORACLE.pkl --seed_confs_cycle
+S1core| S1_lam0.75_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam0.75_cyc_ORACLE.pkl --seed_confs_cycle
 # --- S1.5 ring / acyclic oracles (CB, B1; CR only if packing passed: D3)
 S1A5 | S1_A5ring_cyc_ORACLE       | 20 | 0 | --seed_confs $QM9_SEEDS2/L_A5ring_cyc_ORACLE.pkl --seed_confs_cycle
 S1A5 | S1_A5acyc_cyc_ORACLE       | 20 | 0 | --seed_confs $QM9_SEEDS2/L_A5acyc_cyc_ORACLE.pkl --seed_confs_cycle
@@ -23,17 +37,18 @@ S1CR | S5ctrl_pre_mmff            | 20 | 0 | --pre_mmff
 # V18 on B1 s0 too (its gtLcycle run exists from round 1)
 V18  | S1_lam1.00_cyc_ORACLE      | 20 | 0 | --seed_confs $QM9_SEEDS2/L_lam1.00_cyc_ORACLE.pkl --seed_confs_cycle
 # --- S4 (lambda-conditioned): lambda 0 on RDKit-type L, descriptive lambda grid on MMFF, lambda_in = lambda_build
-S4   | S4_etkdg2L_l0              | 20 | 0 | --l_level 0 --seed_confs $QM9_SEEDS2/L_etkdg2L.pkl --seed_confs_cycle
-S4   | S4_etkdg2L_mmff_l0         | 20 | 0 | --l_level 0 --seed_confs $QM9_SEEDS2/L_etkdg2L_mmff.pkl --seed_confs_cycle
-S4   | S4_etkdg2L_mmff_l0.25      | 20 | 0 | --l_level 0.25 --seed_confs $QM9_SEEDS2/L_etkdg2L_mmff.pkl --seed_confs_cycle
-S4   | S4_etkdg2L_mmff_l0.50      | 20 | 0 | --l_level 0.5 --seed_confs $QM9_SEEDS2/L_etkdg2L_mmff.pkl --seed_confs_cycle
-S4   | S4_lam0.00_l0.00_cyc_ORACLE | 20 | 0 | --l_level 0 --seed_confs $QM9_SEEDS2/L_lam0.00_cyc_ORACLE.pkl --seed_confs_cycle
-S4   | S4_lam0.25_l0.25_cyc_ORACLE | 20 | 0 | --l_level 0.25 --seed_confs $QM9_SEEDS2/L_lam0.25_cyc_ORACLE.pkl --seed_confs_cycle
-S4   | S4_lam0.50_l0.50_cyc_ORACLE | 20 | 0 | --l_level 0.5 --seed_confs $QM9_SEEDS2/L_lam0.50_cyc_ORACLE.pkl --seed_confs_cycle
-S4   | S4_lam0.75_l0.75_cyc_ORACLE | 20 | 0 | --l_level 0.75 --seed_confs $QM9_SEEDS2/L_lam0.75_cyc_ORACLE.pkl --seed_confs_cycle
+#   S4core = lambda 0 on etkdg/mmff + lambda_in = lambda_build at 0 and 0.5; S4x = the descriptive rest (D8 trim)
+S4core| S4_etkdg2L_l0              | 20 | 0 | --l_level 0 --seed_confs $QM9_SEEDS2/L_etkdg2L.pkl --seed_confs_cycle
+S4core| S4_etkdg2L_mmff_l0         | 20 | 0 | --l_level 0 --seed_confs $QM9_SEEDS2/L_etkdg2L_mmff.pkl --seed_confs_cycle
+S4x  | S4_etkdg2L_mmff_l0.25      | 20 | 0 | --l_level 0.25 --seed_confs $QM9_SEEDS2/L_etkdg2L_mmff.pkl --seed_confs_cycle
+S4x  | S4_etkdg2L_mmff_l0.50      | 20 | 0 | --l_level 0.5 --seed_confs $QM9_SEEDS2/L_etkdg2L_mmff.pkl --seed_confs_cycle
+S4core| S4_lam0.00_l0.00_cyc_ORACLE | 20 | 0 | --l_level 0 --seed_confs $QM9_SEEDS2/L_lam0.00_cyc_ORACLE.pkl --seed_confs_cycle
+S4x  | S4_lam0.25_l0.25_cyc_ORACLE | 20 | 0 | --l_level 0.25 --seed_confs $QM9_SEEDS2/L_lam0.25_cyc_ORACLE.pkl --seed_confs_cycle
+S4core| S4_lam0.50_l0.50_cyc_ORACLE | 20 | 0 | --l_level 0.5 --seed_confs $QM9_SEEDS2/L_lam0.50_cyc_ORACLE.pkl --seed_confs_cycle
+S4x  | S4_lam0.75_l0.75_cyc_ORACLE | 20 | 0 | --l_level 0.75 --seed_confs $QM9_SEEDS2/L_lam0.75_cyc_ORACLE.pkl --seed_confs_cycle
 # --- S5: B3 without --pre_mmff (train-only cell); B3 with --pre_mmff is its in-job default eval
 S5   | S5_nommff                  | 20 | 0 |
-# --- S6 sampler checks on the released model (3 sampling seeds) and on B1 s0 with gtLcycle (descriptive, D8 trims first)
+# --- S6 sampler checks on the released model (3 sampling seeds) and on B1 s0 with gtLcycle (descriptive: D8 trims these first; not in the default matrix)
 S6   | C_steps10                  | 10 | 0 |
 S6   | C_steps10_seed1            | 10 | 1 |
 S6   | C_steps10_seed2            | 10 | 2 |

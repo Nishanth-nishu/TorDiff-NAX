@@ -14,7 +14,7 @@ LOGS=$PROJECT/logs
 # DECISION D5 outcome (smoke/d5 measurement, IMPLEMENTATION.md §5): CPUs and loader workers per training job
 TRAIN_CPUS=${TRAIN_CPUS:-4}
 LOADER_WORKERS=${LOADER_WORKERS:-3}
-PACK=${PACK:-3}            # DECISION D4 outcome: packed evaluation, 3 gen_eval processes per GPU
+PACK=${PACK:-1}            # DECISION D4 outcome: packing NOT enabled (exact-reproduction test failed; IMPLEMENTATION.md §5)
 nlines() { grep -cvE '^\s*(#|$)' "$1"; }
 
 case "${1:-}" in
@@ -47,12 +47,11 @@ case "${1:-}" in
     # next to the single wave-4 training, so %3 keeps <= 4 GPUs busy); the wave-4 model (last line) gets its own task.
     POST=$S/r2_eval_models_post.tsv
     if [[ "$2" == "fail" ]]; then grep -v 'S4_lamcond' "$S/r2_eval_models_post.tsv" > "$S/r2_eval_models_post_noS4.tsv"; POST=$S/r2_eval_models_post_noS4.tsv; fi
-    grep -vE '^\s*(#|$)' "$POST" | grep -v 'B6_jit0.02pa' > "$S/r2_eval_models_post_main.tsv"
-    grep 'B6_jit0.02pa' "$POST" > "$S/r2_eval_models_post_last.tsv"
+    # all panels depend on the training tasks of waves 1-3 (tasks 0..n-2); they run next to the single wave-4
+    # training (B6_jit0.02pa, no panel), so %3 keeps <= 4 GPUs busy
     dep="afterany"; for i in $(seq 0 $((n - 2))); do dep="$dep:${jt}_$i"; done
-    m=$(nlines "$S/r2_eval_models_post_main.tsv")
-    MODELS=$S/r2_eval_models_post_main.tsv PACK=$PACK sbatch --export=ALL --dependency=$dep --array=0-$((m - 1))%3 "$S/r2_eval_array.sbatch"
-    MODELS=$S/r2_eval_models_post_last.tsv PACK=$PACK sbatch --export=ALL --dependency=afterany:${jt}_$((n - 1)) --array=0 "$S/r2_eval_array.sbatch"
+    m=$(nlines "$POST")
+    MODELS=$POST PACK=$PACK sbatch --export=ALL --dependency=$dep --array=0-$((m - 1))%3 "$S/r2_eval_array.sbatch"
     ;;
   *) echo "usage: $0 prep|head|gate|train pass|fail"; exit 1 ;;
 esac
