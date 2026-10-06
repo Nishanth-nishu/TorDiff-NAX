@@ -35,6 +35,11 @@ parser.add_argument('--primary', nargs='+', default=['MAT-R', 'COV-R@0.5'])
 parser.add_argument('--n_boot', type=int, default=5000)
 parser.add_argument('--seed', type=int, default=0)
 parser.add_argument('--out', default=None)
+# [round2 S0] default 'union' reproduces the round-1 tables. 'intersection' = molecules evaluated in EVERY file of the ref
+# and every arm (key secondary COV-R@0.1 family, SHORTLIST endpoints; code_plan_2 §2.1). Holm runs over --primary only,
+# so one call per family gives separate Holm families.
+parser.add_argument('--universe', choices=['union', 'intersection'], default='union')
+parser.add_argument('--report_failures', action='store_true', help='[round2 S0] print model-failure counts per file')
 args = parser.parse_args()
 
 
@@ -97,6 +102,15 @@ rng = np.random.default_rng(args.seed)
 ref_name, ref_dfs = load_arm(args.ref, args.thresholds)
 arms = [load_arm(a, args.thresholds) for a in args.arm]
 universe = sorted(set().union(*[set(d.index) for d in ref_dfs], *[set(d.index) for _, ds in arms for d in ds]))
+if args.universe == 'intersection':
+    universe = sorted(set.intersection(*[set(d.index) for d in ref_dfs], *[set(d.index) for _, ds in arms for d in ds]))
+if args.report_failures:
+    for spec in [args.ref] + args.arm:
+        name, paths = spec.split('=', 1)
+        for p in [q for q in paths.split(',') if q]:
+            with open(p, 'rb') as f:
+                R = pickle.load(f)
+            print(f'FAILURES {name} {p}: num_failures={R.get("num_failures")} n_results={len(R["results"])}')
 ref = combine(ref_dfs, universe)
 metrics = list(ref.columns)
 

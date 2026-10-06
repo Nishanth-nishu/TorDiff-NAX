@@ -60,7 +60,7 @@ RDLogger.DisableLog('rdApp.*')
 sys.path.insert(0, os.getcwd())  # run from the torsional-diffusion repo root
 
 parser = ArgumentParser()
-parser.add_argument('--mode', choices=['test', 'run', 'std'], required=True)
+parser.add_argument('--mode', choices=['test', 'run', 'std', 'leak'], required=True)
 parser.add_argument('--test_csv', default='data/QM9/test_smiles.csv')
 parser.add_argument('--true_mols', default='data/QM9/test_mols.pkl')
 parser.add_argument('--std_pickles', default='data/QM9/standardized_pickles')
@@ -76,6 +76,14 @@ parser.add_argument('--popsize', type=int, default=15)
 parser.add_argument('--maxiter', type=int, default=50, help='DE iterations (standardize_confs.py uses 15)')
 parser.add_argument('--seed', type=int, default=1, help='RDKit randomSeed; never 0 (RDKit seed 0 => identical conformers)')
 parser.add_argument('--mmff_seeds', action='store_true', help='MMFF-relax the ETKDG seeds first (== generate --pre_mmff)')
+# [round2 S0] DE convergence check (code_plan_2 §2.1): restarts with seeds de_seed + 7919*r, minimum kept. Defaults
+# (1 restart, de_seed = --seed) reproduce round 1 exactly. --de_seed decouples the DE seed from the ETKDG seed.
+parser.add_argument('--de_restarts', type=int, default=1)
+parser.add_argument('--de_seed', type=int, default=None)
+# [round2 S0 leak test] torsion-space source-hit test on a --seed_confs_cycle run (verify_B §4 R2-0(e))
+parser.add_argument('--seed_confs', default=None, help='--mode leak: the seed pickle the cycle run used')
+parser.add_argument('--raw_dir', default='data/QM9/qm9/', help='--mode leak: raw pickles for Boltzmann weights')
+parser.add_argument('--n_perm', type=int, default=200)
 args = parser.parse_args()
 
 
@@ -176,9 +184,13 @@ def torsion_floor(seed_mol, seed_cid, gt_mol, torsions, amap, x_extra=None):
         setx(x)
         return heavy_rmsd(seed_mol, gt_mol, seed_cid, -1, amap)
 
-    res = differential_evolution(f, [(-np.pi, np.pi)] * len(torsions), popsize=args.popsize,
-                                 maxiter=args.maxiter, seed=args.seed, polish=True, tol=1e-6)
-    cands = [(res.fun, res.x)] + [(f(x), x) for x in (x_extra or [])]
+    base_seed = args.seed if args.de_seed is None else args.de_seed
+    cands = []
+    for r in range(args.de_restarts):  # [round2 S0] r = 0 with default args == the round-1 call
+        res = differential_evolution(f, [(-np.pi, np.pi)] * len(torsions), popsize=args.popsize,
+                                     maxiter=args.maxiter, seed=base_seed + 7919 * r, polish=True, tol=1e-6)
+        cands.append((res.fun, res.x))
+    cands = cands + [(f(x), x) for x in (x_extra or [])]
     best_v, best_x = min(cands, key=lambda c: c[0])
     setx(best_x)
     return float(best_v)
@@ -431,14 +443,92 @@ def run_std():
     return pd.DataFrame(rows)
 
 
+# ----------------------------------------------------------------------------------------------- leak test (round 2)
+def leak_job(item):
+    """[round2 S0 (e)] code_plan_2 §2.1 item 4 / verify_B §4 R2-0(e): in TORSION space, is generated conformer i
+    nearest to its L-source GT conformer (i mod L under --seed_confs_cycle, diffusion/sampling.py:75)?"""
+    key, corrected, gts, gens, n_seed, w = item
+    L = len(gts)
+    if L < 2 or n_seed != L:
+        return [dict(smiles=key, corrected_smiles=corrected, error='L<2' if L < 2 else f'n_seed {n_seed} != L {L}')]
+    _, rel_t = relevant_torsions(gts[0])
+    if not rel_t:
+        return [dict(smiles=key, corrected_smiles=corrected, error='no heavy torsion')]
+    maps = heavy_automorphisms(gts[0])
+    # torsion index tuples under every heavy automorphism (symmetric groups give equivalent torsion definitions)
+    tmaps = []
+    for mp in maps:
+        d = dict(mp)
+        if all(all(a in d for a in t) for t in rel_t):
+            tmaps.append([tuple(d[a] for a in t) for t in rel_t])
+    tmaps = tmaps or [rel_t]
+    tg = lambda m, ts: np.array([rdMolTransforms.GetDihedralRad(m.GetConformer(), *t) for t in ts])
+    T_gt = [tg(g, rel_t) for g in gts]
+    D = np.zeros((len(gens), L))
+    for i, g in enumerate(gens):
+        cand = [tg(g, ts) for ts in tmaps]
+        for l in range(L):
+            D[i, l] = min(np.sqrt(np.mean(((c - T_gt[l] + np.pi) % (2 * np.pi) - np.pi) ** 2)) for c in cand)
+    src = np.arange(len(gens)) % L
+    near = D.argmin(1)
+    hit = float(np.mean(near == src))
+    rng = np.random.default_rng(0)
+    null = float(np.mean([np.mean(near == rng.permutation(src)) for _ in range(args.n_perm)]))
+    boltz = float(np.mean([w[src[i]] for i in range(len(gens))])) if w is not None else np.nan
+    return [dict(smiles=key, corrected_smiles=corrected, L=L, n_gen=len(gens), hit=hit, perm_null=null,
+                 boltz_null=boltz, excess=hit - null)]
+
+
+def run_leak():
+    df = pd.read_csv(args.test_csv)
+    with open(args.true_mols, 'rb') as f:
+        true_mols = pickle.load(f)
+    with open(args.confs, 'rb') as f:
+        gen = pickle.load(f)
+    with open(args.seed_confs, 'rb') as f:
+        seeds = pickle.load(f)
+    items = []
+    for row in df.itertuples(index=False):
+        raw_smi, corrected = row[0], row[2]
+        key = getattr(row, 'smiles') if 'smiles' in df.columns else raw_smi
+        if corrected not in gen or key not in true_mols or raw_smi not in seeds:
+            continue
+        gts = clean_confs(corrected, true_mols[key])
+        w = None
+        rp = os.path.join(args.raw_dir, key + '.pickle')
+        if os.path.exists(rp):  # Boltzmann weights by coordinate match to the raw GEOM conformers
+            try:
+                with open(rp, 'rb') as f:
+                    raw = pickle.load(f)['conformers']
+                ww = []
+                for g in gts:
+                    P = g.GetConformer().GetPositions()
+                    m = [r['boltzmannweight'] for r in raw if r['rd_mol'].GetNumAtoms() == len(P) and
+                         np.allclose(r['rd_mol'].GetConformer().GetPositions(), P, atol=1e-3)]
+                    ww.append(m[0] if m else np.nan)
+                w = np.array(ww) / np.nansum(ww) if not np.isnan(ww).any() else None
+            except Exception:
+                w = None
+        items.append((key, corrected, gts, gen[corrected], len(seeds[raw_smi]), w))
+    if args.limit_mols:
+        items = items[:args.limit_mols]
+    print('molecules:', len(items))
+    return pd.DataFrame(pool_map(leak_job, items, chunksize=4))
+
+
 if __name__ == '__main__':
     np.random.seed(args.seed)
-    df = {'test': run_test, 'run': run_run, 'std': run_std}[args.mode]()
+    df = {'test': run_test, 'run': run_run, 'std': run_std, 'leak': run_leak}[args.mode]()
+    if args.mode == 'leak' and 'hit' in df:
+        d = df.dropna(subset=['hit'])
+        print(f'LEAK n={len(d)} hit={d.hit.mean():.4f} perm_null={d.perm_null.mean():.4f} '
+              f'excess={d.excess.mean():.4f} boltz_null={d.boltz_null.mean():.4f}')
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     df.to_csv(args.out, index=False)
     cols = {'test': ['floor_rmsd', 'floor_best', 'floor_best_sym', 'floor_gtother', 'angle_oracle_rmsd',
                      'local_oracle_rmsd', 'transplant_rmsd_best'],
-            'run': ['obs_min_rmsd', 'floor_run', 'torsion_headroom'], 'std': ['match_rmsd']}[args.mode]
+            'run': ['obs_min_rmsd', 'floor_run', 'torsion_headroom'], 'std': ['match_rmsd'],
+            'leak': ['hit', 'perm_null', 'excess']}[args.mode]
     if 'error' in df:
         print('rows with error:', int(df['error'].notna().sum()))
     for col in cols:
