@@ -7,3 +7,4 @@ cluster_sync/results/analysis/local_structure_std.csv
 *.pt
 __pycache__/
 .nested_git_backup/
+.claude/
