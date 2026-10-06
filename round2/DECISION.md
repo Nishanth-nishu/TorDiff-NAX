@@ -32,3 +32,5 @@ Tallied 2026-10-06. Ranking votes: agent 1 → 2 > 3 > 1; agent 2 → 1 > 2 > 3;
   are the same size; 1.47x throughput.
 - Note from implementation: measured 6.4 it/s under node load suggests ~14-16 h per 100-epoch run (not 10.7 h), so
   wall-clock is ~50-60 h. Still within the 4-day job limit.
+- **2026-10-07: S4 ruling confirmed by the user** after both research checks showed subset re-scoring fixes the test
+  side but not the training side. Kept as is; reported as a limitation (see FIXES.md).
