@@ -16,7 +16,9 @@ Per std conformer c of molecule `name` (std key = raw file stem, standardize_con
   3. same labelled graph (atom order + bonds; code_plan_2 V1).
   4. lgeom.align_pair (heavy-atom Kabsch applied to all atoms + terminal relabelling) and lgeom.pair_check at
      lambda = 0.5 (stereo / bond / clash). Failing pairs are DROPPED and counted (DECISION D1).
-Stored: conf['gt_pos_aligned'] (float32, RDKit frame), conf['pair_heavy_rmsd'], conf['n_swaps']. rd_mol is untouched.
+Stored: conf['gt_pos_aligned'] (float32, RDKit frame), conf['pair_heavy_rmsd'], conf['n_swaps'], conf['pair_ok'],
+conf['pair_reason']. rd_mol is untouched. Only verification failures (steps 1-3) are dropped; pair_ok failures are kept
+and flagged (see the comment in pair_molecule).
 Molecules left with no conformer are dropped and counted. Per-file stats go to <out_dir>/stats/NNN.json and
 --summarize prints the pairing-clean percentage.
 
@@ -110,15 +112,20 @@ def pair_molecule(name, mol_dic, cnt, dev_hist):
         al = lgeom.align_pair(c['rd_mol'], X, Y)
         chk = lgeom.pair_check(c['rd_mol'], X, al['Y_al'])
         dev_hist.append((chk['worst_bond_dev'], chk['min_nonbonded'], al['n_swaps']))
+        # DECISION D1: pairs failing pair_ok must not be INTERPOLATED. They are kept here with pair_ok=False and
+        # counted; the S4 loader drops them (utils/dataset.py, --l_interp), while S3/B1cap (no midpoints) keep every
+        # verified pair so that their RDKit half stays identical to CTRL_rematch's data (F4).
         if not chk['pair_ok']:
-            cnt[f'drop_pair_{chk["reason"]}'] += 1
-            continue
+            cnt[f'unsafe_pair_{chk["reason"]}'] += 1
         cnt['confs_paired'] += 1
+        cnt['confs_pair_ok'] += int(chk['pair_ok'])
         cnt['confs_with_swaps'] += int(al['n_swaps'] > 0)
         c = dict(c)
         c['gt_pos_aligned'] = al['Y_al'].astype(np.float32)
         c['pair_heavy_rmsd'] = al['heavy_rmsd']
         c['n_swaps'] = al['n_swaps']
+        c['pair_ok'] = bool(chk['pair_ok'])
+        c['pair_reason'] = chk['reason']
         new.append(c)
     if not new:
         cnt['mol_dropped_all_confs'] += 1
@@ -176,8 +183,10 @@ def summarize():
         print(f'  {k}: {tot[k]}')
     pct = 100.0 * n_ok / max(n_in, 1)
     print(f'PAIRING_CLEAN confs {n_ok}/{n_in} = {pct:.3f} %  molecules {tot["mols_out"]}/{tot["mols_in"]}')
-    drops = {k: v for k, v in tot.items() if k.startswith('drop_')}
-    print('drops by reason:', drops)
+    pok = 100.0 * tot['confs_pair_ok'] / max(n_ok, 1)
+    print(f'PAIR_OK confs {tot["confs_pair_ok"]}/{n_ok} = {pok:.3f} % of verified pairs (S4 interpolates only these)')
+    print('drops by reason:', {k: v for k, v in tot.items() if k.startswith('drop_')})
+    print('unsafe (kept, not interpolated) by reason:', {k: v for k, v in tot.items() if k.startswith('unsafe_')})
     return pct
 
 

@@ -83,7 +83,9 @@ def test_lambda_endpoints_and_noise_crn(fake_set):
             # lambda = 1 is the GT conformer up to a rigid motion + terminal relabelling: heavy RMSD ~ 0
             h = lgeom.heavy_idx(g)
             Y = lgeom.positions(a)
-            assert lgeom.rmsd_on(Y, lgeom.kabsch_fit(Y, lgeom.positions(g), h), h) < 1e-4
+            G = lgeom.positions(g)  # (up to a heavy-atom graph automorphism, chosen by align_pair)
+            assert min(lgeom.rmsd_on(Y, lgeom.kabsch_fit(Y, G[pm], h), h)
+                       for pm in lgeom.heavy_automorphism_perms(g)) < 1e-4
         for j, g in enumerate(true_mols[smi]):
             G = lgeom.positions(g)
             e2, e4 = lgeom.positions(n2[smi][j]) - G, lgeom.positions(n4[smi][j]) - G
@@ -138,9 +140,10 @@ def test_paired_builder_on_fake_std_pickles(fake_set, tmp_path):
     with open(po / '000.pickle', 'rb') as f:
         P = pickle.load(f)
     n = sum(len(v['conformers']) for v in P.values())
-    assert n >= 6  # 9 pairs; swapped-isopropyl type pairs may be dropped by the pair_ok guard (counted)
+    assert n == 9  # every verified pair kept (pair_ok failures are flagged, not dropped; DECISION D1 drop is in S4)
     for v in P.values():
         for c in v['conformers']:
             X, Y = lgeom.positions(c['rd_mol']), c['gt_pos_aligned']
             h = lgeom.heavy_idx(c['rd_mol'])
-            assert abs(lgeom.rmsd_on(X, Y, h) - c['rmsd']) < 1e-4  # aligned frame reproduces the stored rmsd
+            # aligned frame reproduces the stored rmsd, or improves on it via a graph automorphism
+            assert lgeom.rmsd_on(X, Y, h) <= c['rmsd'] + 1e-4 and 'pair_ok' in c

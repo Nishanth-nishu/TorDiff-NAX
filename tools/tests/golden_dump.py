@@ -21,6 +21,10 @@ from argparse import ArgumentParser, Namespace
 import numpy as np
 import torch
 
+# single-threaded CPU math: multi-threaded scatter/radius reductions make the forward pass non-deterministic run to run
+# (measured: max |diff| ~2e-6 between two runs of the SAME code), which would mask a real regression
+torch.set_num_threads(1)
+
 sys.path.insert(0, '.')
 from utils.dataset import TorsionNoiseTransform, ConformerDataset  # noqa: E402
 from utils.featurization import featurize_mol_from_smiles, qm9_types  # noqa: E402

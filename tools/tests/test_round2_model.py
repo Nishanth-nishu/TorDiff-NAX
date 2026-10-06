@@ -67,7 +67,7 @@ def test_golden_model_transform_featurize_identical(tmp_path):
     for root in (SNAP, REPO):
         o = tmp_path / (os.path.basename(os.path.dirname(root)) + '.pt')
         r = subprocess.run([sys.executable, os.path.join(TOOLS, 'tests', 'golden_dump.py'), str(o),
-                            '--data_root', os.path.join(REPO, 'data/QM9')], cwd=root, capture_output=True, text=True)
+                            '--data_root', os.path.join(REPO, 'data/QM9')], cwd=root, capture_output=True, text=True, env=dict(os.environ, OMP_NUM_THREADS='1', MKL_NUM_THREADS='1'))
         assert r.returncode == 0, r.stderr[-3000:]
         outs.append(torch.load(o))
     a, b = outs
@@ -95,7 +95,8 @@ def test_golden_generate_identical(tmp_path):                                   
         r = subprocess.run([sys.executable, 'generate_confs.py', '--model_dir', PRE, '--test_csv',
                             os.path.join(REPO, 'data/QM9/test_smiles.csv'), '--limit_mols', '4', '--seed', '0',
                             '--no_energy', '--inference_steps', '5', '--out', str(o)],
-                           cwd=root, capture_output=True, text=True, env=dict(os.environ, CUDA_VISIBLE_DEVICES=''))
+                           cwd=root, capture_output=True, text=True,
+                           env=dict(os.environ, CUDA_VISIBLE_DEVICES='', OMP_NUM_THREADS='1', MKL_NUM_THREADS='1'))
         assert r.returncode == 0, r.stderr[-3000:]
         outs.append(pickle.load(open(o, 'rb')))
     assert outs[0].keys() == outs[1].keys() and len(outs[0]) > 0
@@ -312,3 +313,25 @@ def test_C11_fail_on_nan_and_limit_iters():
             p_.fill_(float('nan'))
     with pytest.raises(FloatingPointError):
         train_epoch(model, L, opt, 'cpu', fail_on_nan=True)
+
+
+def test_C12_s4_pair_ok_filter(tmp_path):
+    """DECISION D1: S4 never interpolates a pair that failed pair_ok; S3/B1cap keep every verified pair"""
+    items = datas(paired=True)
+    items[0].pair_ok = [True, False, True]
+    items[1].pair_ok = [False, False, False]
+    for d in items[2:]:
+        d.pair_ok = [True] * len(d.pos)
+    cache = tmp_path / 'c'
+    with open(str(cache) + '.train', 'wb') as f:
+        pickle.dump(items, f)
+    ds = ConformerDataset('x/', 'unused', 'train', types='qm9', dataset='qm9', cache=str(cache),
+                          transform=TorsionNoiseTransform(l_interp=True))
+    assert len(ds.datapoints) == len(items) - 1
+    assert len(ds.datapoints[0].pos) == 2 and all(ds.datapoints[0].pair_ok)
+    assert abs(sum(ds.datapoints[0].weights) - 1) < 1e-9
+    ds3 = ConformerDataset('x/', 'unused', 'train', types='qm9', dataset='qm9', cache=str(cache),
+                           transform=TorsionNoiseTransform(l_mix_p_gt=0.5))
+    assert len(ds3.datapoints) == len(items) and len(ds3.datapoints[0].pos) == 3
+    d = ds3[0]
+    assert not hasattr(d, 'pair_ok') and not hasattr(d, 'gt_pos')

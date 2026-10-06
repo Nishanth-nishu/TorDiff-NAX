@@ -100,12 +100,52 @@ def permute_terminal(mol, X, Y):
     return Y[perm], perm, int((perm != np.arange(len(Y))).sum())
 
 
+def heavy_automorphism_perms(mol, max_maps=200):
+    """Full-atom index permutations induced by the heavy-atom graph automorphisms of mol (H atoms follow their parent;
+    their order inside a parent is fixed later by permute_terminal). Identity first."""
+    hv = [a.GetIdx() for a in mol.GetAtoms() if a.GetAtomicNum() > 1]
+    n = mol.GetNumAtoms()
+    h = Chem.RemoveHs(mol, sanitize=False)
+    if h.GetNumAtoms() != len(hv):
+        return [np.arange(n)]
+    try:
+        ms = h.GetSubstructMatches(h, uniquify=False, useChirality=False, maxMatches=max_maps)
+    except Exception:
+        return [np.arange(n)]
+    hs_of = {i: [nb.GetIdx() for nb in mol.GetAtomWithIdx(i).GetNeighbors() if nb.GetAtomicNum() == 1] for i in hv}
+    perms = [np.arange(n)]
+    for mt in ms:
+        perm = np.arange(n)
+        ok = True
+        for q, p in enumerate(mt):          # heavy atom hv[q] takes the position of heavy atom hv[p]
+            i, j = hv[q], hv[p]
+            perm[i] = j
+            if len(hs_of[i]) != len(hs_of[j]):
+                ok = False
+                break
+            for a, b in zip(hs_of[i], hs_of[j]):
+                perm[a] = b
+        if ok and len(set(perm.tolist())) == n and not np.array_equal(perm, perms[0]):
+            perms.append(perm)
+    return perms
+
+
 def align_pair(mol, X, Y):
     """DECISION D1: heavy-atom Kabsch of Y onto X (applied to all atoms), terminal relabelling, twice (the second
-    pass is idempotent in tests). Returns dict(Y_al, perm, heavy_rmsd, n_swaps)."""
+    pass is idempotent in tests). Returns dict(Y_al, perm, heavy_rmsd, n_swaps).
+    Extension (IMPLEMENTATION.md §2, measured on rematch 000.pickle): before the terminal relabelling, Y is relabelled by
+    the heavy-atom graph automorphism with the lowest heavy-atom Kabsch RMSD (the correspondence GetBestRMS uses), so a
+    prochiral swap of non-terminal equivalent groups (e.g. the two methyls of an isopropyl) is not interpolated through
+    a planar centre. Like the terminal relabelling, this is a graph automorphism: the model sees the same graph."""
     h = heavy_idx(mol)
-    Yal = kabsch_fit(X, Y, h)
-    perm_tot = np.arange(len(Y))
+    best = None
+    for pm in heavy_automorphism_perms(mol):
+        Yp = Y[pm]
+        r = rmsd_on(X, kabsch_fit(X, Yp, h), h)
+        if best is None or r < best[0] - 1e-9:
+            best = (r, pm)
+    perm_tot = best[1].copy()
+    Yal = kabsch_fit(X, Y[perm_tot], h)
     for _ in range(2):
         Yal, perm, _ = permute_terminal(mol, X, Yal)
         perm_tot = perm_tot[perm]

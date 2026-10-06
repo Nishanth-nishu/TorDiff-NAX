@@ -88,7 +88,7 @@ class TorsionNoiseTransform(BaseTransform):
         x, y = data.pos[k], data.gt_pos[k]
         assert x.shape == y.shape
         if self.l_interp:
-            # S4: lambda ~ U[0,1] (SHORTLIST S4); unsafe pairs were dropped offline (DECISION D1), so every
+            # S4: lambda ~ U[0,1] (SHORTLIST S4); pairs failing pair_ok were dropped at load (DECISION D1, see __init__), so every
             # midpoint is chemically sane. evidence E5/E6 research_A
             lam = float(np.random.uniform())
             data.pos = interp_x_torch(x, y, lam, data.edge_index)
@@ -98,6 +98,8 @@ class TorsionNoiseTransform(BaseTransform):
             data.pos = y if np.random.uniform() < self.l_mix_p_gt else x
         data.l_conf_idx = k  # for tests only
         del data.gt_pos  # data is a deepcopy (get(), :193); never collate the list
+        if hasattr(data, 'pair_ok'):
+            del data.pair_ok
 
     def __repr__(self) -> str:
         return (f'{self.__class__.__name__}(sigma_min={self.sigma_min}, '
@@ -140,6 +142,24 @@ class ConformerDataset(Dataset):
         if getattr(transform, 'needs_gt', False):
             n_bad = sum(1 for d in self.datapoints if not hasattr(d, 'gt_pos') or len(d.gt_pos) != len(d.pos))
             assert n_bad == 0, f'{n_bad}/{len(self.datapoints)} datapoints lack paired gt_pos: wrong/stale cache {cache}'
+        if getattr(transform, 'l_interp', False):
+            # [round2 S4] DECISION D1: pairs that fail the pair_ok guard (stereo / inversion / bond / clash at
+            # lambda = 0.5) are never interpolated: drop those conformers, and molecules left with none; counted.
+            n_c0, n_m0 = sum(len(d.pos) for d in self.datapoints), len(self.datapoints)
+            kept = []
+            for d in self.datapoints:
+                ok = getattr(d, 'pair_ok', [True] * len(d.pos))
+                idx = [i for i, o in enumerate(ok) if o]
+                if not idx:
+                    continue
+                if len(idx) < len(d.pos):
+                    w = [d.weights[i] for i in idx]
+                    d.pos, d.gt_pos, d.pair_ok = [d.pos[i] for i in idx], [d.gt_pos[i] for i in idx], [True] * len(idx)
+                    d.weights = list(np.array(w) / np.sum(w)) if np.sum(w) > 0 else [1 / len(idx)] * len(idx)
+                kept.append(d)
+            self.datapoints = kept
+            print(f'[round2 S4] pair_ok filter ({mode}): kept {sum(len(d.pos) for d in kept)}/{n_c0} conformers, '
+                  f'{len(kept)}/{n_m0} molecules')
 
 
     def preprocess_datapoints(self, root, split_path, pickle_dir, mode, num_workers, limit_molecules):
@@ -269,6 +289,7 @@ class ConformerDataset(Dataset):
         pos = []
         weights = []
         gt_pos = []  # [round2] paired GT L, only filled from standardized_pickles_paired (code_plan_2 §5.2)
+        pair_ok = []
         for conf in confs:
             mol = conf['rd_mol']
 
@@ -287,6 +308,7 @@ class ConformerDataset(Dataset):
             if 'gt_pos_aligned' in conf:
                 # appended in the SAME iteration as pos, so the 'reacted' filter above keeps the pairing intact
                 gt_pos.append(torch.tensor(conf['gt_pos_aligned'], dtype=torch.float))
+                pair_ok.append(bool(conf.get('pair_ok', True)))
             correct_mol = mol
 
             if self.boltzmann_resampler is not None:
@@ -306,6 +328,7 @@ class ConformerDataset(Dataset):
         if gt_pos:
             assert len(gt_pos) == len(pos) and all(g.shape == p.shape for g, p in zip(gt_pos, pos)), name
             data.gt_pos = gt_pos
+            data.pair_ok = pair_ok
 
         return data
 
