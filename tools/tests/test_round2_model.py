@@ -61,24 +61,37 @@ def datas(paired=False, n_conf=3):
 
 
 # --------------------------------------------------------------------------------------------- golden (defect 6)
+# The round-1 code itself is not bit-reproducible across processes in its model forward pass on CPU (measured on
+# gnode118: two runs of the SNAPSHOT give max |edge_pred diff| 4-8e-6 even single-threaded with PYTHONHASHSEED=0;
+# radius_graph and scatter are deterministic, the source is inside the e3nn/torch stack). Everything upstream of the
+# forward pass is compared EXACTLY (state_dict, transform outputs, post-call RNG states, featurized datapoints); the
+# forward output and the generated coordinates are compared against the snapshot-vs-snapshot noise floor.
+def _env1():
+    return dict(os.environ, OMP_NUM_THREADS='1', MKL_NUM_THREADS='1', PYTHONHASHSEED='0', CUDA_VISIBLE_DEVICES='')
+
+
 @pytest.mark.skipif(not SNAP, reason='R1_SNAPSHOT not set')
 def test_golden_model_transform_featurize_identical(tmp_path):
     outs = []
-    for root in (SNAP, REPO):
-        o = tmp_path / (os.path.basename(os.path.dirname(root)) + '.pt')
+    for k, root in enumerate((SNAP, SNAP, REPO)):
+        o = tmp_path / f'dump{k}.pt'
         r = subprocess.run([sys.executable, os.path.join(TOOLS, 'tests', 'golden_dump.py'), str(o),
-                            '--data_root', os.path.join(REPO, 'data/QM9')], cwd=root, capture_output=True, text=True, env=dict(os.environ, OMP_NUM_THREADS='1', MKL_NUM_THREADS='1'))
+                            '--data_root', os.path.join(REPO, 'data/QM9')], cwd=root, capture_output=True, text=True,
+                           env=_env1())
         assert r.returncode == 0, r.stderr[-3000:]
         outs.append(torch.load(o))
-    a, b = outs
+    a, a2, b = outs
     assert a['model_state'].keys() == b['model_state'].keys()
-    assert all(torch.equal(a['model_state'][k], b['model_state'][k]) for k in a['model_state'])     # M1
-    assert torch.equal(a['model_out'], b['model_out'])                                                 # M1
-    for (p1, e1, s1), (p2, e2, s2) in zip(a['transform'], b['transform']):                             # M2
+    assert all(torch.equal(a['model_state'][k], b['model_state'][k]) for k in a['model_state'])     # M1 exact
+    noise = float((a['model_out'] - a2['model_out']).abs().max())
+    diff = float((a['model_out'] - b['model_out']).abs().max())
+    print(f'GOLDEN model_out: snapshot-vs-snapshot {noise:.3e}  snapshot-vs-patched {diff:.3e}')
+    assert diff <= 3 * noise + 1e-12                                                                   # M1 vs noise
+    for (p1, e1, s1), (p2, e2, s2) in zip(a['transform'], b['transform']):                             # M2 exact
         assert torch.equal(p1, p2) and torch.equal(e1, e2) and torch.equal(s1, s2)
     assert a['rng_after'][0] == b['rng_after'][0] and np.array_equal(a['rng_after'][1], b['rng_after'][1])
     assert torch.equal(a['rng_after'][2], b['rng_after'][2])                                           # no extra draw
-    for v in ('std', 'raw'):                                                                           # M8
+    for v in ('std', 'raw'):                                                                           # M8 exact
         A, B = a['featurized'][v], b['featurized'][v]
         assert not isinstance(A, str), A
         assert len(A) == len(B) > 0
@@ -90,19 +103,23 @@ def test_golden_model_transform_featurize_identical(tmp_path):
 @pytest.mark.skipif(not (SNAP and PRE), reason='R1_SNAPSHOT / PRETRAINED not set')
 def test_golden_generate_identical(tmp_path):                                                          # M9
     outs = []
-    for k, root in enumerate((SNAP, REPO)):
+    for k, root in enumerate((SNAP, SNAP, REPO)):
         o = tmp_path / f'confs{k}.pkl'
         r = subprocess.run([sys.executable, 'generate_confs.py', '--model_dir', PRE, '--test_csv',
                             os.path.join(REPO, 'data/QM9/test_smiles.csv'), '--limit_mols', '4', '--seed', '0',
                             '--no_energy', '--inference_steps', '5', '--out', str(o)],
-                           cwd=root, capture_output=True, text=True,
-                           env=dict(os.environ, CUDA_VISIBLE_DEVICES='', OMP_NUM_THREADS='1', MKL_NUM_THREADS='1'))
+                           cwd=root, capture_output=True, text=True, env=_env1())
         assert r.returncode == 0, r.stderr[-3000:]
         outs.append(pickle.load(open(o, 'rb')))
-    assert outs[0].keys() == outs[1].keys() and len(outs[0]) > 0
-    for smi in outs[0]:
-        for m1, m2 in zip(outs[0][smi], outs[1][smi]):
-            assert np.array_equal(m1.GetConformer().GetPositions(), m2.GetConformer().GetPositions())
+    assert outs[0].keys() == outs[2].keys() and len(outs[0]) > 0
+
+    def maxdiff(x, y):
+        return max(float(np.abs(m1.GetConformer().GetPositions() - m2.GetConformer().GetPositions()).max())
+                   for smi in x for m1, m2 in zip(x[smi], y[smi]))
+    noise, diff = maxdiff(outs[0], outs[1]), maxdiff(outs[0], outs[2])
+    print(f'GOLDEN generate coords: snapshot-vs-snapshot {noise:.3e}  snapshot-vs-patched {diff:.3e}')
+    assert all(len(outs[0][s]) == len(outs[2][s]) for s in outs[0])
+    assert diff <= 3 * noise + 1e-9
 
 
 # --------------------------------------------------------------------------------------------- S4 model (C1-C4)

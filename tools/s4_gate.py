@@ -39,6 +39,10 @@ m = re.search(r'PAIRING_CLEAN confs (\d+)/(\d+) = ([0-9.]+) %', txt)
 pct = float(m.group(3)) if m else -1.0
 print(f'(1,2) pairing clean {pct:.3f} % (need >= {a.min_clean})', 'PASS' if pct >= a.min_clean else 'FAIL')
 ok &= pct >= a.min_clean
+m2 = re.search(r'PAIR_OK confs (\d+)/(\d+) = ([0-9.]+) %', txt)
+# (2) the pair_ok guard is applied by construction (unsafe pairs are flagged offline and dropped by the S4 loader);
+# its pass rate is reported, not thresholded: DECISION D7 does not fix a number (see IMPLEMENTATION.md §3)
+print(f'(2) pair_ok rate {m2.group(3) if m2 else "n/a"} % of verified pairs (S4 trains on these only) INFO')
 
 sd = {}
 for spec in a.sd_files:
