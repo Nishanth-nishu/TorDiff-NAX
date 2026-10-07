@@ -306,3 +306,56 @@ The pass case is above the 175 cap; the overrun is reported rather than trimmed 
 **Wall clock (gate pass):** about 4 h for the head phase, then 13 training runs on 4 GPUs (4 waves × ~12.3 h); panels fill the last wave. That gives **≈ 50–55 h**. B3 cannot start before featurize 10106, at about 15:00 on 7 Oct.
 
 **Not yet synced to the cluster:** the dry-run id fix (last commit).
+
+## Resume (user request, 2026-10-07; commit 6a4657d)
+
+**What was added**
+- **`train.py --resume`** (default off).
+  - Restores model, optimizer, scheduler, epoch, best val loss/epoch, and the python / numpy / torch / cuda RNG states.
+  - Logs `RESUMED … continuing at epoch N`.
+- **`last_model.pt`** now also stores those values.
+  - It is written atomically: save to a `.tmp` file, then `os.replace`.
+  - Its existing keys are unchanged.
+- **SIGUSR1** makes `train.py` finish the current epoch's checkpoint and then exit with code 99.
+- **S2 / S3 / S4 samplers** keep no state of their own: they draw from the restored RNGs, and DataLoader workers are re-seeded every epoch from the main torch RNG.
+- **`ablation_train_array.sbatch`**
+  - Runs with `--time=4-00:00:00`, `--requeue` and `--signal=B:USR1@900`.
+  - A trap forwards USR1 to `train.py`. On exit code 99 the script runs `scontrol requeue`.
+  - An incomplete run resumes if its saved arguments match the TSV line; otherwise it is moved aside and restarted, as before.
+  - Evaluation starts only after the last-epoch check.
+- **Requeue on plafnet2:** the cluster has `JobRequeue=0` and `PreemptMode=OFF`. The explicit `--requeue` works: test C below was requeued.
+- **Manual fallback:** after a scancel or crash, resubmit the same index:
+
+  ```
+  TABLE=<same table> sbatch --array=<i> ablation_train_array.sbatch
+  ```
+
+  It resumes rather than restarts.
+
+**Test evidence (gnode118, 3-epoch runs, 3000 molecules)**
+- **Unit test.** `test_R1_atomic_checkpoint_roundtrip` PASSED. It checks:
+  - exact restore of model, optimizer and scheduler;
+  - that the RNG streams continue exactly;
+  - that a broken `.tmp` file does not affect the last good checkpoint.
+- **A/B: S4 run, killed by scancel and resubmitted.**
+  - Job 10826 was scancelled after its epoch-0 checkpoint.
+  - The resubmitted job 10832 logged `RESUMED … last finished epoch 0, continuing at epoch 1` and finished epochs 1–2 (third epoch). Its SUMMARY was written.
+  - Training loss across the restart: 1.0216 → 1.0044 → 0.9944, smooth.
+- **C: S2 run, USR1 → requeue.**
+  - Job 10842_1 received USR1 during epoch 0. It wrote the checkpoint, exited 99, and its state shows REQUEUED.
+  - On restart it RESUMED at epoch 1, finished epoch 2, and ended COMPLETED.
+  - Training loss: 1.0075 → 0.9811.
+
+**Dry run.** The array scripts carry the new header, so all training arrays now run with `--time=4-00:00:00` and `--requeue`. Commands and dependencies are unchanged from the Fixes dry run. Because `cache_mmff` exists (10105 and 10106 COMPLETED), the B3 array no longer needs `MMFF_JOB`.
+
+**X1 rebuilt populations (job 10375)**
+
+| sets | molecules kept |
+|---|---|
+| λ0, λ1, A5ring, A5acyc | 955 / 997 (95.8 %) |
+| λ0.25, λ0.5, λ0.75 | 906 (90.9 %) |
+| S4 test subset | 906 |
+
+- In the λ0.25 / λ0.5 / λ0.75 sets, 49 molecules have no safe pair; 1268 seeds were replaced, in 258 molecules.
+- **This is below the 95 % target**, because of the bond-deviation check over the λ grid (822 unsafe pairs).
+- X11: 1223 of 25,312 test-time MMFF conformers did not converge, in 51 molecules; setup failures 0. The etkdg pickles reproduce identically.
