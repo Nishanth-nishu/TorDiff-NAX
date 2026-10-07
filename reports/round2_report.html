@@ -116,6 +116,7 @@ html { scroll-behavior: smooth; }
   <ol>
     <li><a href="#overview">Overview</a></li>
     <li><a href="#workflow">How the agents worked</a></li>
+    <li><a href="#status">Round 2 status</a></li>
     <li><a href="#infra">Setup and repo</a></li>
     <li><a href="#r1">Round 1 results</a></li>
     <li><a href="#geometry">Where the error lives</a></li>
@@ -155,11 +156,59 @@ html { scroll-behavior: smooth; }
     <li><div><div class="who">Me: merge into one shortlist</div><div class="what">Kept arms both verifiers approved, built in all their required fixes, deferred the two arms the evidence did not support yet.</div></div><span class="pill done">Done</span></li>
     <li><div><div class="who">Coding agents 1, 2 and 3, independently</div><div class="what">Agent 1 aimed for the smallest code change, agent 2 for scientific validity, agent 3 for cluster throughput. Each wrote a full plan with <code>file:line</code> citations.</div></div><span class="pill done">Done</span></li>
     <li><div><div class="who">Cross-review and vote</div><div class="what">Each agent read the other two plans, listed their defects, and voted on 9 contested decisions. Plan 2 won 2–1. Agents 1 and 3 each ranked their own plan last.</div></div><span class="pill done">Done</span></li>
-    <li><div><div class="who">Coding agent 2 implements</div><div class="what">Code written and synced to gnode118. Tests: 13/13 local, 25/25 cluster model tests, 2/2 regression tests. Training data loading is fast enough with 4 CPUs per job (4.6% wait). Waiting on the GPU smoke test, the data builds and the MMFF standardisation.</div></div><span class="pill run">Running</span></li>
-    <li><div><div class="who">Agents 1 and 3 review the code</div><div class="what">Independent code review and test re-run before anything is pushed or submitted.</div></div><span class="pill wait">Next</span></li>
-    <li><div><div class="who">Submit round 2 on gnode118</div><div class="what">About 160–175 GPU-h, roughly 40–45 hours on the 4 GPUs.</div></div><span class="pill wait">Pending</span></li>
-    <li><div><div class="who">Analysis and this report, updated</div><div class="what">Paired statistics, the same verifier pass on the conclusions, then push.</div></div><span class="pill wait">Pending</span></li>
+    <li><div><div class="who">Coding agent 2 implements</div><div class="what">New training options (off by default), geometry-blending tools, data builders, tests and a submit script. Tests pass locally and on gnode118, including checks that the original code paths behave as before.</div></div><span class="pill done">Done</span></li>
+    <li><div><div class="who">Agents 1 and 3 review the code</div><div class="what">Two blockers found. The S1 test files had lost 358 of 997 molecules. Memory requests were silently giving each training 10 CPUs instead of 4.</div></div><span class="pill done">Done</span></li>
+    <li><div><div class="who">Research agents check the code against the papers</div><div class="what">At your request. Both agents, independently: nothing wrong, nothing that contradicts TorDiff's design. Caveats recorded (see below).</div></div><span class="pill done">Done</span></li>
+    <li><div><div class="who">Coding agent 2 applies 13 fixes, then adds checkpoint resume</div><div class="what">Test coverage restored to 955/997 molecules. Jobs now fail loudly. Every comparison is fixed in an analysis script before any results exist. A killed job resumes from its last checkpoint (tested twice on gnode118).</div></div><span class="pill done">Done</span></li>
+    <li><div><div class="who">Stage 1: evaluate existing models (job 10860)</div><div class="what">8 model tasks. One hit a temporary GPU out-of-memory error from another job and was rerun (11155).</div></div><span class="pill done">Done</span></li>
+    <li><div><div class="who">S4 gate check</div><div class="what">Passed all four checks. Full training submitted.</div></div><span class="pill done">Done</span></li>
+    <li><div><div class="who">Stage 2: 13 training runs + 12 evaluations (jobs 11168, 11169, 11170–11185)</div><div class="what">First 4 runs at epoch ~20 of 100 (19:48 IST, 7 Oct). About 12.4 h per run. All done in roughly 2–2.5 days.</div></div><span class="pill run">Running</span></li>
+    <li><div><div class="who">Analysis, verification, report update</div><div class="what">Pre-declared analysis script, then the research and verifier agents check the conclusions.</div></div><span class="pill wait">Pending</span></li>
   </ol>
+</section>
+
+<section id="status">
+  <h2>Round 2: where things stand</h2>
+  <p>Status at 19:48 IST, 7 October 2026. Each training run is 100 epochs at about 7.4 minutes per epoch. Each model's evaluation starts automatically when its training ends.</p>
+  <figure class="chart" id="c-progress">
+    <figcaption>Training progress by run</figcaption>
+    <div class="sub">Epochs completed out of 100 · queued runs start 4 at a time as GPUs free up</div>
+  </figure>
+  <div class="tbl"><table>
+    <thead><tr><th>Stage</th><th>Jobs</th><th>State</th><th>Expected</th></tr></thead>
+    <tbody>
+      <tr><td>Evaluate existing models (S1, ring/acyclic, MMFF controls)</td><td>10860, 11155</td><td>Done</td><td>—</td></tr>
+      <tr><td>S4 gate</td><td>—</td><td>Passed</td><td>—</td></tr>
+      <tr><td>Wave 1: S2 noise ×3, S3 mix seed 0</td><td>11168_0–3</td><td>Running, epoch ~20</td><td>~06:00, 8 Oct</td></tr>
+      <tr><td>Wave 2: S4 blend-level ×3, S3 mix seed 1</td><td>11168_4–7</td><td>Queued</td><td>~19:00, 8 Oct</td></tr>
+      <tr><td>Wave 3: B1cap, S2 noise 0.02, S5 MMFF ×3</td><td>11168_8–9, 11169_0–2</td><td>Queued</td><td>~08:00–20:00, 9 Oct</td></tr>
+      <tr><td>Evaluation after each training</td><td>11170–11180, 11185</td><td>Waiting on training</td><td>~1–2 h after each run</td></tr>
+      <tr><td>Analysis and verification</td><td>—</td><td>Not started</td><td>~10 Oct</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Gate results before training started</h3>
+  <ul class="tight">
+    <li><b>Pairing:</b> 99.999% of RDKit/true pairs verify (gate: 98%). Pass.</li>
+    <li><b>Safe pairs:</b> 87.7% pass the geometry safety check. S4 trains on these only, as you ruled; the limitation will be stated with S4's results.</li>
+    <li><b>Endpoint check:</b> at full true geometry, the blend test set reproduces the existing true-geometry result for both models (differences of −0.004 and −0.002 Å, tolerance 0.003). Pass.</li>
+    <li><b>Smoke test:</b> no failures. Pass.</li>
+    <li><b>Test-set coverage:</b> 955 of 997 molecules in the endpoint and ring/acyclic files; 906 in the partial blends, where 49 molecules have no safe pair. Blend comparisons are paired on the same 906 molecules.</li>
+  </ul>
+  <h3>Your decisions this round</h3>
+  <ul class="tight">
+    <li>Push everything to <code>Nishanth-nishu/TorDiff-NAX</code>.</li>
+    <li>S4 trains on safe pairs only, and its controls are re-scored on S4's molecules. Kept after the research agents showed it leaves a small training-set difference.</li>
+    <li>Pack 3 inference jobs per GPU.</li>
+    <li>Use the full 4-day limit, and resume from checkpoints.</li>
+    <li>δ = 0.5 Å stays the single primary threshold.</li>
+  </ul>
+  <h3>What the literature check of the code said</h3>
+  <ul class="tight">
+    <li><b>Blending in 3D coordinates is valid</b> (ET-Flow uses the same construction, and rings stay closed). S1 and S4 results will be plotted against the measured geometry error, not the blend level.</li>
+    <li><b>S2's noise is the right size but the wrong shape.</b> It is random, while RDKit's error is systematic and mostly in rings. S2 tests robustness to random error only.</li>
+    <li><b>S4's blend-level input</b> matches how cascaded diffusion conditions on its augmentation level.</li>
+    <li><b>S5 is the strongest MMFF baseline,</b> not the strongest fixed-geometry one: GEOM's references come from xTB.</li>
+  </ul>
 </section>
 
 <section id="infra">
@@ -351,6 +400,10 @@ html { scroll-behavior: smooth; }
       <tr><td>Coding agents 1 and 3</td><td>Plan 1 compared S3/S4 against the wrong control</td><td>A confounded comparison (wrong data pickles)</td></tr>
       <tr><td>Coding agent 3</td><td>Matching discards its own best optimum (<code>standardize_confs.py:106</code>)</td><td>No bias, since every arm shares it. Logged for round 3</td></tr>
       <tr><td>Coding agent 2 (tests)</td><td>Round-1 code isn't bit-reproducible across processes</td><td>Regression tests now compare against the measured run-to-run noise</td></tr>
+      <tr><td>Reviewer 1</td><td>The S1 builder dropped a whole molecule if any one of its pairs was unsafe: 358 of 997 test molecules lost</td><td>S1 results on an unrepresentative 64% of the test set, missing mostly the flexible molecules</td></tr>
+      <tr><td>Reviewer 3</td><td>The 5 GB-per-CPU limit turned 48 GB requests into 10 CPUs per training</td><td>Four trainings taking 40 of the node's 48 shared CPUs</td></tr>
+      <tr><td>Both reviewers</td><td>Failed packed evaluations were not recorded</td><td>Missing results discovered only at analysis time</td></tr>
+      <tr><td>Me (during the run)</td><td>Head task 5 hit a GPU out-of-memory error while another job briefly held that GPU</td><td>Caught by the new failure check; rerun as job 11155</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -370,13 +423,11 @@ html { scroll-behavior: smooth; }
 <section id="next">
   <h2>Next steps</h2>
   <ul class="tight">
-    <li><b>Now:</b> coding agent 2 finishes the cluster smoke tests and data builds. Agents 1 and 3 review the code. Then I push and submit round 2 to gnode118 (~40–45 h).</li>
+    <li><b>Now:</b> round 2 is training on gnode118 (13 runs, about 2–2.5 days). Each model is evaluated automatically when its training ends.</li>
     <li><b>Decision after round 2:</b> if S2 or S4 matches TorDiff on RDKit geometry and beats it on better geometry, the torsion side of FlexiTors is solved. Then build the geometry generator to the accuracy S1 says is needed.</li>
     <li><b>Round 3 candidates:</b> a ring-puckering factor (PuckerFlow-style) composed with TorDiff; a learned geometry refiner; joint acyclic-angle diffusion only if S1 shows acyclic geometry matters with the model in the loop.</li>
     <li><b>Then GEOM-DRUGS</b>, where coupling and ring diversity are larger and the published baselines are less saturated.</li>
-    <li><b>Your call:</b> whether COV-R@0.1 becomes a co-primary metric. It currently stays secondary, as you pre-registered.</li>
-    <li><b>Your call (S4 gate):</b> every RDKit/true pair verifies, but only 92% pass the geometry safety check, below the 98% gate. Running S4 on the safe pairs drops about 8% of conformers and about 4% of molecules, which makes its population differ from the controls.</li>
-    <li><b>Your call (packing):</b> the "reproduce round 1 exactly" test can't pass even unpacked, because round-1 code varies slightly run to run (COV-R 89.0286 vs 89.0293). Packed and unpacked differ by the same tiny amount. Packing 3 jobs per GPU is 1.47× faster.</li>
+    <li><b>Open question for you:</b> whether COV-R@0.1 becomes a co-primary metric. It stays secondary, as you pre-registered.</li>
   </ul>
   <p style="color:var(--ink-3);font-size:14px;margin-top:20px">Source files: <code>RESULTS_QM9.md</code>, <code>cluster_sync/results/analysis/*.md</code>, <code>round2/*.md</code> in the TorDiff-NAX repo. This report will be updated with round-2 results.</p>
 </section>
@@ -555,6 +606,26 @@ html { scroll-behavior: smooth; }
     });
     legend(fig, ser.map(r => [r[0], r[1]]));
     table(fig, ['Arm', ...th], ser.map(r => [r[1], ...r[2].map(v => v.toFixed(2))]));
+  })();
+
+  // 7. Training progress
+  (function () {
+    const fig = document.getElementById('c-progress'); const tip = tipFor(fig);
+    const d = [['S2 noise 0.04, seed 0', 20, 'Running'], ['S2 noise 0.04, seed 1', 20, 'Running'], ['S2 noise 0.04, seed 2', 20, 'Running'], ['S3 50/50 mix, seed 0', 22, 'Running'],
+      ['S4 blend-level, seed 0', 0, 'Queued'], ['S4 blend-level, seed 1', 0, 'Queued'], ['S4 blend-level, seed 2', 0, 'Queued'], ['S3 50/50 mix, seed 1', 0, 'Queued'],
+      ['B1cap control', 0, 'Queued'], ['S2 noise 0.02, seed 0', 0, 'Queued'], ['S5 MMFF-matched, seed 0', 0, 'Queued'], ['S5 MMFF-matched, seed 1', 0, 'Queued'], ['S5 MMFF-matched, seed 2', 0, 'Queued']];
+    const W = 680, L = 190, R = 70, rowH = 24, T = 4, H = T + d.length * rowH + 26;
+    const s = svg(fig, W, H); const x = v => L + v / 100 * (W - L - R);
+    [0, 25, 50, 75, 100].forEach(t => { el('line', { x1: x(t), x2: x(t), y1: T, y2: H - 20, class: 'grid' }, s); el('text', { x: x(t), y: H - 5, 'text-anchor': 'middle' }, s, t); });
+    d.forEach(([lab, v, st], i) => {
+      const y = T + i * rowH;
+      el('text', { x: L - 10, y: y + 15, 'text-anchor': 'end', class: 'lab' }, s, lab);
+      el('rect', { x: L, y: y + 5, width: x(100) - L, height: 13, rx: 3, style: 'fill:var(--rule)' }, s);
+      const r = el('rect', { x: L, y: y + 5, width: Math.max(0, x(v) - L), height: 13, rx: 3, style: 'fill:var(--s1)' }, s);
+      el('text', { x: x(100) + 8, y: y + 15, style: `fill:var(${st === 'Running' ? '--run' : '--ink-3'})` }, s, st === 'Running' ? v + '/100' : 'queued');
+      hover(r.width.baseVal.value ? r : r, tip, `<b>${lab}</b><br>${st}: epoch ${v} of 100`);
+    });
+    table(fig, ['Run', 'Epochs done', 'State'], d.map(r => [r[0], r[1], r[2]]));
   })();
 
   // 6. Budget bars
