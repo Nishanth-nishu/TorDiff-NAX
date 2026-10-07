@@ -1,4 +1,4 @@
-import math, os, random, torch, yaml
+import math, os, random, signal, sys, torch, yaml
 torch.multiprocessing.set_sharing_strategy('file_system')
 import numpy as np
 from rdkit import RDLogger
@@ -17,12 +17,60 @@ RDLogger.DisableLog('rdApp.*')
 """
 
 
+_STOP = {'requested': False}
+
+
+def _rng_state():
+    st = {'py_rng': random.getstate(), 'np_rng': np.random.get_state(), 'torch_rng': torch.get_rng_state()}
+    if torch.cuda.is_available():
+        st['cuda_rng'] = torch.cuda.get_rng_state_all()
+    return st
+
+
+def save_checkpoint(path, state):
+    """[round2 resume] atomic write: a kill during torch.save can never leave a truncated last_model.pt"""
+    tmp = path + '.tmp'
+    torch.save(state, tmp)
+    os.replace(tmp, path)
+
+
+def load_resume_state(args, model, optimizer, scheduler):
+    """[round2 resume] returns (start_epoch, best_val_loss, best_epoch). Restores model, optimizer, scheduler and the
+    python / numpy / torch (+cuda) RNG states. The training-L samplers (S2 jitter, S3 mix, S4 lambda) keep no state of
+    their own: they draw from these RNGs in the main process, and DataLoader workers are re-seeded every epoch from the
+    main torch RNG, so restoring the RNG states is enough. A resumed run is still not bit-identical to an uninterrupted
+    one (CUDA / e3nn non-determinism, see IMPLEMENTATION.md §3)."""
+    ck = os.path.join(args.log_dir, 'last_model.pt')
+    if not os.path.exists(ck):
+        print('RESUME requested but no last_model.pt: starting from epoch 0', flush=True)
+        return 0, math.inf, 0
+    s = torch.load(ck, map_location='cpu')
+    model.load_state_dict(s['model'], strict=True)
+    optimizer.load_state_dict(s['optimizer'])
+    if scheduler is not None and s.get('scheduler') is not None:
+        scheduler.load_state_dict(s['scheduler'])
+    if 'py_rng' in s:
+        random.setstate(s['py_rng'])
+        np.random.set_state(s['np_rng'])
+        torch.set_rng_state(s['torch_rng'])
+        if 'cuda_rng' in s and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all(s['cuda_rng'])
+    start = s['epoch'] + 1
+    best_val_loss, best_epoch = s.get('best_val_loss', math.inf), s.get('best_epoch', 0)
+    print(f'RESUMED from {ck}: last finished epoch {s["epoch"]}, continuing at epoch {start}; '
+          f'best_val_loss {best_val_loss} (epoch {best_epoch}); rng restored: {"py_rng" in s}', flush=True)
+    return start, best_val_loss, best_epoch
+
+
 def train(args, model, optimizer, scheduler, train_loader, val_loader):
     best_val_loss = math.inf
     best_epoch = 0
+    start_epoch = 0
+    if getattr(args, 'resume', False):
+        start_epoch, best_val_loss, best_epoch = load_resume_state(args, model, optimizer, scheduler)
 
     print("Starting training...")
-    for epoch in range(args.n_epochs):
+    for epoch in range(start_epoch, args.n_epochs):
 
         stats = {}
         train_loss, base_train_loss = train_epoch(model, train_loader, optimizer, device, stats=stats,
@@ -46,12 +94,20 @@ def train(args, model, optimizer, scheduler, train_loader, val_loader):
             best_epoch = epoch
             torch.save(model.state_dict(), os.path.join(args.log_dir, 'best_model.pt'))
 
-        torch.save({
+        # [round2 resume] same keys as before + best val / RNG states for --resume; written atomically
+        save_checkpoint(os.path.join(args.log_dir, 'last_model.pt'), {
             'epoch': epoch,
             'model': model.state_dict(),
             'optimizer': optimizer.state_dict(),
             'scheduler': scheduler.state_dict() if scheduler else None,
-        }, os.path.join(args.log_dir, 'last_model.pt'))
+            'best_val_loss': best_val_loss,
+            'best_epoch': best_epoch,
+            **_rng_state(),
+        })
+        if _STOP['requested'] and epoch < args.n_epochs - 1:
+            print(f'STOP requested (SIGUSR1): checkpoint of epoch {epoch} written, exiting with 99 for requeue',
+                  flush=True)
+            sys.exit(99)
 
     print("Best Validation Loss {} on Epoch {}".format(best_val_loss, best_epoch))
 
@@ -87,6 +143,10 @@ def boltzmann_train(args, model, optimizer, train_loader, val_loader, resampler)
 
 if __name__ == '__main__':
     args = parse_train_args()
+    if args.resume:
+        # [round2 resume] SIGUSR1 (sbatch --signal=B:USR1@900, forwarded by ablation_train_array.sbatch): finish the
+        # current epoch and its checkpoint, then exit 99 so the batch script requeues the job
+        signal.signal(signal.SIGUSR1, lambda *_: _STOP.update(requested=True))
     # [ablation-hooks] args.seed was parsed but never used upstream
     random.seed(args.seed); np.random.seed(args.seed); torch.manual_seed(args.seed)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

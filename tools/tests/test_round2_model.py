@@ -352,3 +352,43 @@ def test_C12_s4_pair_ok_filter(tmp_path):
     assert len(ds3.datapoints) == len(items) and len(ds3.datapoints[0].pos) == 3
     d = ds3[0]
     assert not hasattr(d, 'pair_ok') and not hasattr(d, 'gt_pos')
+
+
+def test_R1_atomic_checkpoint_roundtrip(tmp_path):
+    """[round2 resume] save_checkpoint is atomic and load_resume_state restores model, optimizer, scheduler, epoch,
+    best val loss and the python / numpy / torch RNG states"""
+    import train as T
+    from utils.utils import get_optimizer_and_scheduler
+    torch.manual_seed(0)
+    a = Namespace(**ARGS, optimizer='adam', lr=1e-3, scheduler='plateau', scheduler_patience=20, log_dir=str(tmp_path))
+    model = get_model(a)
+    opt, sch = get_optimizer_and_scheduler(a, model)
+    b = next(iter(DataLoader([TorsionNoiseTransform(sigma_min=0.0314, sigma_max=3.14)(copy.deepcopy(d)) for d in datas()],
+                             batch_size=6)))
+    model.train()
+    out = model(b)
+    out.edge_pred.pow(2).mean().backward()
+    opt.step()
+    sch.step(0.5)
+    random.seed(7); np.random.seed(7); torch.manual_seed(7)
+    path = os.path.join(str(tmp_path), 'last_model.pt')
+    state = dict(epoch=4, model=model.state_dict(), optimizer=opt.state_dict(), scheduler=sch.state_dict(),
+                 best_val_loss=0.123, best_epoch=3, **T._rng_state())
+    T.save_checkpoint(path, state)
+    assert os.path.exists(path) and not os.path.exists(path + '.tmp')
+    expect = (random.random(), np.random.rand(), float(torch.rand(1)))
+    # a kill mid-save leaves only a broken .tmp: the previous checkpoint must still load
+    open(path + '.tmp', 'wb').write(b'garbage')
+    torch.manual_seed(1)
+    m2 = get_model(a)
+    o2, s2 = get_optimizer_and_scheduler(a, m2)
+    random.seed(0); np.random.seed(0); torch.manual_seed(0)
+    start, bv, be = T.load_resume_state(a, m2, o2, s2)
+    assert (start, bv, be) == (5, 0.123, 3)
+    assert all(torch.equal(x, y) for x, y in zip(model.state_dict().values(), m2.state_dict().values()))
+    for g1, g2 in zip(opt.state_dict()['state'].values(), o2.state_dict()['state'].values()):
+        assert all(torch.equal(torch.as_tensor(g1[k]), torch.as_tensor(g2[k])) for k in g1)
+    assert s2.state_dict()['best'] == sch.state_dict()['best'] and s2.num_bad_epochs == sch.num_bad_epochs
+    assert (random.random(), np.random.rand(), float(torch.rand(1))) == expect   # RNG streams continue exactly
+    a2 = Namespace(**vars(a)); a2.log_dir = str(tmp_path / 'none')
+    assert T.load_resume_state(a2, m2, o2, s2) == (0, float('inf'), 0)            # no checkpoint -> fresh start

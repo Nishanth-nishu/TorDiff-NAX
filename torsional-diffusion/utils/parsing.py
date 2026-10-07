@@ -35,6 +35,7 @@ def parse_train_args():
     parser.add_argument('--log_timing', action='store_true', default=False, help='[round2 D5] print per-epoch data-wait time (pure logging)')
     parser.add_argument('--fail_on_nan', action='store_true', default=False, help='[round2 D9] abort on a non-finite training loss')
     parser.add_argument('--limit_train_iters', type=int, default=0, help='[round2 D5 measurement] stop each train epoch after this many iterations (0 = off)')
+    parser.add_argument('--resume', action='store_true', default=False, help='[round2] continue from <log_dir>/last_model.pt (model, optimizer, scheduler, epoch, best val, RNG states); SIGUSR1 then means: finish the epoch checkpoint and exit 99')
 
     # Feature arguments
     parser.add_argument('--in_node_features', type=int, default=74, help='Dimension of node features: 74 for drugs and xl, 44 for qm9')
