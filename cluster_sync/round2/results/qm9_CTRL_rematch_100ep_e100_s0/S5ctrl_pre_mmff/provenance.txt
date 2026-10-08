@@ -1,0 +1,5 @@
+model=/scratch/nishanth.r/tordiff/workdir/qm9_CTRL_rematch_100ep_e100_s0
+args=--pre_mmff
+ba90aa2c56ca204107beb6e608c76af5c503766f5d20811713627e32e8dee403
+code=dd354f5a130945ee863639439d38997ed557c05e
+pack=3

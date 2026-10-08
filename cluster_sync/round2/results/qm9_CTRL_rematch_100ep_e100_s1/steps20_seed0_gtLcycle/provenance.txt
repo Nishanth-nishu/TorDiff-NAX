@@ -1,0 +1,6 @@
+model=/scratch/nishanth.r/tordiff/workdir/qm9_CTRL_rematch_100ep_e100_s1
+args=--seed_confs data/QM9/test_gt_seed_confs.pkl --seed_confs_cycle
+93ae2f27be494408ac73d8724dcd7ca16879fc156533f1ce46ba15945d310883
+06d2eb6fab3e53236274beae929d00b7960fffe4bafaccf844466838cf5d8cc1
+code=dd354f5a130945ee863639439d38997ed557c05e
+pack=3

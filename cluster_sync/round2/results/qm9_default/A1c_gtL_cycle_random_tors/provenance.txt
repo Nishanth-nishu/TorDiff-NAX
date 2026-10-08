@@ -1,0 +1,6 @@
+model=/scratch/nishanth.r/tordiff/workdir/pretrained/qm9_default
+args=--seed_confs data/QM9/test_gt_seed_confs.pkl --seed_confs_cycle --no_model
+6a9a6ee9b0e51bdaa15f1661d2d41a4809507b2e1f31f9f74f9cd38fa25ee74f
+06d2eb6fab3e53236274beae929d00b7960fffe4bafaccf844466838cf5d8cc1
+code=dd354f5a130945ee863639439d38997ed557c05e
+pack=3

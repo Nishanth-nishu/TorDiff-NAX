@@ -1,0 +1,45 @@
+n_molecules 955 of 997 candidates; dropped 42 (95.8% kept)
+set_counts {'kept': 955, 'replaced_seeds': 0, 'mols_with_replacement': 0}
+counts {'no_clean_gt': 3, 'interp_unsafe_pair_bond_dev': 822, 'L_lam0.00_cyc_ORACLE:kept': 955, 'L_lam0.00_cyc_ORACLE:replaced_seeds': 0, 'L_lam0.00_cyc_ORACLE:mols_with_replacement': 0, 'L_lam0.25_cyc_ORACLE:kept': 906, 'L_lam0.25_cyc_ORACLE:replaced_seeds': 1268, 'L_lam0.25_cyc_ORACLE:mols_with_replacement': 258, 'L_lam0.50_cyc_ORACLE:kept': 906, 'L_lam0.50_cyc_ORACLE:replaced_seeds': 1268, 'L_lam0.50_cyc_ORACLE:mols_with_replacement': 258, 'L_lam0.75_cyc_ORACLE:kept': 906, 'L_lam0.75_cyc_ORACLE:replaced_seeds': 1268, 'L_lam0.75_cyc_ORACLE:mols_with_replacement': 258, 'L_lam1.00_cyc_ORACLE:kept': 955, 'L_lam1.00_cyc_ORACLE:replaced_seeds': 0, 'L_lam1.00_cyc_ORACLE:mols_with_replacement': 0, 'L_A5ring_cyc_ORACLE_stereo_flip': 14, 'L_A5ring_cyc_ORACLE:kept': 955, 'L_A5acyc_cyc_ORACLE_stereo_flip': 9, 'L_A5acyc_cyc_ORACLE:kept': 955, 'interp_mols_all_pairs_safe': 648, 's4_subset_member': 906, 'interp_unsafe_pair_inversion': 526, 'L_lam0.25_cyc_ORACLE:dropped_no_safe_pair': 49, 'L_lam0.50_cyc_ORACLE:dropped_no_safe_pair': 49, 'L_lam0.75_cyc_ORACLE:dropped_no_safe_pair': 49, 'interp_unsafe_pair_stereo': 8, 'interp_embed_retry': 53, 'interp_embed_failed': 41, 'multifrag': 1, 'interp_seed_reuse': 10}
+C#C[C@@]1(C)[C@H]2C[C@]1(C)C2
+C#C[C@]12C[C@@]1(C)[C@@H]1CN12
+C1C[C@H]2[C@H]3C[N][C](O1)N23
+C1C[C@]23C[C@@H]4C[C@H]2N4[C@H]13
+C1OC[C@H]2[C@H]3C[N][C]1N32
+C1[C@@H]2N3[C@H]4[C@@H]3[C@@]23CO[C@]143
+C1[C@H]2C[C@]34CC[C@]3(C4)[C@@H]12
+C=C1C(=O)C=NN1C.N
+CC(=O)[C@H]1[C@H]2CN=CN21
+CN1C[C@]12[C@@H]1[C@H]3C[C@@H]1[C@H]32
+CO[C@H]1[C@H]2C[C@]1(O)[C@H]2C
+C[C@@H]1O[C@@H]2[C@@H]3[C@H]1[C@H]2[C@@H]3C
+C[C@@H]1[C@]2(C)N3C[C@@H]3[C@]12O
+C[C@@]12C[C@H]3O[C]([NH])N1[C@H]32
+C[C@@]12C[C@H]3[C@@H]1OC(=O)[C@H]32
+C[C@@]12[C]3[CH]CN4[C@@H]3[C@@H]1[C@H]42
+C[C@H]1C[C@]23CO[C@@]2(C1)C3
+C[C@H]1C[C@]23C[C@H](C2)[C@H]3O1
+C[C@H]1C[C@]23C[C@](O)(C2)[C@@H]13
+C[C@H]1O[C@]23C[C@H](C2=O)[C@@H]13
+C[C@H]1[C@@H]2[C@@H]3[C@H](O)[C@]3(C)[C@H]12
+C[C@H]1[C@@H]2[C@H]3C[C@](C)(C3)[C@H]12
+C[C@H]1[C@H]2C(=O)N3[C@H]2[C@]13C
+C[C@H]1[C@H]2C[C@]1(C)[C@H]2O
+C[C@H]1[C@H]2N1[C]([NH])[C@@]21CO1
+C[C@H]1[C@H]2[C@@H](C#N)[C@@H](C)N12
+C[C@]12C[C@](C#N)(C1)C2=O
+C[C@]12C[C@](CCO)(C1)C2
+C[C@]12OC[C@H]3[C@@H]4[C@H]3[C@H]1[C@@H]42
+C[C@]12[C]([NH])O[C@@H]3[C@H]1C[C@@H]32
+C[C]1C[C@@]2(O)[C@H]3[C]1C[C@H]32
+N#C[C@H]1[C@H]2C[C@@H]1C2
+N=C(CC1CC1)NC=O
+NC(=O)[C@H]1N=CN2C[C@@H]12
+O=C1C[C@@H]2[C@@H]3[C@@H]4[C@H]1[C@@H]4[C@@H]32
+O=C1NC[C@@]23CC[C@@]12O3
+O=C1O[C@H]2[C@@H]3[C@H]4[C@@H]3N1[C@@H]24
+O=C[C@@]12C[C@H]3[N][CH]N1[C@H]32
+O=C[C@]12O[C@H]1[C@H]1C[C@H]12
+O[C@H]1C[C@]23O[C@@H]4[C@H]2O[C@@]143
+[CH]1CO[C@H]2[C@H]3C=C[C]1[C@H]32
+[NH][C]1O[C@@H]2[C@H]3C[C@@H]2[C@@H]13

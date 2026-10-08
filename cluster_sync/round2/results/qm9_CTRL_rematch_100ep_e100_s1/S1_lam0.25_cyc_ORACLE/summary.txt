@@ -1,0 +1,8 @@
+SUMMARY threshold=0.5000 COV-R_mean=86.2549 COV-R_median=100.0000 MAT-R_mean=0.1599 MAT-R_median=0.1306 COV-P_mean=84.4369 COV-P_median=100.0000 MAT-P_mean=0.1806 MAT-P_median=0.1469 n_evaluated=906 n_model_failures=94 n_additional_failures=0
+SWEEP thr=0.050 COV-R_mean=10.19 COV-R_median=0.00 COV-P_mean=8.84 COV-P_median=0.00
+SWEEP thr=0.100 COV-R_mean=43.96 COV-R_median=37.50 COV-P_mean=38.37 COV-P_median=25.00
+SWEEP thr=0.250 COV-R_mean=74.73 COV-R_median=96.70 COV-P_mean=71.44 COV-P_median=87.50
+SWEEP thr=0.500 COV-R_mean=86.25 COV-R_median=100.00 COV-P_mean=84.44 COV-P_median=100.00
+SWEEP thr=0.750 COV-R_mean=89.55 COV-R_median=100.00 COV-P_mean=89.24 COV-P_median=100.00
+SWEEP thr=1.000 COV-R_mean=90.37 COV-R_median=100.00 COV-P_mean=90.15 COV-P_median=100.00
+SWEEP thr=1.250 COV-R_mean=90.60 COV-R_median=100.00 COV-P_mean=90.47 COV-P_median=100.00

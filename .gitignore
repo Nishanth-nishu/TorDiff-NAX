@@ -11,3 +11,4 @@ __pycache__/
 
 # web snapshots of blogs (copyrighted text, local only)
 papers/blogs/*.txt
+cluster_sync/round2/data/QM9/round2_seeds/l_error.csv

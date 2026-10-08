@@ -1,0 +1,6 @@
+model=/scratch/nishanth.r/tordiff/workdir/qm9_B1_train_gtL_e100_s1
+args=--seed_confs data/QM9/round2_seeds/L_noise0.02pa_cyc_ORACLE.pkl --seed_confs_cycle
+b8559dd7882e8174b0a7b3d8bdd67e79d9c0c2fa5d344a9a57d4f3bcbdd7dc2e
+69bee537dd6f7d6bbcdc8fb90639edc9bcb00797cf4f498426dab9dede4995b1
+code=dd354f5a130945ee863639439d38997ed557c05e
+pack=3

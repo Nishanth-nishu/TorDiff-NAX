@@ -1,0 +1,6 @@
+model=/scratch/nishanth.r/tordiff/workdir/qm9_CTRL_rematch_100ep_e100_s0
+args=--seed_confs data/QM9/round2_seeds/L_etkdg2L_mmff.pkl --seed_confs_cycle
+ba90aa2c56ca204107beb6e608c76af5c503766f5d20811713627e32e8dee403
+bf321a55c6c090d3ba09c01770eea30f7b405b8dc727d61c36d6c331e652db1f
+code=dd354f5a130945ee863639439d38997ed557c05e
+pack=3

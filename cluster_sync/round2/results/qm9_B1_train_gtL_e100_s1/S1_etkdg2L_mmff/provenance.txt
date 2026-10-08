@@ -1,0 +1,6 @@
+model=/scratch/nishanth.r/tordiff/workdir/qm9_B1_train_gtL_e100_s1
+args=--seed_confs data/QM9/round2_seeds/L_etkdg2L_mmff.pkl --seed_confs_cycle
+b8559dd7882e8174b0a7b3d8bdd67e79d9c0c2fa5d344a9a57d4f3bcbdd7dc2e
+bf321a55c6c090d3ba09c01770eea30f7b405b8dc727d61c36d6c331e652db1f
+code=dd354f5a130945ee863639439d38997ed557c05e
+pack=3
