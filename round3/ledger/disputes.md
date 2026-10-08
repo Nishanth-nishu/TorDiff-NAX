@@ -11,7 +11,7 @@ GFN2-xTB relaxation is local, so the ring pucker and torsion basin a conformer s
 component changes) still decide the relaxed structure and its properties.
 Requested fix: change "dominate" to "become important" in the claim; in C-EVAL-06 drop "by construction insensitive",
 or label it INFERENCE with this caveat.
-Status: OPEN
+Status: CLOSED-VERIFIED (V1, round 2: E-EVAL-023 claim now "become important"; C-EVAL-06 (b) argument withdrawn and re-argued on weights/cost)
 Response (EVAL): ACCEPTED, fixed. E-EVAL-023 claim now says "become important" (the source's words), original kept as
 superseded. C-EVAL-06 §3(b): "by construction insensitive" WITHDRAWN. V1's point stands: GFN2-xTB relaxation is local,
 so the ring pucker / torsion basin an L choice produces survives relaxation. Part (b) is now argued only on cost,
@@ -31,7 +31,7 @@ deduplication, at a cost in speed and redundancy. Minor: the visible byline is C
 Vandezande and Eli Mann (meta author Corin Wagen), not "Rowan".
 Requested fix: restore "for large systems (e.g. PROTACs)" in the claim; limit the QM9-relevant part to the twist-boat
 anecdote; reword C-EVAL-04 §2 to match "can be ameliorated ... but slow".
-Status: OPEN
+Status: CLOSED-VERIFIED (V1, round 2: scope "for large systems (e.g. PROTACs)" restored; "can be ameliorated" matches source; byline fixed)
 Response (EVAL): ACCEPTED, fixed. E-EVAL-029 claim restores the scope "for large systems (e.g. PROTACs)"; only the
 twist-boat remark (anecdote, no numbers) is kept as QM9-relevant; wording now "can be ameliorated ... at a cost in speed
 and redundancy"; byline corrected to Corin Wagen, Nick Casetti, Jonathon Vandezande, Eli Mann (meta author Corin
@@ -47,7 +47,7 @@ builds exist, latest 6.7.1) holds.
 Requested fix: correct the snapshot and quote. Optionally note that GEOM's own xTB version, 6.2.3 (GEOM PDF p. 8, Code
 availability: "CREST version 2.9 was used with xTB version 6.2.3"), is available, which lets C-EVAL-03/04/05 match the
 reference level exactly.
-Status: OPEN
+Status: CLOSED-VERIFIED (V1, round 2: new snapshot condaforge_xtb_metadata_eval.txt matches live JSON, 28 linux-64 files incl. 6.2.3; E-EVAL-056 quote exact, GEOM p. 8)
 Response (EVAL): ACCEPTED, fixed with a new source. I did not edit SCOUT GEOM's snapshot; I made my own verbatim
 snapshot of the live JSON (papers/blogs/condaforge_xtb_metadata_eval.txt, accessed 2026-10-08): "latest_version":
 "6.7.1"; 28 linux-64 files, versions 6.2.3, 6.3.0-6.3.3, 6.4.0, 6.4.1, 6.5.0, 6.5.1, 6.6.0, 6.6.1, 6.7.1 (same list as
@@ -60,7 +60,7 @@ Raised by: V1
 Problem: wrong line range. The quoted `_cr = [...] + [0] * num_failures` is torsional-diffusion/evaluate_confs.py:166,
 outside the cited 168-171. The `MAT-R_mean ... np.nanmean(amr_recall)` line is :171. The behaviour is as claimed.
 Requested fix: locator `torsional-diffusion/evaluate_confs.py:166-171` (printed block with the same convention: :152-155).
-Status: OPEN
+Status: CLOSED-VERIFIED (V1, round 2: locator evaluate_confs.py:166-171 correct)
 Response (EVAL): ACCEPTED, fixed. Locator now torsional-diffusion/evaluate_confs.py:166-171 (:166 COV with
 [0] * num_failures, :171 nanmean; printed block :152-155).
 
@@ -86,7 +86,7 @@ C-EVAL-05 §3 ("Rigid ring molecules dominate the macro average [E-EVAL-048]; fo
 torsions to move)", which is wrong for about half of that group).
 Requested fix: rewrite the inference with the rigid share and the AMR-sum shares above (scratchpad `v1_macro.py`,
 `v1_breakdown.py`), and fix the three card sentences.
-Status: OPEN
+Status: CLOSED-VERIFIED (V1, round 2: E-EVAL-057 recomputed by V1 v1_d005_round2.py: 30.4 % / 26.0 % / 25.4 %, n_true<=3 46.1 %, 0.185 -> 0.043, 54.9 % (56.0 % vs ETKDG base); residual slip in C-EVAL-04 §3, see verify_V1.md Round 2)
 Response (EVAL): ACCEPTED; inference WITHDRAWN and replaced after my own recomputation (scratchpad
 d005_recompute.py, from local_structure_test.csv and the CTRL_rematch s0 breakdown.log files): n_gt <= 3 = 48.1 % of
 molecules, only 52.2 % of them rigid; rigid (0 heavy torsions) = 30.4 % of molecules and 26.0 % of the macro AMR-R sum
@@ -118,7 +118,7 @@ Problem:
    links GEOM's 11.6 % reacted QM9 graphs to our 60 cage molecules (see E-EVAL-017 note). Unsupported.
 Requested fix: state which ET-Flow number is the target and give the crossing for 0.073–0.083. Use matching sources
 for δ = 0.05 Å and AMR-R. Weaken §4 bullet 2 and the §2 inference.
-Status: OPEN
+Status: CLOSED-VERIFIED (V1, round 2: all four points fixed; residual slip in C-EVAL-01 §3/§5 "CTRL never reaches the ET-Flow range": CTRL s0 0.0803 at λ=1 is inside 0.073-0.083, see verify_V1.md Round 2)
 Response (EVAL): ACCEPTED, all four points fixed in C-EVAL-01. (1) Target stated as a range: published ET-Flow
 0.073 A (E-EVAL-001); FM-refiner's ET-Flow run 0.083 A with COV-R@0.05 75.72 % (E-EVAL-008). Every delta = 0.05 A
 comparison now uses only the FM-refiner pairs (AMR-R and COV from the same run). (2) My own recomputation from E-EVAL-044
@@ -145,7 +145,7 @@ Problem:
    not show the second half. Cite the code path instead (no relaxation unless `--post_mmff`, E-EVAL-035).
 Requested fix: use l_error.csv for both ETKDG and MMFF in C-EVAL-02. Qualify the torsion statement in C-EVAL-03.
 Re-label the EnFlow analogy in C-EVAL-05 as selection.
-Status: OPEN
+Status: CLOSED-VERIFIED (V1, round 2: all four points fixed in C-EVAL-02/03/05; ratios 1.73x/1.42x/1.32x confirmed)
 Response (EVAL): ACCEPTED, all four fixed. (1) C-EVAL-02 §3 now uses l_error.csv for both: ETKDG 0.0314 A / 2.80 deg /
 10.65 deg vs MMFF 0.0182 / 1.97 / 8.07 (E-EVAL-049); the GT-GT spread (E-EVAL-047) is cited separately as context, not
 as a like-for-like comparison. (2) C-EVAL-03 §2 qualified: diffusion models beat MMFF on bonds, angles and E_relax, not
@@ -271,7 +271,8 @@ point as V2's D-110(c). Used in C-GEOM-01 §3 ("so it is the arm that can also m
 Requested fix: restate as "true rings alone help both models by ≈ 0.075 Å (λ0 base) but leave B1 above CTRL; only true
 acyclic geometry puts B1 below CTRL"; quote ring gains against the λ0 base (0.197 → 0.119), or state that the ETKDG base
 is a different population (936 vs 955) and seed set.
-Status: OPEN
+Status: CLOSED-VERIFIED (V3 R2: E-013 revision and λ0-base numbers recomputed; cards 01/02/04 fixed)
+Response (GEOM): ACCEPTED; inference WITHDRAWN. Recomputed on the like-for-like λ = 0 base (BRIEF lines 30, 37, 38; same 955 molecules): true rings alone CTRL 0.197 → 0.119 (−0.078), B1 0.261 → 0.188 (−0.074); true acyclic alone CTRL −0.014, B1 −0.103, and only A5acyc puts B1 below CTRL (0.158 < 0.182). E-GEOM-013 now carries a 'Revised after D-201' block (original kept, marked superseded); E-GEOM-006 has a λ = 0-base addendum (rigid 0.184 → 0.043, one rotor 0.181 → 0.104). Cards fixed: C-GEOM-01 §3 (rings help both; xTB is the B1 lever because it also relaxes acyclic L, labelled INFERENCE), C-GEOM-02 §3 and §6, C-GEOM-04 §3 now quote 0.197 → 0.119 / 0.261 → 0.188.
 
 ## D-202 on E-GEOM-014 (minor)
 Raised by: V3
@@ -280,7 +281,8 @@ micromamba from conda-forge" is not what the script does. `setup_env.sh:43-58` t
 falls back to a micromamba conda-forge python if none is found; all packages are pip-installed into a venv
 (`:62-103`). Nothing on disk shows which branch ran on gnode118.
 Requested fix: "pip venv on python 3.9 (micromamba/conda-forge python only as a fallback, `setup_env.sh:43-58`)".
-Status: OPEN
+Status: CLOSED-VERIFIED (V3 R2; nit: the cu118 profile exists in setup_env.sh but default is cu117, "already used" is not shown)
+Response (GEOM): ACCEPTED. E-GEOM-014 revised: pip venv on python 3.9; micromamba/conda-forge python only as the fallback (`setup_env.sh:43-58`), packages pip-installed (`:62-103`); branch used on gnode118 not recorded. Added for D-206: the venv pins `numpy==1.23.5` (`:68`, `:89`) and the script has a `cu118` profile (`torch==2.0.1+cu118`, PyG 2.3.1, `:80-84`).
 
 ## D-203 on E-GEOM-045
 Raised by: V3
@@ -294,7 +296,8 @@ is an ETKDG result. C-GEOM-01 §2 uses the ETKDG/MMFF part ("force-field relaxat
 puckers (piperazine)").
 Requested fix: limit the claim to the srETKDGv3 result; describe the first run as "default EmbedParameters (plain DG)".
 In C-GEOM-01 §2 cite E-GEOM-002 (MMFF 20.2% vs ETKDG 28.6% > 10°) for "MMFF only partly repairs puckers" instead.
-Status: OPEN
+Status: CLOSED-VERIFIED (V3 R2: E-045 limited to srETKDGv3; C-GEOM-01 re-sourced to E-002)
+Response (GEOM): ACCEPTED. Checked locally (RDKit 2026.03.6): bare `EmbedParameters()` has ET False, K False, so the post's first run is plain DG. E-GEOM-045 revised: only 'srETKDGv3: 358 chair / 142 twisted (28%)' is kept; the ETKDG/MMFF part is WITHDRAWN. C-GEOM-01 §2 now cites E-GEOM-002 (MMFF 20.2% vs ETKDG 28.6% > 10°; 35.1% vs 49.6% excl. all-3-ring molecules) and no longer cites E-045. E-045 now supports C-GEOM-06 only.
 
 ## D-204 on E-GEOM-048
 Raised by: V3
@@ -305,7 +308,8 @@ RDKit chiral tags and flips the conformer on mismatch. The 0.073 in Table 2 is t
 §6 (the "O(3) chirality fix" as a reason for MAYBE) rest on this.
 Requested fix: "ET-Flow (O(3)) uses a post hoc chirality correction (§3.4); SO(3) is an architectural alternative".
 Check whether `etflow`'s `BaseFlow.predict` applies the correction; keep a stereo check on the seeds either way.
-Status: OPEN
+Status: CLOSED-VERIFIED (V3 R2: E-053 quotes exact p. 5; E-054 code facts checked on main, configs.py:118, :189, model.py:459-462, :525)
+Response (GEOM): ACCEPTED; E-GEOM-048's claim WITHDRAWN (entry kept with a revision block; supports no card). New E-GEOM-053 (ET-Flow p. 5 §3.4: post hoc flip on oriented-volume mismatch; 'Our base method (ET-Flow) corresponds to using the post hoc correction'). New E-GEOM-054 checks the package as requested: `etflow/commons/configs.py:118` `parity_switch = "post_hoc"` is the `ModelArgsSchema` default used by `QM9_O3` (`:189-196`), and `model.py:459-462` applies it inside `sample()`, which `predict()` calls (`:525`); snapshot `papers/blogs/etflow_repo_code_chirality.txt`. C-GEOM-03 §2/§4 rewritten; a per-seed stereo check stays because the flip is whole-molecule.
 
 ## D-205 on E-GEOM-004 (advisory; entry VERIFIED) and the rigid-subset gates of C-GEOM-01/02/04/06
 Raised by: V3
@@ -320,7 +324,8 @@ per L source: ETKDG/MMFF 284, λ0.25–0.75 258, λ0/λ1/A5 289, noise 318. The 
 population with λ values on 258 molecules.
 Requested fix: in the CPU gates, score the seed sets directly (AMR-R of seeds vs GT, no model) on one common rigid set
 defined by TD's own `edge_mask` heavy-atom criterion, and recompute the λ / MMFF / ETKDG reference values on that set.
-Status: OPEN
+Status: CLOSED-VERIFIED (V3 R2: gates redesigned; note "empty edge_mask" is stricter than the heavy-atom criterion and shrinks the set)
+Response (GEOM): ACCEPTED. E-GEOM-004 revised: logged bin-0 values are indicative (≤ 0.006 Å model dependence; populations 258–318). Gate redesigned in C-GEOM-01 §5 Step 2 and adopted by C-GEOM-02/03/04/06: score the seed sets directly (heavy-atom symmetric AMR-R of seeds vs GT, no model) on one common rigid set = test molecules with an empty TD `edge_mask` present in every compared source; recompute ETKDG / MMFF / λ references on that set in the same run. Go rules are now non-oracle comparisons (beat MMFF or ETKDG by ≥ 0.010 Å rigid AMR-R or ≥ 5 points of > 10° share); λ references are interpretation yardsticks only (flagged as experiment selection for the validity judge). All absolute thresholds (0.110, 0.107, 0.077) removed.
 
 ## D-206 on C-GEOM-03 (card sentences beyond E-GEOM-037)
 Raised by: V3
@@ -334,7 +339,8 @@ Checkpoints" (zenodo 16551316): which split `qm9-o3` was trained on is not estab
 (D-204).
 Requested fix: replace the CUDA-12 requirement with "own env (numpy 1.26.4, torch 2.x; CUDA version open, try cu118
 first)"; add a step-0 check of the `qm9-o3` training split; revise §6 accordingly.
-Status: OPEN
+Status: CLOSED-VERIFIED (V3 R2: CUDA and chirality fixed; split provenance still open, see D-210)
+Response (GEOM): ACCEPTED, and the call changes MAYBE → YES. Both MAYBE reasons are withdrawn: chirality is corrected in the released model (D-204, E-GEOM-053/054), and CUDA 12 is only the dev env.yml choice. C-GEOM-03 §4 now says: own env because of the numpy 1.26.4 pin (TD venv has 1.23.5, E-GEOM-014 revision); torch/CUDA open, try a cu118 torch 2.x first. Split: Zenodo record 14226681 holds `qm9-o3.ckpt` with `QM9.zip`, the scaffold splits are a separate record (16551316) (E-GEOM-054); that `qm9-o3` used TD's random split is labelled INFERENCE, and step 0 now compares `QM9.zip`'s split with our `test_smiles.csv` as a kill criterion. Card stays a diagnostic, ranked below C-GEOM-01/02. I did not cite the lightning version details (no entry of mine).
 
 ## D-207 on C-GEOM-02 (card sentences)
 Raised by: V3
@@ -345,7 +351,8 @@ no evidence entry. (d) §5 gate "rigid AMR-R ≤ 0.107" is on a different popula
 coverage numbers depend on the key including stereo tags (isomeric SMILES). A stereo-free key gives 421 components and
 66.3% / 58.6% leave-one-out coverage, which helps the card. State the key.
 Requested fix: correct (a) and (b), add a source or "UNVERIFIED" to (c), pair the gate as in D-205.
-Status: OPEN
+Status: CLOSED-VERIFIED (V3 R2: all five parts fixed; recomputed)
+Response (GEOM): ACCEPTED. (a) 'molecules whose smallest ring has 4–7 atoms: 48–92%'. (b) like-for-like 0.197 → 0.119 (CTRL) and 0.261 → 0.188 (B1) with rigid 0.184 → 0.043 (E-GEOM-006 addendum). (c) '~10⁶ training conformers' replaced by 'count not established here, UNVERIFIED' (also in C-GEOM-01). (d) gate paired as in D-205. (e) Recomputed (scratchpad `p2.py`): isomeric key 534 / 50.8% / 45.2%; stereo-free key 421 / 66.3% / 58.6% (345 bad-seed molecules) — both now in E-GEOM-012 and C-GEOM-02 §3.
 
 ## D-208 on E-GEOM-041 / E-GEOM-008 (advisory; entries VERIFIED) and C-GEOM-06 design
 Raised by: V3
@@ -357,7 +364,8 @@ Problem: the open part of E-041 is now resolved. RDKit `Release_2022_09_5`,
 config **and** small-ring torsions together, and its "≤ 0.005 Å" expectation covers two changes, not one.
 Requested fix: update E-041 / C-GEOM-06 §2 with the 2022.9.5 defaults; add an `L_etkdgv3_2L` arm (ETKDGv3 without small
 rings, same random seed) so the small-ring terms are isolated. CPU only, no extra GPU unless it passes the gate.
-Status: OPEN
+Status: CLOSED-VERIFIED (V3 R2: E-052 = Release_2022_09_5 rdDistGeom.cpp:346-351, re-fetched; C-GEOM-06 single-factor)
+Response (GEOM): ACCEPTED, with my own check of the source: new E-GEOM-052 (RDKit `Release_2022_09_5` `rdDistGeom.cpp:346-351`: ET/K true, small-ring false, macrocycle false, `ETversion = 1`; snapshot `papers/blogs/rdkit_2022_09_5_rdDistGeom_wrapper.txt`). E-GEOM-041 revised accordingly. C-GEOM-06 is now single-factor: `L_etkdg2L` (v1) vs `L_etkdgv3_2L` (ETKDGv3, small rings off) vs `L_sretkdg2L` (srETKDGv3), same random seed; the ≤ 0.005 Å expectation now applies only to the v3 → srv3 step, and no expectation is stated for v1 → v3 (no source). C-GEOM-01's table labels ETKDG as v1.
 
 ## D-209 on C-GEOM-04 (card sentences)
 Raised by: V3
@@ -369,4 +377,28 @@ separately". E-033 is about macrocycle NeRF reconstruction, so "closure constrai
 INFERENCE. (c) Inherits the "0.178 → 0.119" base issue (D-201).
 Requested fix: "almost every (832 of 885 ring molecules)"; label (b) INFERENCE and cite PuckerFlow's per-component-ring
 statement. The card's NO call is unaffected.
+Status: CLOSED-VERIFIED (V3 R2: 832/885 recomputed; E-055 quote exact p. 6)
+Response (GEOM): ACCEPTED. (a) Recomputed: 53 of 885 ring molecules have no exocyclic heavy atom → 'almost every (832 of 885)' (E-GEOM-011 addendum; C-GEOM-04 §3). (b) New E-GEOM-055 (PuckerFlow p. 6, per-component-ring extension to fused/spiro); C-GEOM-04 §3/§4 cite it and label extra closure constraints for fused systems as INFERENCE (E-033 is macrocycle-only). (c) λ = 0 base used (D-201). NO call unchanged.
+
+## GEOM note (coordinator item, no thread number): l_error grouping
+Response (GEOM): ACCEPTED (V3 recomputation R2, reproduced with scratchpad `p2.py`). 3-ring "dihedrals" are identically 0, so the 113 all-3-ring molecules add zeros. Excluding them: share of ring seeds > 10° is ETKDG 49.6%, MMFF 35.1%, λ0 52.1%, λ0.25 38.6%, λ0.50 19.4%, λ0.75 0.02%, noise 0.04 0.58%. E-GEOM-002 has a revision block; C-GEOM-01 (table now shows both bases), -02, -04, -05, -06 quote both bases; the gate uses the excl.-all-3-ring basis.
+
+
+## D-210 on C-GEOM-03 / E-GEOM-054 (split provenance of `qm9-o3`; validity)
+Raised by: V3
+Problem: that `qm9-o3` was trained on TD's (GeoMol) QM9 split is not established, and the sources give reasons to doubt
+that step 0(a) can settle it in 1 h. (1) ET-Flow p. 6 states the GeoMol split (243473/30433/1000) for DRUGS only; for
+QM9 it says only "we train and test model on GEOM-QM9". (2) At the release commit of the checkpoints (`4e1c5aa942`,
+2024-12-12), `configs/qm9-o3.yaml:15-16` trains from `QM9/train_indices.npy` / `QM9/val_indices.npy`. These are
+presumably the files in Zenodo `QM9.zip` (2.9 MB), and they index ET-Flow's own processed order (old
+`scripts/prepare_data.py` iterates `summary_qm9.json`), not TD's file list. To map them to SMILES you need ET-Flow's old
+processed `smiles.npz`, or a re-run of that preprocessing. (3) Current `main` (`scripts/prepare_data.py:199-206`)
+applies TD's `split.npy` indices to an unsorted `list(glob("*"))`, while TD indexes a sorted list
+(`torsional-diffusion/utils/dataset.py:171`). So a model retrained from `main` would not get TD's train set either. If
+any TD test molecule is in `qm9-o3`'s training set, ET-Flow L for it is partly memorised GT: ORACLE-contaminated, and it
+could falsely meet the λ = 0.75 spec.
+Requested fix: in C-GEOM-03 step 0(a), state the check as "map `QM9.zip` train/val indices to SMILES (old ET-Flow
+preprocessing) and intersect with TD `test_smiles.csv`". Add: "if the mapping cannot be done or is inconclusive, stop
+(or label every ET-Flow-L result ORACLE)". Label E-054's split statement INFERENCE with these two counter-points. The
+YES call should read "YES, conditional on a conclusive step 0(a)".
 Status: OPEN

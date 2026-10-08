@@ -16,7 +16,7 @@ this card argues it is dominated by GFN2-xTB (C-GEOM-01) for GEOM-QM9 and should
 
 ## 3. Why it could matter here (scout)
 - MMFF relaxation helped CTRL (0.178 → 0.152) but not B1 (0.236 → 0.232) [E-GEOM-007]; its residual is the pucker tail
-  (20.2% of ring seeds > 10°) with bonds/angles already at λ = 0.5 level [E-GEOM-001, E-GEOM-002]. A better potential
+  (20.2% of ring seeds > 10°; 35.1% excluding all-3-ring molecules) with bonds/angles already at λ = 0.5 level [E-GEOM-001, E-GEOM-002]. A better potential
   would only help if it moves seeds into the right pucker basin or brings bonds/angles to the λ = 0.75 level.
 - The second effect needs the **reference** level, which is GFN2-xTB, not DFT [E-GEOM-015, E-GEOM-027]: a DFT-level
   ML potential converges to minima that differ systematically from GEOM's (INFERENCE by analogy with the MMFF→GFN2

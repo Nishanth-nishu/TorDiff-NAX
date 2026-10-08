@@ -243,3 +243,55 @@ E-045 that is an ETKDG result (28% twisted), so it stands. Design correction: th
 `srETKDGv3` vs `L_etkdg2L` changes ETversion 1 → 2, macrocycle torsions and the 1-4 config **and** small-ring torsions at
 once. Add a plain `ETKDGv3` arm (same random seed) to isolate the small-ring terms; "expected ≤ 0.005 Å" is then a
 statement about two changes, not one.
+
+## Round 2 verdicts (after Scout GEOM's responses to D-201..D-209; 2026-10-08)
+
+Re-checked against the sources: revised blocks in `evidence_GEOM.md`, new E-052..055, and the revised cards. Numbers
+recomputed with my own scripts (`v3_r2.py`, plus R1–R4 above). Code and record facts checked against raw files from
+the ET-Flow repo (`main` and the release commit `4e1c5aa942`), the Zenodo API (records 14226681 and 16551316), and the
+RDKit `Release_2022_09_5` source, with WebFetch confirming `configs.py` and `rdDistGeom.cpp`.
+
+| Entry | Verdict | Note |
+|---|---|---|
+| E-GEOM-002 (revision) | VERIFIED | Excl. all-3-ring: 715 mols / 4181 rows; > 10°: ETKDG 49.61, MMFF 35.06, λ0 52.13, λ0.25 38.55, λ0.50 19.44, λ0.75 0.02, noise 0.02 0, noise 0.04 0.58; > 20°: 31.12 / 21.84 / λ0.50 0.07 / λ0.75 0. All exact |
+| E-GEOM-004 (revision) | VERIFIED | Matches R4; gates now score seeds directly on one common set |
+| E-GEOM-006 (addendum) | VERIFIED | λ0 base 0.184 / 0.181 / 0.209 / 0.209 / 0.254 → A5ring 0.043 / 0.104 / 0.162 / 0.193 / 0.249 (v3_rigid.py) |
+| E-GEOM-011 (addendum) | VERIFIED | 53 of 885 ring molecules lack an exocyclic heavy atom; 832 have one |
+| E-GEOM-012 (revision) | VERIFIED | Isomeric 534 / 50.8 / 45.2; stereo-free 421 / 66.3 / 58.6 (v3_rings.py) |
+| E-GEOM-013 (revision) | VERIFIED | BRIEF lines 30, 38 quoted exactly; λ0-base deltas match my 3-seed means (−0.078 / −0.074 / −0.014 / −0.103) |
+| E-GEOM-014 (revision) | VERIFIED | Lines `:43-58`, `:62-103`, `:68`, `:89`, `:80-84` as cited. Nit: "a CUDA-11.8 torch 2.x route already used by our tooling". The profile exists, but the default is cu117 and use is not shown |
+| E-GEOM-041 (revision) | VERIFIED | Consistent with E-052 |
+| E-GEOM-045 (revision) | VERIFIED | Limited to the srETKDGv3 result (358 / 142); supports C-GEOM-06 only |
+| E-GEOM-048 (revision, withdrawn) | VERIFIED | Revision text matches ET-Flow §3.4 and the code; supports no card |
+| E-GEOM-052 (new) | VERIFIED | `rdDistGeom.cpp:346-351` at `Release_2022_09_5`: ET/K true, small-ring false, macrocycle false, `ETversion = 1` (raw file + WebFetch) |
+| E-GEOM-053 (new) | VERIFIED | Both quotes exact, ET-Flow PDF p. 5 §3.4 |
+| E-GEOM-054 (new) | VERIFIED (facts); split INFERENCE contested (D-210) | `configs.py:118` `parity_switch` default `"post_hoc"`; `:189` `QM9_O3`; `model.py:459-462` applies it in `sample()`; `:467` `predict`, `:525` calls `self.sample(`; `from_default` builds `cls(**model_args)`. Zenodo 14226681 files exact (`QM9.zip` 2.9 MB); 16551316 = `scaffold_data.tar.gz`. Split inference: see D-210 |
+| E-GEOM-055 (new) | VERIFIED | PuckerFlow p. 6 quote exact |
+
+Dispute threads: D-201..D-209 set to CLOSED-VERIFIED. New D-210 (OPEN) on C-GEOM-03's split provenance.
+
+### Final card rulings (round 2)
+
+- **C-GEOM-01: SUPPORTED.** All three round-1 fixes are in: the λ0-base ring statement, E-002 replacing the piperazine
+  post, and the paired common-set gate with non-oracle go rules. Every factual sentence rests on a VERIFIED entry.
+  Advisory for P3: "empty TD `edge_mask`" is stricter than needed. Molecules whose only rotors are methyl/OH are also
+  model-free at heavy-atom level, so a heavy-atom criterion would keep ≈ 30% of the test set; report n either way.
+- **C-GEOM-02: SUPPORTED.** The 48–92% range, the λ0 base, the "UNVERIFIED" conformer count, the paired gate and both
+  coverage keys are fixed. Trivial: §5 "bounded below by A5ring's 0.119" still compares a 936-molecule ETKDG-seed run
+  with a 955-molecule λ0-seed oracle. That is a soft yardstick, not a bound.
+- **C-GEOM-03: SUPPORTED, but YES is justified only conditionally (D-210 OPEN).** The withdrawn MAYBE reasons are
+  correctly withdrawn: chirality is corrected in the released model (E-053/054), and CUDA 12 is not required (pip
+  package). The evidence for the mechanism is VERIFIED. The leakage question is not settled by any source:
+  - ET-Flow states the GeoMol split for DRUGS only.
+  - The release-commit config trains `qm9-o3` from `QM9/train_indices.npy` in ET-Flow's own processed order.
+  - Current `main` maps TD's `split.npy` onto an unsorted file list, whereas TD sorts.
+
+  If TD test molecules sit in `qm9-o3`'s training set, ET-Flow L is ORACLE-contaminated. That would be a validity
+  blocker exactly where the card's diagnostic matters, since memorised L would pass the λ = 0.75 spec. So YES holds as
+  "run step 0(a); stop unless it conclusively shows no TD test molecule in `qm9-o3`'s train/val set". The validity
+  judge should see this.
+- **C-GEOM-04: SUPPORTED.** The 832/885 count and E-055 are in; the closure-constraint point is labelled INFERENCE; the
+  λ0 base is used. The NO call is unaffected.
+- **C-GEOM-05: SUPPORTED.** The only change is that both > 10° bases are quoted (verified).
+- **C-GEOM-06: SUPPORTED.** E-052 is in, and the design is now single-factor (v1 → v3 → srv3, same random seed). No
+  expectation is claimed for v1 → v3, which is correct since no source covers it.

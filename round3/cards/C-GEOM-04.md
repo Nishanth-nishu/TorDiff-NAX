@@ -19,20 +19,26 @@ conditions that would reopen it.
   spot [E-GEOM-024].
 
 ## 3. Why it could matter here (scout)
-- Rings carry the QM9 floor: true ring geometry alone moves CTRL 0.178 → 0.119 [E-GEOM-013], and the ETKDG pucker tail
-  (28.6% of ring seeds > 10°) is what separates RDKit/MMFF L from the λ = 0.75 spec [E-GEOM-002, E-GEOM-007]. So the
+- Rings carry much of the QM9 floor: on the like-for-like λ = 0 base, true ring geometry alone moves CTRL 0.197 → 0.119
+  and B1 0.261 → 0.188 (revised after D-201/D-209) [E-GEOM-013], and the ETKDG pucker tail (28.6% of ring seeds > 10°;
+  49.6% excluding all-3-ring molecules) is what separates RDKit/MMFF L from the λ = 0.75 spec [E-GEOM-002,
+  E-GEOM-007]. So the
   target is right; the question is whether a learned pucker model is the cheapest way to hit it.
 - Domain mismatch with QM9 (our data): only 223 of 885 ring molecules have all rings isolated and 5–8-membered,
   holding 48% of the bad (> 10°) ETKDG seeds; isolated 4-rings (25% of bad seeds) and fused/bridged/spiro systems
-  (22%) are outside PuckerFlow's training domain [E-GEOM-011, E-GEOM-003]; 3-rings have no pucker.
-- Substituents matter in QM9 (every test molecule has them), while PuckerFlow is trained without them [E-GEOM-020].
+  (22%) are outside PuckerFlow's training domain [E-GEOM-011, E-GEOM-003]; 3-rings have no pucker. PuckerFlow's
+  authors say the method extends to fused/spiro rings per component ring, but do not show it [E-GEOM-055].
+- Substituents: almost every QM9 test ring molecule has them (832 of 885 have an exocyclic heavy atom; revised after
+  D-209) [E-GEOM-011], while PuckerFlow is trained without them [E-GEOM-020].
 
 ## 4. Assumptions that may not transfer (scout)
 - PuckerFlow's gains are on substituent-free isolated rings scored by pucker displacement; on all-atom RMSD the gain over
   ETKDG is ~0.02 Å and shrinks to ~0.01 Å after MMFF [E-GEOM-023] — the metric we use is all-atom-like (heavy-atom
   RMSD), so the expected effect is small even in-domain (INFERENCE).
-- Re-training PuckerFlow on QM9 rings (3–7-membered, fused, with substituents) is a new model, not a plug-in; fused
-  systems need per-ring Cremer–Pople coordinates plus closure constraints [E-GEOM-020, E-GEOM-033].
+- Re-training PuckerFlow on QM9 rings (3–7-membered, fused, with substituents) is a new model, not a plug-in. Fused
+  systems would use per-component-ring Cremer–Pople coordinates, as the authors propose [E-GEOM-055]; whether shared
+  atoms then need extra closure/consistency constraints is INFERENCE (E-GEOM-033 shows closure problems only for
+  macrocycles).
 - A joint Cremer–Pople × torus factor in FlexiTors is at least the 300+-line change estimated in round 2 for the simpler
   acyclic-angle factor, plus ring closure, plus a training run per seed [E-GEOM-049].
 - Cheaper non-learned sources (C-GEOM-01 xTB, C-GEOM-02 templates) attack the same tail with GT-level geometry and no
@@ -40,8 +46,9 @@ conditions that would reopen it.
 
 ## 5. Minimal experiment (scout)
 None this round. Reopen in round 4 only if **all** hold (pre-declared):
-1. After C-GEOM-01/02, the best non-learned source still has > 5% of ring seeds > 10° ring-dihedral RMSD, or
-   rigid-subset AMR-R > 0.077 (λ = 0.75 level) [E-GEOM-004];
+1. After C-GEOM-01/02, the best non-learned source still has > 5% of ring seeds > 10° ring-dihedral RMSD (excl.
+   all-3-ring basis), or its seed AMR-R on the common rigid set (scored directly, D-205 design) is above the λ = 0.75
+   reference recomputed on that set (ORACLE yardstick, experiment selection only) [E-GEOM-004];
 2. C-GEOM-03 shows a learned model can get the ring tail below 1% (so learning is the missing ingredient);
 3. the residual tail is concentrated in ring classes a pucker model can represent (report by ring size/fusion,
    E-GEOM-011 breakdown).

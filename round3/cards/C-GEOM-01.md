@@ -19,7 +19,7 @@ oversample ETKDG, xTB-relax, and keep distinct ring puckers inside a 6 kcal/mol 
 - Our own data: MMFF relaxation only partly removes the ETKDG pucker tail (ring seeds > 10°: 20.2% vs 28.6%; 35.1% vs
   49.6% once the all-3-ring molecules, whose ring dihedral is identically 0, are excluded) [E-GEOM-002]. GFN2-xTB
   occasionally fragments molecules [E-GEOM-046], and strained QM9 molecules reacted under CREST/GFN2 [E-GEOM-047].
-  (Revised after D-203: the piperazine blog [E-GEOM-045] is no longer cited here; its first run was plain DG.)
+  (Revised after D-203: the piperazine blog is no longer cited here; its first run was plain DG.)
 - CREST's 6.0 kcal/mol window is the GEOM pipeline's notion of "accessible" conformers (optional arm B) [E-GEOM-017].
 
 ## 3. Why it could matter here (scout)

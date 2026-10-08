@@ -168,3 +168,58 @@ D-001 … D-005 (entries) and D-006, D-007 (card-level). Cards: C-EVAL-01 SUPPOR
 SUPPORTED, C-EVAL-04 SUPPORTED, C-EVAL-05 WEAKENED, C-EVAL-06 WEAKENED. No card loses its core mechanism. Scripts:
 scratchpad `v1/v1_lerr.py`, `v1/v1_lambda.py`, `v1/v1_macro.py`, `v1/v1_breakdown.py`; page extractions
 `v1/*.layout.txt`, `v1/*.raw.txt`.
+
+## Round 2 verdicts (after SCOUT EVAL's responses to D-001 … D-007)
+Re-checked 2026-10-08 against the sources and with my own scripts. New script: scratchpad
+`v1/v1_d005_round2.py` (E-EVAL-057 from the four CTRL_rematch s0 breakdown.log files).
+
+### Revised entries
+| Entry | Round-2 verdict | Check |
+|---|---|---|
+| E-EVAL-010 | VERIFIED | Unsupported side note withdrawn; now "(DRUGS only)", with the QM9 contrast attributed to FM-refiner re-runs vs our sweep. |
+| E-EVAL-011 | VERIFIED | Claim now names the mechanism (learned-energy selection, 3K → 2K, no relaxation). Added quote matches the EnFlow p. 5 table notes ("3K candidate conformations are generated and the 2K conformations with the lowest learned energy are retained"). |
+| E-EVAL-013 | VERIFIED | Locator now gives sub-heading "Initial structure generation" and points to E-EVAL-055 for the gas-phase defaults. |
+| E-EVAL-016 | VERIFIED | Extended three-sentence quote is exact (GEOM p. 2, checked programmatically). |
+| E-EVAL-017 | VERIFIED | Unsupported inference (reacted graphs = our cages) withdrawn. |
+| E-EVAL-020 | VERIFIED | Torsion qualification added (8.58/6.01/5.58° vs 4.89°), matching Table 2. |
+| E-EVAL-022 | VERIFIED | Inference reworded ("not the unique cause", GeoMol 43.68). |
+| E-EVAL-023 | VERIFIED (was DOES NOT SUPPORT) | Claim now uses the source's words "become important"; original kept as superseded. D-001 closed. |
+| E-EVAL-028 | VERIFIED | Side note corrected: only the RDKit+Clustering row (97.65/0.1902) matches Zhou; the RDKit and CGCF rows differ. |
+| E-EVAL-029 | VERIFIED (was DOES NOT SUPPORT) | Scope "for large systems (e.g. PROTACs)" restored. "Can be ameliorated" is the source's wording. Byline corrected. QM9 use limited to the twist-boat anecdote, with confidence lowered. D-002 closed. |
+| E-EVAL-032 | VERIFIED (was QUOTE MISMATCH) | New snapshot `papers/blogs/condaforge_xtb_metadata_eval.txt` matches my live JSON: latest 6.7.1; 28 linux-64 files, the same count and version set as mine; `linux-64/xtb-6.2.3-h323e27b_0.tar.bz2` present. D-003 closed. |
+| E-EVAL-033 | VERIFIED (was WRONG LOCATOR) | Locator :166-171 correct. Inference reworded ("flatters" withdrawn, direction unknown, with E-EVAL-005 and E-EVAL-058). D-004 closed. |
+| E-EVAL-048 | VERIFIED (was DOES NOT SUPPORT) | Numbers unchanged and reproduced. The "rigid / mostly ring-L" inference is withdrawn. The replacement inference (per-molecule weighting gives few-conformer molecules ~5× their per-conformer weight: 48.1 % vs 10.2 % = 4.7×) is supported. D-005 closed. |
+
+### New entries
+| Entry | Verdict | Check |
+|---|---|---|
+| E-EVAL-055 | VERIFIED | GEOM PDF p. 5 "CREST simulation": quote exact. Gas phase follows from the CREST defaults; implicit water (ALPB) is used only for BACE (pp. 2, 6). |
+| E-EVAL-056 | VERIFIED | GEOM PDF p. 8 "Code availability": "CREST version 2.9 was used with xTB version 6.2.3 to generate the initial CREs." Exact. |
+| E-EVAL-057 | VERIFIED | Recomputed with `v1_d005_round2.py`. Every number reproduces: rigid 284/935 = 30.4 % of molecules and 26.0 % of the AMR-R sum on ETKDG L (25.4 % on MMFF L); rigid AMR-R 0.152 / 0.127 vs macro 0.1772 / 0.1519; n_true ≤ 3 is 48.1 % of molecules and 46.1 % of the sum; 52.2 % of few-conformer molecules are rigid (`v1_macro.py`); A5ring vs λ = 0 on the same 955 molecules: rigid 0.185 → 0.043 Å, macro gain 0.0783 Å, rigid share of the gain **54.9 %**. Sensitivity: against the plain ETKDG-L base (935 vs 955 molecules, weighted by A5ring bin counts) the share is 56.0 % (rigid 0.152 → 0.043, macro gain 0.0589 Å), so 54.9 % does not depend on the λ = 0 base. Quoted breakdown rows are exact (whitespace collapsed). Note: the λ = 0 matched seed is worse than plain ETKDG for rigid molecules (0.185 vs 0.152), so "0.185 → 0.043" overstates the drop from the ETKDG L we actually use; that drop is 0.152 → 0.043. The card wording is acceptable because the base is named. |
+| E-EVAL-058 | VERIFIED | ET-Flow PDF p. 19, GEOM-XL paragraph after Table 8, exact. GEOM-XL only, as the entry says. |
+| E-EVAL-059 | VERIFIED | GEOM PDF p. 1 Abstract, exact. "Only BACE" also holds against the full text: single-point DFT for 1,511 of 1,513 BACE species, CENSO for 534 BACE (pp. 4–5); no DFT for QM9. |
+
+Round-2 ledger count: all 59 entries VERIFIED (54 original + 5 new); every V1 dispute is CLOSED-VERIFIED.
+
+### Residual issues in the revised cards (too small to reopen a thread; noted in the D-005/D-006 status lines)
+- **R2-1, C-EVAL-01 §3 and §5:** "CTRL ... never reaches the ET-Flow range (0.0803 Å at λ = 1)". The range is now
+  0.073–0.083 Å, and 0.0803 Å is inside it. On seed 0, CTRL reaches 0.083 Å at λ ≈ 0.98 (`v1_lambda.py`), and it never
+  reaches 0.073–0.076 Å. Fix: "never reaches the published 0.073 Å; touches the 0.083-Å re-run level only at λ ≈ 1".
+- **R2-2, C-EVAL-04 §3:** "about half of those (30 % of all molecules) are rigid". Half of the few-conformer group is
+  25 % of all molecules (few ∩ rigid = 0.250, `v1_macro.py`). 30.4 % is the share of *all* rigid molecules, some of which
+  have more than 3 GT conformers. Fix: "(25 % of all molecules; 30 % of molecules are rigid overall)".
+- **R2-3, C-EVAL-03 §5:** "about 1–2 h wall on 32–48 cores" for 22–67 CPU-h is really ~0.5–2 h. Harmless.
+
+### Final card rulings (round 2)
+| Card | Round 1 | Round 2 | Reason |
+|---|---|---|---|
+| C-EVAL-01 | SUPPORTED | **SUPPORTED** | ET-Flow target is now a range (0.073 published / 0.083 FM-refiner re-run), and δ = 0.05 Å comparisons use matched FM-refiner pairs. λ 0.84–0.86 matches my recompute (0.836–0.862). "Flattered" and reacted-graph inferences withdrawn, S3 removed from the λ expectation. Residual R2-1 (wording). |
+| C-EVAL-02 | WEAKENED | **SUPPORTED** | The lead bullet is rebuilt on E-EVAL-057 (verified, 54.9 % reproduced). ETKDG vs MMFF compared on the same file (1.73× / 1.42× / 1.32× confirmed). The FM-refiner rationale is labelled INFERENCE. |
+| C-EVAL-03 | SUPPORTED | **SUPPORTED** | Torsion qualification added; gas phase and xtb 6.2.3 settled (E-EVAL-055/056); ETKDG-failure scope fixed; cost includes the validation subset. Residual R2-3 (trivial). Still UNVERIFIED: xtb install and runtime on gnode118, 1–3 s per optimisation. |
+| C-EVAL-04 | SUPPORTED | **SUPPORTED** | Blog scope and wording fixed; xtb 6.2.3 cited; rigid vs few-conformer separated; B-clust wording and Zhou ablation reading (MMFF buys MAT, not COV) corrected. Residual R2-2 (25 % vs 30 %). |
+| C-EVAL-05 | WEAKENED | **SUPPORTED** | EnFlow relabelled as selection and no longer used as relaxation evidence. "TD RMSD is unrelaxed" now cites the code path (E-EVAL-035). The rigid-stratum sentence now uses E-EVAL-057 (30.4 % / 26.0 % / 54.9 %), all reproduced. |
+| C-EVAL-06 | WEAKENED | **SUPPORTED** | "By construction insensitive" withdrawn. Part (b) is re-argued on CREST weights (E-EVAL-016 extended, E-EVAL-059 BACE-only DFT weights) and on redundancy with C-EVAL-03/05. The call for (b) is softened to "not for round 3 / MAYBE for DRUGS"; (a) stays NO on comparability (E-EVAL-001…008, 013). |
+
+All six EVAL cards now rest on VERIFIED entries for every factual sentence I checked, apart from R2-1 and R2-2. Those
+are wording/number slips that do not change any card's mechanism or call. The scout can fix them before P3 without a
+new dispute.

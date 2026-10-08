@@ -488,7 +488,7 @@ assigned pair, not "best pucker over all seeds".
   > ET-Flow - SO(3) is ET-Flow using the SO(3) architecture for chirality correction.
 - Shows vs infers: SHOWS. INFERENCE: `qm9-o3` samples need a stereo check (reflect or drop mirror images) before use
   as L seeds.
-- Supports card(s): C-GEOM-03
+- Supports card(s): none after revision
 - Confidence: high
 - Revised after D-204 (original claim WITHDRAWN): ET-Flow's base O(3) model *is* chirality-corrected, post hoc (oriented
   volume vs RDKit tags, whole-conformer flip on mismatch), and that corrected model is the reported 0.073; SO(3) is an
@@ -650,7 +650,7 @@ assigned pair, not "best pucker over all seeds".
   > requires_dist: ['torch>=1.12', 'e3nn==0.4.4', ...
 - Shows vs infers: SHOWS (declared metadata). INFERENCE: AIMNet2 and current TorchANI cannot go into the TD env;
   MACE-OFF can only go into a separate venv (e3nn pin conflicts with TD's 0.5.1, E-GEOM-014); none was install-tested.
-- Supports card(s): C-GEOM-05
+- Supports card(s): C-GEOM-03, C-GEOM-05
 - Confidence: high (metadata); medium (install inference)
 
 ### E-GEOM-037
@@ -743,7 +743,7 @@ assigned pair, not "best pucker over all seeds".
   ("Still about 50% ... twisted") does not match its own MMFF counter output; the counter lines are cited. INFERENCE:
   consistent with our 6-ring numbers (ETKDG 66% of seeds > 10°, MMFF 45%; E-GEOM-003): force-field relaxation and the
   small-ring torsion terms only partly remove wrong puckers.
-- Supports card(s): C-GEOM-01, C-GEOM-06
+- Supports card(s): C-GEOM-06
 - Confidence: medium
 - Revised after D-203: the post's first run ("ETKDG v1") passes a bare `EmbedParameters()` (cell 6), which has
   `useExpTorsionAnglePrefs=False` and `useBasicKnowledge=False` (local check, RDKit 2026.03.6: ET False, K False), i.e.
@@ -787,7 +787,7 @@ assigned pair, not "best pucker over all seeds".
   > python::arg("ETversion") = 1),
 - Shows vs infers: SHOWS. With E-GEOM-008 (TD calls `EmbedMultipleConfs` without a parameter object): every cluster
   seed is ETKDG v1.
-- Supports card(s): C-GEOM-06
+- Supports card(s): C-GEOM-01, C-GEOM-06
 - Confidence: high
 
 ### E-GEOM-053

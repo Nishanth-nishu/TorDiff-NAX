@@ -17,7 +17,7 @@ its 1–2 days of coding and a training run.
 - ET-Flow's base O(3) model applies a post hoc chirality correction (oriented volume vs RDKit tags, flip on mismatch),
   and that corrected model is the reported 0.073 [E-GEOM-053]; the released `qm9-o3` config defaults to this correction
   inside `sample()`/`predict()` [E-GEOM-054]. (Revised after D-204: the earlier claim that only SO(3) is
-  chirality-corrected, E-GEOM-048, is withdrawn.)
+  chirality-corrected is withdrawn.)
 - Refiner literature, for the "build our own" alternative: FM-refiner starts from upstream conformers rather than noise
   [E-GEOM-029] but only corrects errors inside its noise range [E-GEOM-030]; Equivariant Blurring Diffusion corrects an
   RDKit fragment prior instead of freezing it [E-GEOM-051]; GO-Flow finds internal coordinates the most important
