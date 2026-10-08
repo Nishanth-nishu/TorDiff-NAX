@@ -8,3 +8,6 @@ cluster_sync/results/analysis/local_structure_std.csv
 __pycache__/
 .nested_git_backup/
 .claude/
+
+# web snapshots of blogs (copyrighted text, local only)
+papers/blogs/*.txt
