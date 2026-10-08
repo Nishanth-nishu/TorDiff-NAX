@@ -31,7 +31,7 @@ assigned pair, not "best pucker over all seeds".
 - Confidence: high
 
 ### E-GEOM-002
-- Claim: Among seeds of ring molecules, the fraction with endocyclic ring-dihedral RMSD > 10° is ETKDG 28.6%, MMFF
+- Claim (original, superseded where the revision below differs): Among seeds of ring molecules, the fraction with endocyclic ring-dihedral RMSD > 10° is ETKDG 28.6%, MMFF
   20.2%, λ=0.25 22.3%, λ=0.50 11.2%, λ=0.75 0.01%, noise 0.02 Å 0.00%, noise 0.04 Å 0.34%; > 20°: ETKDG 17.9%, MMFF
   12.6%, λ=0.50 0.04%, λ=0.75 0%. Ring-pucker (dihedral) error, not bond/angle size, is what separates ETKDG/MMFF from
   λ≥0.5 quality.
@@ -44,6 +44,11 @@ assigned pair, not "best pucker over all seeds".
   errors of MMFF ≈ λ=0.50 (E-GEOM-001) while dihedral tails differ.
 - Supports card(s): C-GEOM-01, C-GEOM-02, C-GEOM-03, C-GEOM-04, C-GEOM-05, C-GEOM-06
 - Confidence: high (numbers); medium (inference)
+- Revised after D-201..D-209 thread (coordinator note on grouping; recomputed by GEOM, scratchpad `p2.py`): a
+  3-membered ring's "dihedral" (a,b,c,a) is identically 0, so the 113 molecules whose rings are all 3-membered add
+  only zeros. Excluding them (715 molecules, 4181 ETKDG rows): share > 10° is ETKDG 49.6%, MMFF 35.1%, λ=0 52.1%,
+  λ=0.25 38.6%, λ=0.50 19.4%, λ=0.75 0.02%, noise 0.02 Å 0%, noise 0.04 Å 0.58%; > 20°: ETKDG 31.1%, MMFF 21.8%,
+  λ=0.50 0.07%, λ=0.75 0%. The ordering ETKDG > MMFF > λ0.5 >> λ0.75 is unchanged; cards now quote both bases.
 
 ### E-GEOM-003
 - Claim: By smallest ring size, ETKDG median ring-dihedral RMSD and fraction > 10° are: 3-ring 0.0° / 9%; 4-ring
@@ -61,7 +66,7 @@ assigned pair, not "best pucker over all seeds".
 - Confidence: high
 
 ### E-GEOM-004
-- Claim: For rigid molecules (0 rotatable heavy-atom bonds; 284–318 of ~936–996 molecules, ≈30%), MAT-R (= AMR-R)
+- Claim (original, superseded where the revision below differs): For rigid molecules (0 rotatable heavy-atom bonds; 284–318 of ~936–996 molecules, ≈30%), MAT-R (= AMR-R)
   depends on the L source and not on the torsion model: CTRL_rematch / B1 (3-seed means) = ETKDG 0.152 / 0.155; MMFF
   0.128 / 0.127; λ=0.50 0.107 / 0.109; λ=0.75 0.077 / 0.074; true ring geometry only (A5ring) 0.043 / 0.048; true L +
   noise 0.02 Å 0.032 / 0.029; true L 0.005 (CTRL) / 0.001 (B1 seed 0). So the rigid subset is a model-free, CPU-only
@@ -76,6 +81,13 @@ assigned pair, not "best pucker over all seeds".
   the L seeds up to alignment.
 - Supports card(s): C-GEOM-01, C-GEOM-02, C-GEOM-03, C-GEOM-04, C-GEOM-06
 - Confidence: high
+- Revised after D-205: the logged bin 0 is not exactly model-free (λ=1.00, true L, gives CTRL 0.004 / 0.004 / 0.007
+  vs B1 0.001; ETKDG CTRL 0.152 / 0.151 / 0.154 vs B1 0.155 / 0.156 / 0.155 per seed, V3 recomputation), because
+  `tools/breakdown.py` bins by corrected SMILES and a few bin-0 molecules have a TD-rotatable bond; and the bin-0
+  population differs by L source (ETKDG/MMFF 284, λ0.25–0.75 258, λ0/λ1/A5 289, noise 318). The values above are
+  therefore indicative (model dependence ≤ 0.006 Å, different molecule sets). All CPU gates in C-GEOM-01/02/04/06 now
+  score the seed sets directly (heavy-atom AMR-R of seeds vs GT, no model) on one common rigid set defined by TD's own
+  empty `edge_mask`, and recompute the ETKDG / MMFF / λ references on that same set.
 
 ### E-GEOM-005
 - Claim: With the standard model, random isotropic L error with large bond/angle error but small ring-dihedral error
@@ -105,6 +117,10 @@ assigned pair, not "best pucker over all seeds".
 - Shows vs infers: SHOWS. Caveat: A5ring/A5acyc use the λ=0 matched-seed population (955 molecules), ETKDG uses 936.
 - Supports card(s): C-GEOM-01, C-GEOM-02
 - Confidence: high
+- Addendum after D-201/D-207 (like-for-like base; values from the same breakdown.log files, `S1_lam0.00_cyc_ORACLE`,
+  CTRL 3-seed means, 289 rigid molecules): CTRL λ=0 by bin 0 / 1 / 2 / 3 / 4+ = 0.184 / 0.181 / 0.209 / 0.209 / 0.254 →
+  A5ring 0.043 / 0.104 / 0.162 / 0.193 / 0.249. The gain is still concentrated in the 0–1-rotor bins; cards now quote the
+  λ=0 base (rigid 0.184 → 0.043) rather than the ETKDG base (different population and seeds).
 
 ### E-GEOM-007
 - Claim: MMFF-relaxed L reaches λ≈0.5-level ring bond/angle error (0.0199 Å / 1.42° vs λ=0.50 0.0189 Å / 1.34°) but
@@ -163,7 +179,7 @@ assigned pair, not "best pucker over all seeds".
 - Confidence: high
 
 ### E-GEOM-011
-- Claim: Of 885 test ring molecules, 420 contain only isolated rings (no two rings share an atom) and 465 contain a
+- Claim (original, superseded where the revision below differs): Of 885 test ring molecules, 420 contain only isolated rings (no two rings share an atom) and 465 contain a
   fused, bridged or spiro system. Of the 2074 ETKDG seeds with ring-dihedral RMSD > 10°, 78% are in isolated-ring
   molecules and 22% in fused/bridged/spiro ones. By (category, smallest ring): isolated 4-rings 519 bad seeds (76% of
   their seeds), isolated 5-rings 635 (49%), 6-rings 222 (67%), 7-rings 140 (92%); fused systems 449 in total. Molecules
@@ -177,9 +193,11 @@ assigned pair, not "best pucker over all seeds".
 - Shows vs infers: SHOWS (counts). Caveat E-GEOM-009 (assignment on angles, not puckers).
 - Supports card(s): C-GEOM-02, C-GEOM-04
 - Confidence: high
+- Addendum after D-209 (recomputed, `p2.py`): 53 of the 885 test ring molecules have no exocyclic heavy atom; 832
+  have at least one.
 
 ### E-GEOM-012
-- Claim: The 885 test ring molecules contain 534 distinct ring-system components (ring atoms and ring bonds only, with
+- Claim (original, superseded where the revision below differs): The 885 test ring molecules contain 534 distinct ring-system components (ring atoms and ring bonds only, with
   atom/bond types; substituents removed). Within the test set alone, 50.8% of ring molecules have every ring-system
   component also present in another test molecule (45.2% among the 345 molecules with any ETKDG seed > 10°).
 - Source type: our-data
@@ -192,9 +210,12 @@ assigned pair, not "best pucker over all seeds".
   higher; UNVERIFIED until counted on the cluster against the training pickles.
 - Supports card(s): C-GEOM-02
 - Confidence: high (numbers); low (train-set inference)
+- Revised after D-207(e) (recomputed, `p2.py`): the numbers above use isomeric fragment SMILES as the key (RDKit
+  default, stereo tags on ring atoms). With a stereo-free key: 421 distinct components, leave-one-out coverage 66.3% of
+  ring molecules, 58.6% among the 345 molecules with an ETKDG seed > 10°. C-GEOM-02 states both keys.
 
 ### E-GEOM-013
-- Claim: Improving ring geometry alone helps the standard model but not B1: with true ring geometry and RDKit acyclic
+- Claim (original, superseded where the revision below differs): Improving ring geometry alone helps the standard model but not B1: with true ring geometry and RDKit acyclic
   geometry (A5ring) CTRL reaches 0.119 and B1 0.188; with true acyclic geometry and RDKit rings (A5acyc) CTRL 0.182 and
   B1 0.158.
 - Source type: our-data
@@ -205,9 +226,17 @@ assigned pair, not "best pucker over all seeds".
   a B1-side gain needs acyclic bonds/angles at near-reference quality too.
 - Supports card(s): C-GEOM-01, C-GEOM-02, C-GEOM-03, C-GEOM-04
 - Confidence: high
+- Revised after D-201 (the original inference "helps CTRL but not B1" is WITHDRAWN): A5ring and A5acyc are built from
+  the matched λ=0 pairs (`tools/make_l_seed_pickles.py:236-246`), so the like-for-like base is λ=0 on the same 955
+  molecules (BRIEF line 30: CTRL 0.197, B1 0.261). True rings alone: CTRL 0.197 → 0.119 (−0.078), B1 0.261 → 0.188
+  (−0.074), i.e. both models gain about equally, but B1 stays above CTRL. True acyclic geometry alone: CTRL 0.197 →
+  0.182 (−0.014), B1 0.261 → 0.158 (−0.103), and only this puts B1 below CTRL (0.158 < 0.182). Revised INFERENCE: ring
+  accuracy helps both models; for B1 to overtake CTRL the acyclic bonds/angles must also be near-reference. Exact quote
+  added: "| Matched RDKit seed, λ = 0 (ORACLE-selected) | 0.197 | 0.261 | 955 |" and "| True acyclic geometry only
+  (A5acyc, ORACLE) | 0.182 | 0.158 | 955 |" (BRIEF lines 30, 38).
 
 ### E-GEOM-014
-- Claim: The cluster TD environment is python 3.9, torch 1.13.1+cu117, torch-geometric 2.0.4, e3nn 0.5.1, rdkit
+- Claim (original, superseded where the revision below differs): The cluster TD environment is python 3.9, torch 1.13.1+cu117, torch-geometric 2.0.4, e3nn 0.5.1, rdkit
   2022.9.5, built with micromamba from conda-forge.
 - Source type: code
 - Locator: code: `slurm/setup_env.sh:56`, `:76-79`, `:99-100`; `round2/IMPLEMENTATION.md:130`.
@@ -217,6 +246,11 @@ assigned pair, not "best pucker over all seeds".
 - Shows vs infers: SHOWS.
 - Supports card(s): C-GEOM-03, C-GEOM-05
 - Confidence: high
+- Revised after D-202: the environment is a pip venv on python 3.9; `slurm/setup_env.sh:43-58` uses a system/module
+  python 3.9 and only falls back to a micromamba conda-forge python; packages are pip-installed (`:62-103`). Which branch
+  ran on gnode118 is not recorded. Versions unchanged. Also relevant to C-GEOM-03 (D-206): the TD venv pins
+  `numpy==1.23.5` (`:68`, `:89`), and the script has an alternative `cu118` profile with `torch==2.0.1+cu118` and
+  torch-geometric 2.3.1 (`:80-84`), a CUDA-11.8 torch 2.x route already used by our tooling (not tested for ET-Flow).
 
 ### E-GEOM-049
 - Claim: The round-2 design estimate for adding even a non-ring (acyclic) joint angle factor to TD was 300+ changed
@@ -446,7 +480,7 @@ assigned pair, not "best pucker over all seeds".
 - Confidence: high
 
 ### E-GEOM-048
-- Claim: ET-Flow's chirality-corrected variant is the SO(3) architecture; the default O(3) model is not
+- Claim (original, superseded where the revision below differs): ET-Flow's chirality-corrected variant is the SO(3) architecture; the default O(3) model is not
   chirality-corrected (the released QM9 checkpoint is `qm9-o3`, E-GEOM-037).
 - Source type: paper
 - Locator: paper: `papers/related/2024_hassan_etflow.pdf`, PDF p. 7 (printed 7), Table 2 caption.
@@ -456,6 +490,11 @@ assigned pair, not "best pucker over all seeds".
   as L seeds.
 - Supports card(s): C-GEOM-03
 - Confidence: high
+- Revised after D-204 (original claim WITHDRAWN): ET-Flow's base O(3) model *is* chirality-corrected, post hoc (oriented
+  volume vs RDKit tags, whole-conformer flip on mismatch), and that corrected model is the reported 0.073; SO(3) is an
+  architectural alternative [E-GEOM-053]. The released `qm9-o3` config defaults to `parity_switch = "post_hoc"` and
+  `sample()` applies it, so `predict()` returns corrected conformers [E-GEOM-054]. A stereo check on the seeds stays (a
+  whole-molecule flip cannot fix a sample with only some stereocentres inverted).
 
 ### E-GEOM-029
 - Claim: FM-refiner starts sampling from upstream conformers instead of noise. Reused from `round2/research_A.md` E17
@@ -689,7 +728,7 @@ assigned pair, not "best pucker over all seeds".
 - Confidence: high
 
 ### E-GEOM-045
-- Claim: A practitioner write-up on piperazine (RDKit 2020.03.2, 500 conformers) finds ETKDG (v1 parameters) gives
+- Claim (original, superseded where the revision below differs): A practitioner write-up on piperazine (RDKit 2020.03.2, 500 conformers) finds ETKDG (v1 parameters) gives
   many non-chair rings (naive |torsion| classifier: 254 chair / 228 twisted / 18 boat), MMFF optimisation leaves many
   twisted (366 / 131 / 3), and srETKDGv3 still gives 28% twisted rings once the torsion-sign pattern is checked
   (358 chair / 142 twisted).
@@ -706,9 +745,15 @@ assigned pair, not "best pucker over all seeds".
   small-ring torsion terms only partly remove wrong puckers.
 - Supports card(s): C-GEOM-01, C-GEOM-06
 - Confidence: medium
+- Revised after D-203: the post's first run ("ETKDG v1") passes a bare `EmbedParameters()` (cell 6), which has
+  `useExpTorsionAnglePrefs=False` and `useBasicKnowledge=False` (local check, RDKit 2026.03.6: ET False, K False), i.e.
+  plain distance geometry; the MMFF counts are MMFF on plain-DG output, scored with the naive classifier the author later
+  shows over-counts chairs. **Only the srETKDGv3 result counts**: with the torsion-sign check, 358 chair / 142 twisted
+  (28% twisted) for piperazine. The ETKDG/MMFF part of the claim is WITHDRAWN; C-GEOM-01 now cites E-GEOM-002 for "MMFF
+  only partly repairs puckers". Supports only C-GEOM-06 after revision.
 
 ### E-GEOM-041
-- Claim: In RDKit 2026.03.6 (local), the keyword defaults of `EmbedMultipleConfs` are `useSmallRingTorsions=False`,
+- Claim (original, superseded where the revision below differs): In RDKit 2026.03.6 (local), the keyword defaults of `EmbedMultipleConfs` are `useSmallRingTorsions=False`,
   `useMacrocycleTorsions=True`, `ETversion=2`, `useMacrocycle14config=True` (i.e. ETKDGv3 without the small-ring
   terms). The cluster's 2022.9.5 defaults were not checked (UNVERIFIED); the current docs also list
   `useSmallRingTorsions` as default False (E-GEOM-039).
@@ -720,3 +765,71 @@ assigned pair, not "best pucker over all seeds".
 - Shows vs infers: SHOWS (local version only).
 - Supports card(s): C-GEOM-06
 - Confidence: high (local); low (cluster)
+- Revised after D-208 (resolved with a new source, E-GEOM-052): in RDKit 2022.9.5 (cluster) the python keyword
+  defaults are `useExpTorsionAnglePrefs=true`, `useBasicKnowledge=true`, `useSmallRingTorsions=false`,
+  `useMacrocycleTorsions=false`, `ETversion=1`, i.e. **ETKDG v1**. So all cluster seeds (training-time matching and
+  test-time) are ETKDG v1, not v3.
+
+## Entries added in P2 (disputes D-201..D-209)
+
+### E-GEOM-052
+- Claim: In RDKit 2022.09.5 (the cluster's version) the python `EmbedMultipleConfs` keyword defaults are
+  `useExpTorsionAnglePrefs=true`, `useBasicKnowledge=true`, `useSmallRingTorsions=false`, `useMacrocycleTorsions=false`,
+  `ETversion=1`, i.e. ETKDG v1 without small-ring or macrocycle terms.
+- Source type: code (library source at the release tag)
+- Locator: code: RDKit `Release_2022_09_5`, `Code/GraphMol/DistGeomHelpers/Wrap/rdDistGeom.cpp:346-351`
+  (https://github.com/rdkit/rdkit/blob/Release_2022_09_5/Code/GraphMol/DistGeomHelpers/Wrap/rdDistGeom.cpp, accessed
+  2026-10-08), snapshot `papers/blogs/rdkit_2022_09_5_rdDistGeom_wrapper.txt`. Found first by V3 (D-208), re-fetched
+  and checked by GEOM.
+- Exact quote:
+  > python::arg("useSmallRingTorsions") = false,
+  > python::arg("useMacrocycleTorsions") = false,
+  > python::arg("ETversion") = 1),
+- Shows vs infers: SHOWS. With E-GEOM-008 (TD calls `EmbedMultipleConfs` without a parameter object): every cluster
+  seed is ETKDG v1.
+- Supports card(s): C-GEOM-06
+- Confidence: high
+
+### E-GEOM-053
+- Claim: ET-Flow's base O(3) model uses a post hoc chirality correction (compare the oriented volume with the RDKit
+  chiral tags and flip the conformation on mismatch); the SO(3) architecture is the alternative, and the base method
+  (reported 0.073 on QM9) is the post-hoc-corrected one.
+- Source type: paper
+- Locator: paper: `papers/related/2024_hassan_etflow.pdf`, PDF p. 5 (printed 5), §3.4 (chirality correction).
+- Exact quote:
+  > In the case of a mismatch, we simply flip the conformation against the z-axis.
+  > Our base method (ET-Flow) corresponds to using the post hoc correction whereas the SO(3) variant is referred by ET-Flow-SO(3).
+- Shows vs infers: SHOWS.
+- Supports card(s): C-GEOM-03
+- Confidence: high
+
+### E-GEOM-054
+- Claim: In the released `etflow` code, the `qm9-o3` configuration uses the default `ModelArgsSchema`, whose
+  `parity_switch` defaults to `"post_hoc"`, and `BaseFlow.sample()` (called by `predict()`) applies the parity switch
+  after integration; the `qm9-o3.ckpt` sits in Zenodo record 14226681 together with `QM9.zip` split files, while the
+  scaffold splits are a separate record (16551316, `scaffold_data.tar.gz`).
+- Source type: blog (code repository + data-record metadata)
+- Locator: blog: https://github.com/shenoynikhil/ETFlow, `etflow/commons/configs.py:118`, `:189-196`;
+  `etflow/models/model.py:459-462`, `:467`, `:525` (branch main); https://zenodo.org/api/records/14226681 and 16551316;
+  M. Hassan, N. Shenoy et al.; accessed 2026-10-08; snapshot `papers/blogs/etflow_repo_code_chirality.txt`.
+- Exact quote:
+  > parity_switch: Literal["post_hoc"] = "post_hoc"
+  > if self.parity_switch == "post_hoc":
+  > files: ['drugs-o3.ckpt', 'qm9-o3.ckpt', 'DRUGS.zip', 'QM9.zip', 'drugs-so3.ckpt', 'XL.zip']
+- Shows vs infers: SHOWS. INFERENCE: `qm9-o3` was most likely trained on the random (TD) split shipped next to it, not
+  the scaffold split; still to be confirmed by comparing `QM9.zip`'s test SMILES with TD's `test_smiles.csv` (step 0 of
+  C-GEOM-03).
+- Supports card(s): C-GEOM-03
+- Confidence: high (code facts); medium (split inference)
+
+### E-GEOM-055
+- Claim: PuckerFlow's authors state the approach extends to fused and spiro rings by computing Cremer–Pople coordinates
+  for each component ring separately (not demonstrated in the paper).
+- Source type: paper
+- Locator: paper: `papers/related/2026_schaufelberger_puckerflow.pdf`, PDF p. 6 (printed 6), Sec. 2.3 (same paragraph as
+  E-GEOM-020). Pointed out by V3 (D-209).
+- Exact quote:
+  > our approach can also be applied to fused and spiro rings, where the Cremer-Pople coordinates can be determined for each component ring separately
+- Shows vs infers: SHOWS (a stated extension, not an experiment).
+- Supports card(s): C-GEOM-04
+- Confidence: high

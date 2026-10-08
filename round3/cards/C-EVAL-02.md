@@ -14,23 +14,28 @@ ETKDG seed conformers;
 - Nikitin et al. recommend bond, angle and torsion differences as interpretable local-geometry metrics
   [E-EVAL-019]. Their version compares each structure with its own GFN2-xTB minimum (that variant is C-EVAL-03); the
   vs-matched-GT version here is the oracle-side complement.
-- The FM-refiner paper reports per-conformer improvement and downgrade rates on GEOM-QM9 at tolerances 0.02–0.20 Å,
-  because ensemble means hide whether a change helps most conformers a little or a few a lot [E-EVAL-009].
+- The FM-refiner paper reports per-conformer improvement and downgrade rates on GEOM-QM9 at tolerances 0.02–0.20 Å
+  [E-EVAL-009]. The reason given here (ensemble means hide whether a change helps most conformers a little or a few a
+  lot) is the scout's INFERENCE, not FM-refiner's stated motivation (Revised after V1 note, P2).
 - QM9 at δ = 0.5 Å is saturated, so finer views are needed to see local-structure effects [E-EVAL-006, E-EVAL-007].
 - Our tooling already exists: `geometry_metrics.py` (vs matched GT) and `paired_compare.py` (intersection universe,
   fine thresholds) [E-EVAL-036, E-EVAL-037]; the round-1 analysis job calls `geometry_metrics.py`, but no output is
   in the synced results or any report [E-EVAL-036].
 
 ## 3. Why it could matter here (scout)
-- **Our headline metric is mostly a ring-L metric.** Molecules with 1–3 GT conformers are 48 % of the macro average
-  but 10 % of conformers; 97–98 % of them contain a ring and they carry the highest RDKit-L floor (0.136 / 0.132 Å vs
-  0.089 Å for molecules with > 10 conformers) [E-EVAL-048]. Per-molecule vs per-conformer floor means are 0.1145 vs
-  0.0986 Å [E-EVAL-047]. INFERENCE: a FlexiTors ring factor would move the macro AMR-R much more than a torsion change would;
-  reporting both averages and the strata makes it visible which part of L an arm fixed.
+- **Averaging and strata change what the headline number measures** (Revised after D-005). Molecules with 1–3 GT
+  conformers are 48 % of the per-molecule average but 10 % of conformers, and 97–98 % of them contain a ring
+  [E-EVAL-048]; per-molecule vs per-conformer floor means are 0.1145 vs 0.0986 Å [E-EVAL-047]. Rigid molecules (0 heavy
+  torsions) are a smaller group: 30.4 % of molecules and 26.0 % of the macro AMR-R sum on ETKDG L, but with true ring
+  geometry (ORACLE) they drop 0.185 → 0.043 Å and carry 54.9 % of the whole ring-oracle gain [E-EVAL-057]. INFERENCE:
+  a ring-L improvement would show up disproportionately in the rigid stratum, a torsion-model change in the flexible
+  strata; reporting both averages and the strata makes visible which part of L (or of the model) an arm fixed.
 - **Separating "better L" from "better use of L".** In TD the generated bond lengths and angles are exactly the
-  seed's [E-EVAL-036], so (a) directly measures the L that reached the output: ETKDG L is 0.036 Å / 3.88° from its assigned GT
-  conformer vs 0.004 Å / 1.67° between GT conformers [E-EVAL-047]; MMFF L 0.0182 Å / 1.97° / 8.07° ring dihedral
-  [E-EVAL-049]. For S3/S4/B1-type arms (same L, different model) (a) is constant and (c) shows whether the model
+  seed's [E-EVAL-036], so (a) directly measures the L that reached the output. On the same file and basis, ETKDG L is 0.0314 Å /
+  2.80° / 10.65° (bond / angle / ring dihedral) and MMFF L 0.0182 Å / 1.97° / 8.07° [E-EVAL-049], i.e. MMFF cuts bond
+  error 1.7× and angle error 1.4× but ring dihedrals only 1.3×. For context only (different seed set and file): GT
+  conformers of one molecule differ by 0.004 Å / 1.67° [E-EVAL-047]. (Revised after D-007: the earlier text set the
+  round-1 ETKDG values 0.036 Å / 3.88° next to the round-2 MMFF values.) For S3/S4/B1-type arms (same L, different model) (a) is constant and (c) shows whether the model
   changed many conformers slightly or few strongly.
 - **Ceiling honesty.** B1 on cycled true L 0.0215 Å vs random-GT-conformer true L 0.0374 Å [E-EVAL-045]: the cycled
   oracle includes conformer identity. Learned-L arms should be judged against the random-conformer ceiling.
@@ -54,7 +59,9 @@ ETKDG seed conformers;
 - Outputs per arm: local errors (bond Å, angle °, ring dihedral °, heavy torsion °), macro and micro AMR-R/AMR-P,
   stratified AMR-R (rigid / ring / acyclic), and improvement/downgrade rates at 0.02 / 0.05 / 0.10 / 0.20 Å for the
   paired comparisons S3 vs CTRL and CTRL-MMFF vs CTRL-ETKDG (same seeds).
-- Expected direction: MMFF arms lower angle error and the largest AMR gain in the rigid/ring stratum; S3 vs CTRL on
+- Expected direction: MMFF arms lower bond/angle error; their AMR-R gain is about the same in the rigid stratum as
+  overall (0.152 → 0.127 Å vs 0.177 → 0.152 Å, CTRL s0 [E-EVAL-057]), unlike true ring geometry, whose gain is
+  concentrated there [E-EVAL-057]; S3 vs CTRL on
   ETKDG L ≈ symmetric improvement/downgrade (no net change, 0.182 vs 0.178 Å); B1/S3 on random-GT L between CTRL and
   the cycled value.
 - Cost: 0 GPU-h; ~2–4 CPU-h on 16 cores (geometry matching is the slow part).
@@ -62,6 +69,12 @@ ETKDG seed conformers;
 ## 6. Scout's own call (scout)
 Worth trying: YES — no GPU, tools exist, and it tells the panel *which* part of L each arm fixed, which AMR-R alone
 cannot.
+
+Revision history (scout, P2): Revised after D-005 and D-007. Original §3 lead bullet "Our headline metric is mostly a
+ring-L metric ... 48 % of the macro average" (few-conformer conflated with rigid) withdrawn and replaced with the rigid
+share and the ring-oracle gain (E-EVAL-057); original ETKDG-vs-MMFF comparison mixed files; original §5 expected the
+largest MMFF gain in the rigid stratum, which the breakdown does not show. The call is unchanged: the diagnostics do
+not depend on the withdrawn inference.
 
 ## 7. Code grounding (grounder)
 ## 8. Predicted effect on our project (analyst)

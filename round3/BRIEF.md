@@ -53,6 +53,17 @@ Readings to test, not conclusions:
   and the true-L gain, pending its second seed and paired analysis.
 - MMFF L helps the standard model (−0.026) but not B1.
 
+### Update 2026-10-08 22:20 IST: wave 2 finished (in-job evaluation, PRELIMINARY, unpaired)
+Source: `results/<run>/steps20_seed0*/summary.txt` on gnode118 (not yet synced locally).
+
+| Arm | RDKit L | True L cycled (ORACLE) |
+|---|---|---|
+| S3 50/50 mix, seed 0 / seed 1 | 0.182 / 0.182 | 0.033 / 0.034 |
+| S4 λ-conditioned (λ=0 on RDKit, λ=1 on true L), seeds 0/1/2 | 0.183 / 0.181 / 0.182 | 0.044 / 0.044 / 0.041 |
+
+S3 replicates across seeds. S4 matches S3 on RDKit L but is worse on true L (≈0.043 vs 0.034); note S4 trains only
+on the 87.7% pair_ok-safe pairs (user ruling), so the two are not a clean single-factor comparison.
+
 ## Still running (results by ~10 Oct)
 S4 λ-conditioned training ×3, S3 seed 1, B1cap, S2 σ = 0.02, S5 (MMFF-matched training) ×3, and all post-training
 evaluation panels. The round-3 panel (P4) will be re-run on final round-2 numbers if they change a conclusion.

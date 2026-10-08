@@ -20,8 +20,10 @@ un-matched true torsions.
 - Domain randomisation: training on several sources makes the target look like one more variation [E-ROBUST-036].
 
 ## 3. Why it could matter here (scout)
-- MMFF L is the best non-oracle L we have. It halves the bond/angle error (bonds 0.018 Å, angles 1.97°) and helps CTRL
-  (0.1525 vs 0.1779), but B1 cannot use it (0.2323) [E-ROBUST-009]. A model trained on MMFF L could.
+- MMFF L is the best non-oracle L we have. Against raw ETKDG it cuts heavy-bond error by about 40% and heavy-angle error
+  by about 30% (0.018 vs 0.031 Å; 1.97 vs 2.80°). It helps CTRL (0.1525 vs 0.1779), but B1 cannot use it (0.2323)
+  [E-ROBUST-009]. Hypothesis (INFERENCE): a model trained on MMFF L could (revised after V2 card note; formerly
+  "halves").
 - B1 learns its targets on true L. CTRL learns on RDKit L with matched targets [E-ROBUST-016]. S3 shows that mixing the
   two keeps most of both (0.182 RDKit, 0.033 true L, 1 seed) [E-ROBUST-004, E-ROBUST-001]. S3's gain on RDKit L is in
   flexible molecules, where B1 fails [E-ROBUST-011].

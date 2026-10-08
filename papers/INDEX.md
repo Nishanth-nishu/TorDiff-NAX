@@ -75,7 +75,8 @@ added by SCOUT ROBUST (in `blogs/`): `song_2021_score.txt`, `weng_2019_domain_ra
 | 2023_zhang_infinite_physical_monkey (PDF + fulltext only; added round 3 by SCOUT EVAL) | 2023 | arXiv 2304.10494 | eval | GD-P | Reply to Zhou et al.: a still more random "Infinite Stochastic Monkey" sampler also scores high COV/MAT with ~2000 samples; argues RDKit + Clustering is only a fair baseline if deep models get the same sample-and-cluster budget (p. 5, 9). |
 
 Blog/technical snapshots added by SCOUT EVAL (in `blogs/`): `rowan_openconf_2026.txt` (Rowan, ETKDG pathologies),
-`rdkit_release_notes_2024_03.txt` (RDKit default changed from ETKDGv1 to ETKDGv3 in 2024.03.1). SCOUT EVAL's fulltext
+`rdkit_release_notes_2024_03.txt` (RDKit default changed from ETKDGv1 to ETKDGv3 in 2024.03.1),
+`condaforge_xtb_metadata_eval.txt` (verbatim conda-forge xtb JSON fields; linux-64 6.2.3–6.7.1). SCOUT EVAL's fulltext
 is a `pdftotext -layout` extraction.
 
 **Counts:** 1 core paper + 39 related entries (38 PDFs stored; LoQI note only).

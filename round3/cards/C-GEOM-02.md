@@ -21,14 +21,19 @@ hit, and optionally xTB-relax the result (C-GEOM-01). Non-oracle: only training 
 - RDKit can constrain chosen atoms to given coordinates during embedding (`coordMap`) [E-GEOM-039].
 
 ## 3. Why it could matter here (scout)
-- True ring geometry alone takes CTRL from 0.178 to 0.119 [E-GEOM-013], and the gain sits in molecules with few
-  rotors: rigid molecules 0.152 → 0.043, one rotor 0.161 → 0.104 [E-GEOM-006]. A template carries GT-level ring
-  geometry (training GT is the same GFN2 level), so on a hit it approximates "true ring geometry from another molecule".
-- The ETKDG pucker tail is large: 28.6% of ring seeds > 10° ring-dihedral RMSD; 60–92% for 4- to 7-membered rings
+- Revised after D-201/D-207: on the like-for-like λ = 0 base (955 molecules), true ring geometry alone takes CTRL from
+  0.197 to 0.119 and B1 from 0.261 to 0.188 (both gain ≈ 0.075 Å; B1 stays above CTRL) [E-GEOM-013], and the gain sits
+  in molecules with few rotors: rigid 0.184 → 0.043, one rotor 0.181 → 0.104 (CTRL) [E-GEOM-006]. A template carries
+  GT-level ring geometry (training GT is the same GFN2 level), so on a hit it approximates "true ring geometry from
+  another molecule" (INFERENCE).
+- The ETKDG pucker tail is large: 28.6% of ring seeds > 10° ring-dihedral RMSD (49.6% excluding the all-3-ring
+  molecules, whose ring dihedral is identically 0); 48–92% for molecules whose smallest ring has 4–7 atoms
   [E-GEOM-002, E-GEOM-003]; 22% of the bad seeds are in fused/bridged/spiro systems, which a ring-system-level
   template handles as one unit (unlike monocyclic pucker models) [E-GEOM-011].
-- Coverage proxy: 534 distinct ring-system components in the 885 test ring molecules; even within the 1000-molecule
-  test set, 50.8% of ring molecules have all components in another test molecule [E-GEOM-012]. The training split is
+- Coverage proxy (key = ring atoms + ring bonds; isomeric / stereo-free): 534 / 421 distinct ring-system components
+  in the 885 test ring molecules; even within the 1000-molecule test set, 50.8% / 66.3% of ring molecules have all
+  components in another test molecule (45.2% / 58.6% among the 345 molecules with an ETKDG seed > 10°)
+  [E-GEOM-012]. The training split is
   ~107× larger, so training coverage should be far higher (INFERENCE, UNVERIFIED).
 - Pairs with C-GEOM-01: template fixes the basin, xTB fixes bonds/angles (the residual named in [E-GEOM-043]); that
   combination is the non-learned route to the λ = 0.75 spec (table in C-GEOM-01 §3).
@@ -54,18 +59,21 @@ hit, and optionally xTB-relax the result (C-GEOM-01). Non-oracle: only training 
 - **Step 2, seeds (CPU):** for the `L_etkdg2L` embeddings, impose a frequency-sampled template per ring system
   (two key levels: ring-only, ring + first shell) → `L_tmpl`, and `L_tmpl_xtb` (if C-GEOM-01's xtb install passes).
   Fallback to the unmodified seed on no hit or failure (count them).
-- **Step 3, CPU gate (pre-declared):** same metrics as C-GEOM-01 (ring-dihedral share > 10°, pucker coverage, ring/
-  acyclic RMSD, rigid-subset AMR-R of the seeds). Proceed to GPU if rigid-subset AMR-R ≤ 0.107 (λ = 0.5 level)
-  [E-GEOM-004].
+- **Step 3, CPU gate (pre-declared; revised after D-205):** the C-GEOM-01 gate design: all metrics scored on the seeds
+  directly (no model) on one common molecule set; rigid AMR-R on the common set of molecules with an empty TD
+  `edge_mask`; ETKDG / MMFF / λ references recomputed on that set in the same run [E-GEOM-004]. Go rule (non-oracle):
+  `L_tmpl` beats `L_etkdg2L` on the common rigid set by ≥ 0.010 Å AMR-R or lowers the > 10° share (excl. all-3-ring
+  basis) by ≥ 5 points; λ references for interpretation only.
 - **Step 4, GPU (inference only):** CTRL_rematch s0–2 and B1 s0–2 on the best template source = 6 runs (+ S3/S4 if
   final). Controls: same checkpoints on `L_etkdg2L` / `L_etkdg2L_mmff` (exist), and on `L_etkdg2L_xtb` if C-GEOM-01
   runs. Primary: paired AMR-R, CTRL-on-template vs CTRL-on-ETKDG (expected lower; scout range 0.135–0.165, bounded
   below by A5ring's 0.119); secondary COV-R@0.1, rigid and ring-size strata, B1 − CTRL on `L_tmpl_xtb`.
-- **Cost:** 1.5–3 GPU-h; CPU library build over ~10⁶ training conformers (≈ hours; not measured); ~1–2 days coding
+- **Cost:** 1.5–3 GPU-h; CPU library build over all training conformers (count not established here, UNVERIFIED;
+  runtime not measured); ~1–2 days coding
   (library + transplant + tests).
 
 ## 6. Scout's own call (scout)
-Worth trying: YES — directly attacks the measured pucker tail (where the CTRL ring gain lives) with training data only,
+Worth trying: YES — directly attacks the measured pucker tail (true rings help both models by ≈ 0.075 Å) with training data only,
 needs no new model, and composes with C-GEOM-01; the CPU gate kills it cheaply if coverage or transplant fidelity is
 poor.
 

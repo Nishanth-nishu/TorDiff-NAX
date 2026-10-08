@@ -13,6 +13,11 @@ Conventions
   the repo root); output saved as `round3/ledger/robust_data/lerror_stats.txt`. T3 values are means of the per-seed
   `summary.txt` lines (MAT-R_mean = AMR-R).
 - Reused round-2 entries are re-checked against the fulltext in this round (whitespace-collapsed match).
+- P2 (2026-10-08): after round3/ledger/verify_V2.md, entries E-006, E-007, E-008 were revised; E-010 got an addendum;
+  locators were fixed in E-043, E-046, E-047, E-049, E-058; a note was added to E-018; E-060 and E-061 were added.
+  Each change is marked `Revised after D-1xx` / `Added after D-1xx`, with the superseded wording under History. Tables
+  T4a-c and T5 were appended to lerror_stats.py/.txt; T1-T3 are byte-identical to the version V2 checked.
+  `robust_data/check_quotes.py` re-checks every quote (61/61 found).
 
 ---------------------------------------------------------------------------------------------------------------------
 ## A. Our data and code
@@ -25,7 +30,7 @@ Conventions
   > qm9_B1_train_gtL                S1_etkdg2L        3    0.2356   0.2327   0.2381     936
   > qm9_CTRL_rematch_100ep                S1_etkdg2L        3    0.1779   0.1774   0.1783     936
 - Shows vs infers: SHOWS
-- Supports card(s): C-ROBUST-01, C-ROBUST-03, C-ROBUST-05
+- Supports card(s): C-ROBUST-03
 - Confidence: high
 
 ### E-ROBUST-002
@@ -36,7 +41,7 @@ Conventions
   > qm9_B1_train_gtL     S1_lam1.00_cyc_ORACLE        1    0.0199   0.0199   0.0199     955
   > qm9_CTRL_rematch_100ep     S1_lam1.00_cyc_ORACLE        3    0.0805   0.0803   0.0808     955
 - Shows vs infers: SHOWS (ORACLE condition)
-- Supports card(s): C-ROBUST-01, C-ROBUST-05
+- Supports card(s): none (context only)
 - Confidence: high (single B1 seed at λ = 1)
 
 ### E-ROBUST-003
@@ -76,37 +81,51 @@ Conventions
 - Confidence: high
 
 ### E-ROBUST-006
-- Claim: Isotropic jitter does not reproduce RDKit's L error structure. ETKDG L vs GT: heavy bonds 0.031 Å, heavy angles 2.80°, endocyclic dihedrals mean 10.65° / median 0.44° with 28.6% of ring seeds > 10°. Noise 0.04 Å/axis: bonds 0.055 Å (1.75×), angles 3.31° (1.18×), endocyclic dihedrals mean 1.93° with 0.34% > 10°.
+Revised after D-108 (2026-10-08). Original claim kept under History.
+- Claim: Isotropic jitter does not reproduce RDKit's L error structure. Its decisive gap is the ring tail. On the 936 common molecules, endocyclic-dihedral RMSD > 10° occurs in 28.6% of ETKDG ring seeds and 30.8% of matched RDKit (λ = 0) seeds, against 0.35% under 0.04 Å/axis noise. Among seeds of molecules with a ring of ≥ 4 atoms it is 49.6% (ETKDG) vs 0.58% (noise). In bond and angle RMSD, noise 0.04 is larger than RDKit in bonds only. Against the matched RDKit L that CTRL/S3 train on (heavy bonds 0.0344 Å, heavy angles 3.94°), noise 0.04 (0.0549 Å, 3.31°) is 1.60× the bond error and 0.84× the angle error. Against the ETKDG seed rows (0.0314 Å, 2.80°) it is 1.75× / 1.18×, but those rows are biased low: per GT conformer, the ETKDG seed is chosen by a Hungarian assignment that minimises heavy-atom angle RMSD (tools/make_l_seed_pickles.py:106-114).
 - Source type: our-data
-- Locator: our-data: round3/ledger/robust_data/lerror_stats.txt, T1 (from cluster_sync/round2/data/QM9/round2_seeds/l_error.csv; columns bond_rmsd_heavy_any, angle_rmsd_heavy_any, ring_dihedral_rmsd, computed by tools/lgeom.py:317-337)
-- Exact quote (T1 lines; columns n, bond_heavy_mean, angle_heavy_mean, angle_all_acyc_mean, bond_all_acyc_mean, ringdih_n, ringdih_mean, ringdih_median, ringdih_p90, ringdih_gt5, ringdih_gt10, ringdih_gt20):
-  > L_etkdg2L                 12655           0.0314            2.7963               3.1364              0.0265       7263       10.6522          0.4364      35.0131       0.3576        0.2856        0.1791
-  > L_noise0.04pa_cyc_ORACLE  25762           0.0549            3.3077               3.9756              0.0557      14922        1.9287          1.2588       5.0805       0.1044        0.0034        0.0000
-- Shows vs infers: SHOWS (the numbers); the reading "RDKit's ring error is a heavy tail of wrong ring conformations, which isotropic noise never produces" is INFERENCE from median 0.44° vs mean 10.65° and from E-ROBUST-007
+- Locator: our-data: round3/ledger/robust_data/lerror_stats.txt, T4a (common 936 molecules) and T4b (ring ≥ 4 split); T1 for the all-molecule rows (from cluster_sync/round2/data/QM9/round2_seeds/l_error.csv; columns bond_rmsd_heavy_any, angle_rmsd_heavy_any, ring_dihedral_rmsd, computed by tools/lgeom.py:317-337)
+- Exact quote (T4a and T4b lines):
+  > L_etkdg2L                    bond_heavy=0.0314 angle_heavy=2.796 angle_heavy_acyc=2.836 ringdih_gt10=0.2856
+  > L_lam0.00_cyc_ORACLE         bond_heavy=0.0344 angle_heavy=3.939 angle_heavy_acyc=4.067 ringdih_gt10=0.3076
+  > L_noise0.04pa_cyc_ORACLE     bond_heavy=0.0549 angle_heavy=3.311 angle_heavy_acyc=3.371 ringdih_gt10=0.0035
+  > L_etkdg2L                    only_3_rings: n=3078 max_err=0.000000 | ring_ge4: n=4181 frac_gt10=0.4961
+  > L_noise0.04pa_cyc_ORACLE     only_3_rings: n=6178 max_err=0.000000 | ring_ge4: n=8736 frac_gt10=0.0058
+- Shows vs infers: SHOWS (the numbers; the Hungarian selection is in tools/make_l_seed_pickles.py:106-114, comment "Hungarian assignment GT conformer j <- seed on heavy angle RMSD"). Reading the ring tail as wrong ring conformations is INFERENCE (median 0.44° vs mean 10.65°, T1)
+- History: original claim (superseded): "Isotropic jitter does not reproduce RDKit's L error structure. ETKDG L vs GT: heavy bonds 0.031 Å, heavy angles 2.80°, endocyclic dihedrals mean 10.65° / median 0.44° with 28.6% of ring seeds > 10°. Noise 0.04 Å/axis: bonds 0.055 Å (1.75×), angles 3.31° (1.18×), endocyclic dihedrals mean 1.93° with 0.34% > 10°." The T1 lines it quoted stay valid: `L_etkdg2L 12655 0.0314 2.7963 ...` and `L_noise0.04pa_cyc_ORACLE 25762 0.0549 3.3077 ...`.
 - Supports card(s): C-ROBUST-01
 - Confidence: high
 
 ### E-ROBUST-007
-- Claim: RDKit's endocyclic-dihedral error grows with ring size: share of ETKDG ring seeds with error > 10° is 9% (smallest ring 3), 60% (4), 48% (5), 67% (6), 92% (≥ 7); the same shares under 0.04 Å/axis noise are 0.0-3.3%.
+Revised after D-101 (2026-10-08). Original claim kept under History.
+- Claim: ETKDG ring seeds exceed 10° endocyclic-dihedral RMSD in 48-92% of seeds whose smallest ring has 4 to ≥ 7 atoms (4: 60%, 5: 48%, 6: 67%, ≥ 7: 92%; not monotone in ring size). Three-membered rings carry no such error by construction: every endocyclic dihedral of a 3-ring is identically 0, and all 3078 seeds of 3-ring-only molecules have error 0. Under 0.04 Å/axis noise every bin is ≤ 3.3%.
 - Source type: our-data
-- Locator: our-data: round3/ledger/robust_data/lerror_stats.txt, T2 (frac_gt10 by min_ring for L_etkdg2L and L_noise0.04pa_cyc_ORACLE)
-- Exact quote (T2, L_etkdg2L rows for rings 4 and 6):
+- Locator: our-data: round3/ledger/robust_data/lerror_stats.txt, T2 (frac_gt10 by smallest SSSR ring for L_etkdg2L and L_noise0.04pa_cyc_ORACLE) and T4b (3-ring-only seeds)
+- Exact quote (T2, L_etkdg2L rows for rings 4 and 6; T4b line):
   > 4         1079  15.208  13.674      0.604
   > 6          337  39.030  40.197      0.665
+  > L_etkdg2L                    only_3_rings: n=3078 max_err=0.000000 | ring_ge4: n=4181 frac_gt10=0.4961
 - Shows vs infers: SHOWS
+- History: original claim (withdrawn wording): "RDKit's endocyclic-dihedral error grows with ring size: share of ETKDG ring seeds with error > 10° is 9% (smallest ring 3), 60% (4), 48% (5), 67% (6), 92% (≥ 7); the same shares under 0.04 Å/axis noise are 0.0-3.3%." V2 (D-101) is right on both points: "grows" is false between 4 and 5, and the 9% for ring 3 is a dilution artefact. Recomputed: 3078 of the 4312 ring-3 seeds are 3-ring-only with error 0 (T4b).
 - Supports card(s): C-ROBUST-01, C-ROBUST-02
 - Confidence: high (ring size is the smallest ring of the SMILES, capped at 7)
 
 ### E-ROBUST-008
-- Claim: Per unit of bond/angle error, RDKit-derived (systematic) acyclic error hurts B1 more than isotropic noise: B1 on GT rings + RDKit-matched acyclic geometry (A5ring: bonds 0.027 Å, angles 3.51°, ring dihedrals 0) scores 0.1877, while B1 on GT + 0.04 Å/axis noise (bonds 0.055 Å, angles 3.31°, ring dihedrals 1.93°) scores 0.1536.
+Revised after D-102 (2026-10-08). Original claim withdrawn, kept under History.
+- Claim: B1 is hurt more by A5ring L (GT rings + RDKit-matched acyclic geometry) than by GT + 0.04 Å/axis noise. Its AMR-R is 0.1877 vs 0.1536, and every A5ring seed (0.1813-0.1922) is worse than every noise seed (0.1376-0.1635). CTRL_rematch is hurt equally by both (0.1186 vs 0.1186). The two L conditions differ in error profile rather than size. On the 955 A5 molecules, noise 0.04 has 2.0× A5ring's heavy-bond error (0.0549 vs 0.0270 Å), but 0.94× its heavy-angle error (3.31 vs 3.51°) and 0.82× its heavy acyclic-angle error (3.37 vs 4.11°), plus some ring error (1.92° vs 0).
 - Source type: our-data
-- Locator: our-data: round3/ledger/robust_data/lerror_stats.txt, T1 rows L_A5ring_cyc_ORACLE and L_noise0.04pa_cyc_ORACLE; T3 rows qm9_B1_train_gtL S1_A5ring_cyc_ORACLE and S1_noise0.04pa_cyc_ORACLE
-- Exact quote (T3 lines):
+- Locator: our-data: round3/ledger/robust_data/lerror_stats.txt, T3 rows qm9_B1_train_gtL / qm9_CTRL_rematch_100ep for S1_A5ring_cyc_ORACLE and S1_noise0.04pa_cyc_ORACLE; T4c (L error on the common 955 molecules)
+- Exact quote (T3 and T4c lines):
   > qm9_B1_train_gtL      S1_A5ring_cyc_ORACLE        3    0.1877   0.1813   0.1922     955
   > qm9_B1_train_gtL S1_noise0.04pa_cyc_ORACLE        3    0.1536   0.1376   0.1635     996
-- Shows vs infers: INFERENCE (unpaired, different molecule sets: 955 vs 996; both are built from each molecule's own GT conformers; "systematic" is inferred from the A5ring L being an RDKit-matched geometry, not from a measured signed bias, which l_error.csv does not store)
+  > qm9_CTRL_rematch_100ep      S1_A5ring_cyc_ORACLE        3    0.1186   0.1183   0.1189     955
+  > qm9_CTRL_rematch_100ep S1_noise0.04pa_cyc_ORACLE        3    0.1186   0.1173   0.1196     996
+  > L_A5ring_cyc_ORACLE          bond_heavy=0.0270 angle_heavy=3.51 angle_heavy_acyc=4.11 angle_all_acyc=3.60 ringdih_mean=0.00
+  > L_noise0.04pa_cyc_ORACLE     bond_heavy=0.0549 angle_heavy=3.31 angle_heavy_acyc=3.37 angle_all_acyc=3.98 ringdih_mean=1.92
+- Shows vs infers: SHOWS (unpaired: AMR-R on 955 vs 996 molecules, the 955 a subset; no per-molecule outputs synced). It does NOT show that RDKit-type error is worse "per unit" of error than random error. Attributing B1's extra loss to the structured (RDKit-matched) acyclic error is INFERENCE, consistent with the larger heavy acyclic-angle error of A5ring.
 - Supports card(s): C-ROBUST-01
 - Confidence: medium
+- History: original claim (withdrawn after D-102): "Per unit of bond/angle error, RDKit-derived (systematic) acyclic error hurts B1 more than isotropic noise: B1 on GT rings + RDKit-matched acyclic geometry (A5ring: bonds 0.027 Å, angles 3.51°, ring dihedrals 0) scores 0.1877, while B1 on GT + 0.04 Å/axis noise (bonds 0.055 Å, angles 3.31°, ring dihedrals 1.93°) scores 0.1536." The "per unit" and "larger noise" readings fail because noise 0.04 has less heavy-atom angle error than A5ring (T4c).
 
 ### E-ROBUST-009
 - Claim: MMFF-relaxed ETKDG L has lower bond/angle error than raw ETKDG (bonds 0.018 Å, angles 1.97°, ring dihedrals mean 8.07°, 20% > 10°) and helps CTRL (0.1525 vs 0.1779) but not B1 (0.2323 vs 0.2356).
@@ -130,6 +149,9 @@ Conventions
   > qm9_CTRL_rematch_100ep      S1_A5acyc_cyc_ORACLE        3    0.1824   0.1816   0.1837     955
   > qm9_CTRL_rematch_100ep      S1_A5ring_cyc_ORACLE        3    0.1186   0.1183   0.1189     955
 - Shows vs infers: SHOWS
+- Addendum after D-110 (2026-10-08; claim unchanged, VERIFIED): against the like-for-like base λ = 0 (matched RDKit seed, same 955 molecules), both models gain about equally from true rings. CTRL goes 0.1966 → 0.1186 (−0.078) and B1 0.2614 → 0.1877 (−0.074). They differ in the acyclic gain: CTRL 0.1966 → 0.1824 (−0.014), B1 0.2614 → 0.1583 (−0.103). Base rows (T3):
+  > qm9_B1_train_gtL     S1_lam0.00_cyc_ORACLE        3    0.2614   0.2556   0.2680     955
+  > qm9_CTRL_rematch_100ep     S1_lam0.00_cyc_ORACLE        3    0.1966   0.1964   0.1968     955
 - Supports card(s): C-ROBUST-01
 - Confidence: high
 
@@ -218,7 +240,7 @@ Conventions
 - Locator: code: slurm/ablations_train_round2.tsv:15-17 (S4 lines); torsional-diffusion/diffusion/score_model.py:65-70
 - Exact quote (slurm/ablations_train_round2.tsv:15):
   > S4_lamcond       | paired | --l_interp --lambda_embed_dim 32 --log_timing --fail_on_nan | --l_level 0    | 2 | 0 | --l_level 1
-- Shows vs infers: SHOWS (score_model.py:65 comment: "0 = no extra input, identical layer shapes"); that `--l_interp` alone trains cleanly is INFERENCE (no assert couples the two flags in train.py or utils/dataset.py; not run)
+- Shows vs infers: SHOWS (score_model.py:65 comment: "0 = no extra input, identical layer shapes"); that `--l_interp` alone trains cleanly is INFERENCE (no assert couples the two flags in train.py or utils/dataset.py; not run). Note added after V2 review: a blind training line must also drop `--l_level 0` / `--l_level 1` from the in-job generate fields, because generate_confs.py:107-110 exits when `--l_level` is given to a model without λ conditioning (config, not code)
 - Supports card(s): C-ROBUST-02
 - Confidence: medium
 
@@ -255,13 +277,40 @@ Conventions
 ### E-ROBUST-058
 - Claim: S4 and S3 do not train on the same conformers: the pair_ok filter (dropping about 8% of conformers) runs only when `--l_interp` is set, so S3 keeps the pairs that S4 drops; S3 vs S4 therefore differs in data as well as in the continuum and the λ input.
 - Source type: code
-- Locator: code: torsional-diffusion/utils/dataset.py:144-161; round2/DECISION.md:27 (user ruling, about 8% of conformers)
-- Exact quote (dataset.py:144-146):
+Revised after D-107 (locator only).
+- Locator: code: torsional-diffusion/utils/dataset.py:145-162; round2/DECISION.md:27 (user ruling, about 8% of conformers)
+- Exact quote (dataset.py:145-147):
   > if getattr(transform, 'l_interp', False):
   > # [round2 S4] DECISION D1: pairs that fail the pair_ok guard (stereo / inversion / bond / clash at
   > # lambda = 0.5) are never interpolated: drop those conformers, and molecules left with none; counted.
 - Shows vs infers: SHOWS
 - Supports card(s): C-ROBUST-02
+- Confidence: high
+
+### E-ROBUST-060
+Added after D-109 / V2 recompute 5 (2026-10-08).
+- Claim: Like-for-like round-1 in-job values on the same in-job test sets as S2/S3 (RDKit L n = 935, gtLcycle n = 996, 3 training seeds each): CTRL_rematch on RDKit L 0.1786; B1 on RDKit L 0.2341; B1 on true L cycled 0.0212 (ORACLE). Against them, S3 (seed 0) is 0.003 Å behind CTRL on RDKit L (0.1816) and 0.012 Å behind B1 on true L (0.0331), and S2 is 0.028 Å better than B1 on RDKit L (0.2060).
+- Source type: our-data
+- Locator: our-data: round3/ledger/robust_data/lerror_stats.txt, T5 (from cluster_sync/results/qm9_{CTRL_rematch_100ep,B1_train_gtL}_e100_s{0,1,2}/steps20_seed0{,_gtLcycle}/summary.txt)
+- Exact quote (T5 lines):
+  > qm9_B1_train_gtL                 steps20_seed0            n_seeds=3 amr_mean=0.2341 amr_min=0.2299 amr_max=0.2364 n_mols=935
+  > qm9_B1_train_gtL                 steps20_seed0_gtLcycle   n_seeds=3 amr_mean=0.0212 amr_min=0.0206 amr_max=0.0215 n_mols=996
+  > qm9_CTRL_rematch_100ep           steps20_seed0            n_seeds=3 amr_mean=0.1786 amr_min=0.1773 amr_max=0.1800 n_mols=935
+- Shows vs infers: SHOWS (S3 and S2 values from E-ROBUST-004 / E-ROBUST-003)
+- Supports card(s): C-ROBUST-01, C-ROBUST-05
+- Confidence: high (S3 itself 1 seed)
+
+### E-ROBUST-061
+Added after D-109 (2026-10-08).
+- Claim: At S3's two endpoints, training-seed spread of the reference models is small (0.001-0.007 Å range over 3 seeds): CTRL_rematch on RDKit L 0.1773-0.1800 (in-job) / 0.1774-0.1783 (S1 pickle); B1 on RDKit L 0.2299-0.2364 (in-job); B1 on true L cycled 0.0206-0.0215; CTRL_rematch on true L cycled 0.0816-0.0827. S3's own seed spread is unknown (1 seed).
+- Source type: our-data
+- Locator: our-data: round3/ledger/robust_data/lerror_stats.txt, T5 rows (in-job) and T3 rows S1_etkdg2L / steps20_seed0_gtLcycle
+- Exact quote (T5 and T3 lines):
+  > qm9_CTRL_rematch_100ep           steps20_seed0            n_seeds=3 amr_mean=0.1786 amr_min=0.1773 amr_max=0.1800 n_mols=935
+  > qm9_B1_train_gtL                 steps20_seed0_gtLcycle   n_seeds=3 amr_mean=0.0212 amr_min=0.0206 amr_max=0.0215 n_mols=996
+  > qm9_CTRL_rematch_100ep    steps20_seed0_gtLcycle        3    0.0822   0.0816   0.0827     996
+- Shows vs infers: SHOWS
+- Supports card(s): C-ROBUST-05
 - Confidence: high
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -510,7 +559,8 @@ Conventions
 ### E-ROBUST-043
 - Claim: Huszár: scheduled sampling pushes models toward a trivial solution that ignores the content of the conditioning prefix.
 - Source type: paper
-- Locator: paper: papers/related/2015_huszar_scheduled_sampling_critique.pdf, PDF p. 4, Section 2
+Revised after D-103 (locator only).
+- Locator: paper: papers/related/2015_huszar_scheduled_sampling_critique.pdf, PDF p. 4, Section 4.1 "Scheduled sampling formulated as KL divergence minimisation" (section starts p. 3)
 - Exact quote:
   > Based on this analysis we suggest that scheduled sampling works by pushling models towards a trivial solution of memorising distribution of symbols conditioned on their position in the sequence,
   ("pushling" sic)
@@ -541,7 +591,8 @@ Conventions
 ### E-ROBUST-046
 - Claim: Classifier-free guidance: an unconditional-training probability of 0.5 was consistently worse than 0.1 or 0.2, which performed about equally.
 - Source type: paper
-- Locator: paper: papers/related/2022_ho_classifier_free_guidance.pdf (arXiv 2207.12598), PDF p. 8, Section 4.1
+Revised after D-104 (locator only).
+- Locator: paper: papers/related/2022_ho_classifier_free_guidance.pdf (arXiv 2207.12598), PDF p. 8, Section 4.2 "Varying the unconditional training probability"
 - Exact quote:
   > We find puncond = 0.5 consistently performs worse than puncond {0.1, 0.2} across the entire IS/FID frontier; puncond {0.1, 0.2} perform about equally as well as each other.
   (p_uncond and the ∈ sign are lost in extraction)
@@ -552,7 +603,8 @@ Conventions
 ### E-ROBUST-047
 - Claim: Classifier-free guidance increases sample fidelity at the expense of diversity.
 - Source type: paper
-- Locator: paper: papers/related/2022_ho_classifier_free_guidance.pdf, PDF p. 9, Section 6 "Conclusion"
+Revised after D-105 (locator only).
+- Locator: paper: papers/related/2022_ho_classifier_free_guidance.pdf, PDF p. 9, Section 5 "Discussion" (last paragraph)
 - Exact quote:
   > any guidance method that increases sample fidelity at the expense of diversity must face the question of whether decreased diversity is acceptable.
 - Shows vs infers: SHOWS
@@ -572,7 +624,8 @@ Conventions
 ### E-ROBUST-049
 - Claim: Summing or mixing diffusion scores and running the ordinary reverse process does not sample the composed distribution.
 - Source type: paper
-- Locator: paper: papers/related/2023_du_reduce_reuse_recycle.pdf (ICML 2023, arXiv 2302.11552), PDF p. 5, Section 3
+Revised after D-106 (locator only).
+- Locator: paper: papers/related/2023_du_reduce_reuse_recycle.pdf (ICML 2023, arXiv 2302.11552 v6), PDF p. 5, Section 4 "Scaling Compositional Generation with Diffusion Models" (before 4.1)
 - Exact quote:
   > does not correspond to sampling from the composed model, and thus reverse diffusion sampling will generate incorrect samples from composed distributions.
 - Shows vs infers: SHOWS

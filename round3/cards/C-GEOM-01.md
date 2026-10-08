@@ -16,33 +16,39 @@ oversample ETKDG, xTB-relax, and keep distinct ring puckers inside a 6 kcal/mol 
 - TD already contains an `xtb_optimize` wrapper (gas phase) that needs only an `xtb` binary [E-GEOM-010]; xtb is a
   standalone binary on conda-forge (linux-64, 6.7.1) or a release tarball, independent of our torch/python stack
   [E-GEOM-034, E-GEOM-035].
-- Practice: force-field relaxation only partly repairs ETKDG ring puckers (piperazine: many twisted rings after MMFF)
-  [E-GEOM-045]; GFN2-xTB occasionally fragments molecules [E-GEOM-046], and strained QM9 molecules reacted under
-  CREST/GFN2 [E-GEOM-047].
+- Our own data: MMFF relaxation only partly removes the ETKDG pucker tail (ring seeds > 10°: 20.2% vs 28.6%; 35.1% vs
+  49.6% once the all-3-ring molecules, whose ring dihedral is identically 0, are excluded) [E-GEOM-002]. GFN2-xTB
+  occasionally fragments molecules [E-GEOM-046], and strained QM9 molecules reacted under CREST/GFN2 [E-GEOM-047].
+  (Revised after D-203: the piperazine blog [E-GEOM-045] is no longer cited here; its first run was plain DG.)
 - CREST's 6.0 kcal/mol window is the GEOM pipeline's notion of "accessible" conformers (optional arm B) [E-GEOM-017].
 
 ## 3. Why it could matter here (scout)
 Target numbers from `l_error.csv` (heavy atoms, mean per seed; AMR-R from BRIEF, unpaired, preliminary)
 [E-GEOM-001, E-GEOM-002, E-GEOM-005, E-GEOM-007, E-GEOM-013]:
 
-| test-time L | ring bond Å | ring angle ° | ring dihedral ° (share > 10°) | acyclic bond Å | acyclic angle ° | CTRL | B1 |
+| test-time L | ring bond Å | ring angle ° | ring dihedral ° (share > 10°: all ring mols / excl. all-3-ring mols) | acyclic bond Å | acyclic angle ° | CTRL | B1 |
 |---|---|---|---|---|---|---|---|
-| ETKDG | 0.032 | 2.38 | 10.7 (28.6%) | 0.029 | 2.84 | 0.178 | 0.236 |
-| MMFF-relaxed ETKDG | 0.020 | 1.42 | 8.1 (20.2%) | 0.017 | 2.03 | 0.152 | 0.232 |
-| λ = 0.50 (ORACLE) | 0.019 | 1.34 | 3.2 (11.2%) | 0.017 | 2.01 | 0.136 | 0.181 |
-| **λ = 0.75 (ORACLE, B1 = CTRL)** | **0.010** | **0.67** | **1.6 (0.01%)** | **0.009** | **1.00** | 0.116 | 0.115 |
-| true L + noise 0.02 Å/axis (ORACLE) | 0.027 | 1.38 | 1.0 (0%) | 0.027 | 1.67 | 0.098 | 0.117 |
+| ETKDG (v1, E-GEOM-052) | 0.032 | 2.38 | 10.7 (28.6% / 49.6%) | 0.029 | 2.84 | 0.178 | 0.236 |
+| MMFF-relaxed ETKDG | 0.020 | 1.42 | 8.1 (20.2% / 35.1%) | 0.017 | 2.03 | 0.152 | 0.232 |
+| λ = 0.50 (ORACLE) | 0.019 | 1.34 | 3.2 (11.2% / 19.4%) | 0.017 | 2.01 | 0.136 | 0.181 |
+| **λ = 0.75 (ORACLE, B1 = CTRL)** | **0.010** | **0.67** | **1.6 (0.01% / 0.02%)** | **0.009** | **1.00** | 0.116 | 0.115 |
+| true L + noise 0.02 Å/axis (ORACLE) | 0.027 | 1.38 | 1.0 (0% / 0%) | 0.027 | 1.67 | 0.098 | 0.117 |
 
 - The λ = 0.75 row is the accuracy spec: ring bonds ≤ ~0.01 Å, ring angles ≤ ~0.7°, acyclic angles ≤ ~1°, and
   essentially **no ring seed with ring-dihedral RMSD > 10°**. MMFF already matches λ = 0.5 on bonds/angles; what it
-  misses is the pucker tail (20% vs 11% vs 0%) [E-GEOM-002, E-GEOM-007].
+  misses is the pucker tail (20% vs 11% vs 0%; 35% vs 19% vs 0% without the all-3-ring molecules) [E-GEOM-002,
+  E-GEOM-007].
 - The noise row shows CTRL tolerates 0.027 Å / 1.4° random bond/angle error when puckers are right (0.098), but B1
   does not (0.117) [E-GEOM-005]. B1 needs both right puckers and near-reference bonds/angles; xTB is the only cheap
   source that targets the reference bonds/angles exactly (INFERENCE from E-GEOM-018/019).
-- Rigid molecules (≈ 30% of the test set) give a model-free gate: their AMR-R is the L quality itself (ETKDG 0.152,
-  MMFF 0.128, λ = 0.5 0.107, λ = 0.75 0.077, true rings 0.043) [E-GEOM-004, E-GEOM-006].
-- Ring-only truth helps CTRL (0.178 → 0.119) but not B1 (0.188) [E-GEOM-013]: xTB relaxes rings and acyclic L
-  together, so it is the arm that can also move B1.
+- Rigid molecules (≈ 30% of the test set) are nearly model-free: their logged AMR-R tracks L quality (ETKDG 0.152,
+  MMFF 0.128, λ = 0.5 0.107, λ = 0.75 0.077, true rings 0.043), but these logged values carry ≤ 0.006 Å model
+  dependence and sit on different molecule sets per source (258–318), so they are indicative only; the gate below
+  scores seeds directly on one common set [E-GEOM-004, E-GEOM-006].
+- Revised after D-201: on the like-for-like λ = 0 base (955 molecules), true rings alone help both models about equally
+  (CTRL 0.197 → 0.119, B1 0.261 → 0.188) but leave B1 above CTRL; only true acyclic geometry puts B1 below CTRL
+  (0.158 vs 0.182) [E-GEOM-013]. xTB relaxes ring and acyclic L together, which is why it is the arm that can also move
+  B1 past CTRL (INFERENCE).
 
 ## 4. Assumptions that may not transfer (scout)
 - **Basin retention.** Local optimisation keeps the ETKDG pucker basin wherever a barrier separates puckers (6-ring
@@ -63,14 +69,21 @@ Target numbers from `l_error.csv` (heavy atoms, mean per seed; AMR-R from BRIEF,
 ## 5. Minimal experiment (scout)
 - **Step 0, install (CPU, time-box 30 min):** `micromamba create -p $PROJECT/xtbenv -c conda-forge xtb` (separate env;
   the TD venv is untouched) or the 6.7.1 release tarball. Not to be done by this scout.
-- **Step 1, seeds (CPU):** extend the S1 seed builder so that the existing `L_etkdg2L` embeddings (same random seed,
+- **Step 1, seeds (CPU):** extend the S1 seed builder so that the existing `L_etkdg2L` embeddings (ETKDG v1 on the
+  cluster, E-GEOM-052; same random seed,
   common random numbers) are also written as `L_etkdg2L_xtb` (GFN2-xTB from ETKDG) and `L_etkdg2L_mmff_xtb` (from the
   MMFF seeds), with per-seed graph/stereo checks, convergence flags, wall time, and `l_error.csv` rows. ~25k
   optimisations of ≤ 29-atom molecules; runtime UNVERIFIED (guess 0.5–2 s each ⇒ ≤ 1 h wall on 16 cores; time 200
   first).
-- **Step 2, CPU gate (pre-declared):** for each L source report ring/acyclic bond and angle RMSD, share of ring seeds
-  with ring-dihedral RMSD above 10°, pucker coverage, and the rigid-subset AMR-R of the seeds themselves. Proceed to GPU only if the xTB source
-  beats MMFF on the > 10° share (≤ 15%) **or** on rigid AMR-R (≤ 0.110). Report it against the λ table above.
+- **Step 2, CPU gate (pre-declared; revised after D-205):** score every seed set directly, without a model, on **one
+  common molecule set**: (i) ring/acyclic bond and angle RMSD; (ii) share of ring seeds with ring-dihedral RMSD above
+  10°, reported on both bases (all ring molecules / excluding all-3-ring molecules); (iii) pucker coverage (min over
+  seeds per GT conformer); (iv) heavy-atom symmetric AMR-R of the seeds vs GT on the common rigid set = test molecules
+  whose TD `edge_mask` is empty and that are present in every compared source. ETKDG, MMFF, xTB and the λ = 0.5 / 0.75
+  references are all recomputed on that same set in the same run. Go rule (non-oracle comparison only): proceed to GPU
+  if the xTB source beats MMFF on the common rigid set by ≥ 0.010 Å AMR-R **or** lowers the > 10° share (excl.
+  all-3-ring basis) by ≥ 5 points. The ORACLE λ references are yardsticks for interpretation (experiment selection,
+  flagged for the validity judge), never thresholds for a model.
 - **Step 3, GPU (inference only):** CTRL_rematch s0–2 and B1 s0–2 on `L_etkdg2L_xtb` (or the `_mmff_xtb` variant if
   it wins the gate) = 6 runs; add S3 (both seeds) and S4 (λ chosen on validation, never on test) if their checkpoints
   are final = +3–5 runs. Controls: the same checkpoints on `L_etkdg2L` and `L_etkdg2L_mmff` (already run).
@@ -82,7 +95,7 @@ Target numbers from `l_error.csv` (heavy atoms, mean per seed; AMR-R from BRIEF,
 - **Optional arm C (ceiling, not a method; validity flag):** CREST on the test SMILES (≈ 500 core-h,
   [E-GEOM-016]). Non-oracle (SMILES only) but it is the generator that produced GT, so report it only as a ceiling.
 - **Cost:** 1.5–3 GPU-h (6–12 × 0.25) + ≤ 1 day CPU. No training. Follow-up only if it wins: xTB-matched training
-  (S5 analogue, ~1M training conformers, CPU cost not estimated).
+  (S5 analogue; number of training conformers not counted here, UNVERIFIED; CPU cost not estimated).
 
 ## 6. Scout's own call (scout)
 Worth trying: YES — cheapest non-oracle source that targets the GT's own level of theory, no training, and the CPU gate

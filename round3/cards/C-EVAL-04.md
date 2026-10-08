@@ -21,21 +21,27 @@ evaluator and on the same success intersection as the learned arms:
   No published GEOM-QM9 (TD split) number exists for ETKDG + GFN2-xTB (search negative, ledger §G).
 - The references are GFN2-xTB minima [E-EVAL-012, E-EVAL-013]; MMFF is not at that level of theory [E-EVAL-021] and
   its minima differ from xTB's by 1.22° in angles and 4.89° in torsions on drug-like molecules [E-EVAL-020].
-- Practitioners report ETKDG ring pathologies (twist boats over chairs) that oversampling only partly fixes
-  [E-EVAL-029]. RDKit's default seed generator changed from ETKDGv1 to ETKDGv3 in 2024.03 [E-EVAL-030]; our TD seeds
+- A practitioner blog reports missed and high-energy ETKDG conformers for large systems (not QM9-relevant) and,
+  anecdotally, a preference for twist boats over chairs; it says such problems "can be ameliorated" by generating
+  thousands of conformers and deduplicating, at a cost in speed and redundancy [E-EVAL-029]. (Revised after D-002: the
+  earlier "ring pathologies that oversampling only partly fixes" overstated the source.) RDKit's default seed generator changed from ETKDGv1 to ETKDGv3 in 2024.03 [E-EVAL-030]; our TD seeds
   come from a call without parameters on RDKit 2022.9.5, i.e. ETKDGv1 [E-EVAL-031].
-- The xTB wrapper already exists in TD [E-EVAL-034]; xtb is on conda-forge [E-EVAL-032].
+- The xTB wrapper already exists in TD [E-EVAL-034]; xtb is on conda-forge, including GEOM's version 6.2.3
+  [E-EVAL-032, E-EVAL-056] (Revised after D-003).
 
 ## 3. Why it could matter here (scout)
 - **We do not know how much of A2's gain is MMFF alone.** ETKDG alone 0.2298 Å [E-EVAL-039]; TD on ETKDG 0.1752 Å
   [E-EVAL-038]; TD on MMFF-relaxed ETKDG 0.1507 Å [E-EVAL-040], reproduced by our CTRL (0.1518 Å) [E-EVAL-050]. Without
   B-mmff the "model contribution" on MMFF L is unmeasured.
 - **B-xtb could be a strong QM9 baseline.** INFERENCE: reference conformers are xTB minima [E-EVAL-013], about half of
-  the test molecules have ≤ 3 GT conformers and are ring-containing [E-EVAL-048], and for those molecules an
-  xTB-optimised ETKDG conformer in the right ring pucker is close to *the* reference. If B-xtb approaches TD's 0.15–0.18 Å
+  the test molecules have ≤ 3 GT conformers and are ring-containing [E-EVAL-048], and about half of those (30 % of all
+  molecules) are rigid [E-EVAL-057]; for the rigid ones an xTB-optimised ETKDG conformer in the right ring pucker is
+  close to *the* reference. (Revised after D-005: few-conformer is not the same as rigid.) If B-xtb approaches TD's 0.15–0.18 Å
   without any learning, a learned-L FlexiTors arm has to be judged against it, not against raw ETKDG.
-- **Recall can be bought.** Zhou's numbers (GD protocol, not comparable to ours [E-EVAL-026]) show that oversampling plus
-  MMFF moves recall a lot [E-EVAL-027]; every recall gain we claim should be checked against precision (AMR-P, COV-P)
+- **Recall can be bought.** Zhou's numbers (GD protocol, not comparable to ours [E-EVAL-026]) show that the sampling
+  budget moves recall (COV 91.23 % at a 2 N_ref budget vs 97.65 % with oversampling), while the MMFF sampler improves
+  MAT, not COV (removing it raises COV to 98.01 % but worsens MAT to 0.2511 Å) [E-EVAL-027]. (Revised after V1 note,
+  P2.) every recall gain we claim should be checked against precision (AMR-P, COV-P)
   and against B-clust at the same budget [E-EVAL-028].
 - Measured L error shows MMFF reaches λ≈0.5-level bonds/angles but keeps ETKDG-level ring dihedrals (8.07° vs 10.65°)
   [E-EVAL-049]; B-xtb tells whether a physics optimiser at the right level of theory also fixes ring dihedrals.
@@ -45,7 +51,9 @@ evaluator and on the same success intersection as the learned arms:
   [E-EVAL-026, E-EVAL-028]; only the recipe transfers, not the numbers.
 - All RDKit-based baselines inherit the ~65 ETKDG failures [E-EVAL-046]; compare on the intersection and report
   failures separately.
-- B-clust is a recall-gaming baseline by design [E-EVAL-027]; it is a check, not a target. With N_e = min(20 K, 2000)
+- B-clust's scores depend on its sampling budget [E-EVAL-027] (Zhang et al. call the comparison unfair without equal
+  budgets [E-EVAL-028]); it is a check on recall claims, not a target. (Revised after V1 note: "recall-gaming by
+  design" was the scout's characterisation, not shown by E-EVAL-027.) With N_e = min(20 K, 2000)
   plus the two quarter-size samplers [E-EVAL-025] it draws ≈ 1.5 × 20 K ≈ 15× more structures than 2K (K ≈ 13.7).
 - xTB optimisation from distorted ETKDG geometries may change topology or stereo in strained molecules
   [E-EVAL-017]; apply the evaluator's SMILES filter after relaxation. xtb install/runtime on gnode118 UNVERIFIED
@@ -69,6 +77,9 @@ evaluator and on the same success intersection as the learned arms:
 ## 6. Scout's own call (scout)
 Worth trying: YES for B-mmff and B-xtb (cheap, and they define what "better L" must beat); MAYBE for B-clust (only as a
 matched-budget sanity check of recall claims, not as a target).
+
+Revision history (scout, P2): Revised after D-002, D-003, D-005 and V1 notes (blog scope, xtb 6.2.3, rigid vs
+few-conformer, what Zhou's ablation shows about MMFF, B-clust wording). The calls are unchanged.
 
 ## 7. Code grounding (grounder)
 ## 8. Predicted effect on our project (analyst)

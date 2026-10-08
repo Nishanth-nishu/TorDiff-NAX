@@ -1,0 +1,50 @@
+cond n_rows n_mols bond_heavy_any angle_heavy_any angle_all_acyc bond_all_acyc ringdih_n ringdih_mean ringdih_median frac_gt10
+L_A5acyc_cyc_ORACLE 12795 955 0.014 1.2608 0.5834 0.0 7375 9.2834 0.5854 0.3035
+L_A5ring_cyc_ORACLE 12795 955 0.027 3.5109 3.5972 0.029 7375 0.0 0.0 0.0
+L_etkdg2L 12655 936 0.0314 2.7963 3.1364 0.0265 7263 10.6522 0.4364 0.2856
+L_etkdg2L_mmff 12655 936 0.0182 1.9733 1.9126 0.0112 7263 8.0655 0.4307 0.2018
+L_lam0.00_cyc_ORACLE 12795 955 0.0347 3.9877 3.6087 0.029 7375 9.2834 0.5854 0.3035
+L_lam0.25_cyc_ORACLE 12707 906 0.0266 2.9011 2.7804 0.0217 7289 4.7418 0.3613 0.2228
+L_lam0.50_cyc_ORACLE 12707 906 0.0186 1.9332 2.0569 0.0147 7289 3.1561 0.2374 0.1124
+L_lam0.75_cyc_ORACLE 12707 906 0.0097 0.9668 1.064 0.0075 7289 1.5643 0.1217 0.0001
+L_lam1.00_cyc_ORACLE 12795 955 0.0 0.0 0.0 0.0 7375 0.0 0.0 0.0
+L_noise0.01pa_cyc_ORACLE 25762 996 0.0137 0.8182 0.9913 0.0139 14922 0.4813 0.3129 0.0
+L_noise0.02pa_cyc_ORACLE 25762 996 0.0275 1.6418 1.9849 0.0278 14922 0.963 0.6269 0.0
+L_noise0.04pa_cyc_ORACLE 25762 996 0.0549 3.3077 3.9756 0.0557 14922 1.9287 1.2588 0.0034
+
+ L_etkdg2L by MIN ring size (n, mean, median, frac>10): {0: (4, 3.137, 3.634, 0.0), 3: (4312, 3.481, 0.0, 0.0907), 4: (1079, 15.208, 13.674, 0.6043), 5: (1370, 15.935, 9.268, 0.481), 6: (337, 39.03, 40.197, 0.6647), 7: (161, 68.009, 83.638, 0.9193)}
+   L_etkdg2L by MAX ring size: {0: (4, 3.137, 3.634, 0.0), 3: (3078, 0.0, 0.0, 0.0), 4: (1448, 11.593, 7.493, 0.4572), 5: (1950, 14.054, 7.491, 0.4308), 6: (583, 35.057, 26.162, 0.6707), 7: (200, 63.624, 75.93, 0.905)}
+
+ L_etkdg2L_mmff by MIN ring size (n, mean, median, frac>10): {0: (4, 2.415, 2.968, 0.0), 3: (4312, 2.471, 0.0, 0.0545), 4: (1079, 11.297, 8.288, 0.4365), 5: (1370, 12.419, 4.739, 0.3745), 6: (337, 31.197, 5.695, 0.4481), 7: (161, 50.922, 56.484, 0.5963)}
+   L_etkdg2L_mmff by MAX ring size: {0: (4, 2.415, 2.968, 0.0), 3: (3078, 0.0, 0.0, 0.0), 4: (1448, 9.072, 6.101, 0.3467), 5: (1950, 10.812, 4.374, 0.3133), 6: (583, 25.816, 5.354, 0.4117), 7: (200, 46.503, 42.38, 0.565)}
+
+ L_noise0.04pa_cyc_ORACLE by MIN ring size (n, mean, median, frac>10): {0: (8, 3.439, 3.498, 0.0), 3: (8886, 0.78, 0.0, 0.0001), 4: (2292, 2.678, 2.506, 0.0013), 5: (2740, 3.971, 3.718, 0.0069), 6: (674, 4.856, 4.441, 0.0326), 7: (322, 4.746, 4.585, 0.0186)}
+   L_noise0.04pa_cyc_ORACLE by MAX ring size: {0: (8, 3.439, 3.498, 0.0), 3: (6178, 0.0, 0.0, 0.0), 4: (3188, 2.235, 1.966, 0.0009), 5: (3972, 3.675, 3.407, 0.0048), 6: (1176, 4.419, 4.055, 0.0196), 7: (400, 4.588, 4.278, 0.015)}
+
+ L_lam0.00_cyc_ORACLE by MIN ring size (n, mean, median, frac>10): {0: (4, 3.216, 3.791, 0.0), 3: (4398, 3.122, 0.0, 0.0989), 4: (1105, 16.606, 16.035, 0.6362), 5: (1370, 14.668, 11.694, 0.5365), 6: (337, 25.807, 18.116, 0.6409), 7: (161, 47.071, 40.735, 0.9255)}
+   L_lam0.00_cyc_ORACLE by MAX ring size: {0: (4, 3.216, 3.791, 0.0), 3: (3078, 0.0, 0.0, 0.0), 4: (1549, 12.331, 7.757, 0.4603), 5: (1961, 13.214, 9.473, 0.486), 6: (583, 25.088, 17.621, 0.6758), 7: (200, 44.057, 36.454, 0.89)}
+
+ ETKDG vs noise0.04 vs lam0 (common to etkdg & noise) n_common_mols = 936
+   L_etkdg2L {'n': 12655, 'bond': 0.0314, 'ang': 2.7963, 'ang_all_acyc': 3.1364, 'bond_all_acyc': 0.0265, 'ang_heavy_acyc': 2.8355, 'bond_heavy_acyc': 0.0292, 'rd_mean': 10.6522, 'rd_gt10': 0.2856}
+   L_lam0.00_cyc_ORACLE {'n': 12655, 'bond': 0.0344, 'ang': 3.9386, 'ang_all_acyc': 3.578, 'bond_all_acyc': 0.0288, 'ang_heavy_acyc': 4.0667, 'bond_heavy_acyc': 0.032, 'rd_mean': 9.3793, 'rd_gt10': 0.3076}
+   L_noise0.04pa_cyc_ORACLE {'n': 25310, 'bond': 0.0549, 'ang': 3.3106, 'ang_all_acyc': 3.9765, 'bond_all_acyc': 0.0557, 'ang_heavy_acyc': 3.3706, 'bond_heavy_acyc': 0.0538, 'rd_mean': 1.922, 'rd_gt10': 0.0035}
+   L_noise0.02pa_cyc_ORACLE {'n': 25310, 'bond': 0.0275, 'ang': 1.6431, 'ang_all_acyc': 1.9853, 'bond_all_acyc': 0.0278, 'ang_heavy_acyc': 1.672, 'bond_heavy_acyc': 0.0269, 'rd_mean': 0.9596, 'rd_gt10': 0.0}
+
+ A5ring vs noise (common) n_common_mols = 955
+   L_A5ring_cyc_ORACLE {'n': 12795, 'bond': 0.027, 'ang': 3.5109, 'ang_all_acyc': 3.5972, 'bond_all_acyc': 0.029, 'ang_heavy_acyc': 4.1133, 'bond_heavy_acyc': 0.0322, 'rd_mean': 0.0, 'rd_gt10': 0.0}
+   L_noise0.04pa_cyc_ORACLE {'n': 25590, 'bond': 0.0549, 'ang': 3.3089, 'ang_all_acyc': 3.9758, 'bond_all_acyc': 0.0557, 'ang_heavy_acyc': 3.37, 'bond_heavy_acyc': 0.0538, 'rd_mean': 1.9245, 'rd_gt10': 0.0035}
+   L_noise0.02pa_cyc_ORACLE {'n': 25590, 'bond': 0.0275, 'ang': 1.6423, 'ang_all_acyc': 1.985, 'bond_all_acyc': 0.0278, 'ang_heavy_acyc': 1.6718, 'bond_heavy_acyc': 0.0269, 'rd_mean': 0.9608, 'rd_gt10': 0.0}
+   L_lam0.00_cyc_ORACLE {'n': 12795, 'bond': 0.0347, 'ang': 3.9877, 'ang_all_acyc': 3.6087, 'bond_all_acyc': 0.029, 'ang_heavy_acyc': 4.1222, 'bond_heavy_acyc': 0.0322, 'rd_mean': 9.2834, 'rd_gt10': 0.3035}
+   L_A5acyc_cyc_ORACLE {'n': 12795, 'bond': 0.014, 'ang': 1.2608, 'ang_all_acyc': 0.5834, 'bond_all_acyc': 0.0, 'ang_heavy_acyc': 0.4789, 'bond_heavy_acyc': 0.0, 'rd_mean': 9.2834, 'rd_gt10': 0.3035}
+
+ A5 family all n_common_mols = 955
+   L_A5ring_cyc_ORACLE {'n': 12795, 'bond': 0.027, 'ang': 3.5109, 'ang_all_acyc': 3.5972, 'bond_all_acyc': 0.029, 'ang_heavy_acyc': 4.1133, 'bond_heavy_acyc': 0.0322, 'rd_mean': 0.0, 'rd_gt10': 0.0}
+   L_A5acyc_cyc_ORACLE {'n': 12795, 'bond': 0.014, 'ang': 1.2608, 'ang_all_acyc': 0.5834, 'bond_all_acyc': 0.0, 'ang_heavy_acyc': 0.4789, 'bond_heavy_acyc': 0.0, 'rd_mean': 9.2834, 'rd_gt10': 0.3035}
+   L_lam0.00_cyc_ORACLE {'n': 12795, 'bond': 0.0347, 'ang': 3.9877, 'ang_all_acyc': 3.6087, 'bond_all_acyc': 0.029, 'ang_heavy_acyc': 4.1222, 'bond_heavy_acyc': 0.0322, 'rd_mean': 9.2834, 'rd_gt10': 0.3035}
+
+ noise all n_common_mols = 996
+   L_noise0.04pa_cyc_ORACLE {'n': 25762, 'bond': 0.0549, 'ang': 3.3077, 'ang_all_acyc': 3.9756, 'bond_all_acyc': 0.0557, 'ang_heavy_acyc': 3.3701, 'bond_heavy_acyc': 0.0538, 'rd_mean': 1.9287, 'rd_gt10': 0.0034}
+   L_noise0.02pa_cyc_ORACLE {'n': 25762, 'bond': 0.0275, 'ang': 1.6418, 'ang_all_acyc': 1.9849, 'bond_all_acyc': 0.0278, 'ang_heavy_acyc': 1.6719, 'bond_heavy_acyc': 0.0269, 'rd_mean': 0.963, 'rd_gt10': 0.0}
+
+mol counts: {'L_A5acyc_cyc_ORACLE': 955, 'L_A5ring_cyc_ORACLE': 955, 'L_etkdg2L': 936, 'L_etkdg2L_mmff': 936, 'L_lam0.00_cyc_ORACLE': 955, 'L_lam0.25_cyc_ORACLE': 906, 'L_lam0.50_cyc_ORACLE': 906, 'L_lam0.75_cyc_ORACLE': 906, 'L_lam1.00_cyc_ORACLE': 955, 'L_noise0.01pa_cyc_ORACLE': 996, 'L_noise0.02pa_cyc_ORACLE': 996, 'L_noise0.04pa_cyc_ORACLE': 996}
+A5ring mols not in noise: 0  noise mols not in A5ring: 41

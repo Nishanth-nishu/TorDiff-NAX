@@ -14,7 +14,10 @@ Conventions used in this ledger
 - New papers stored this round: `papers/related/2023_zhang_infinite_physical_monkey.pdf` (+ fulltext, INDEX row added).
   `papers/related/2022_axelrod_geom.pdf` (arXiv 2006.05531v4) was fetched by SCOUT EVAL and SCOUT GEOM at the same time
   (identical 1,637,253-byte file; SCOUT GEOM's copy and INDEX row are the ones on disk); page numbers here refer to that PDF.
-  New snapshots: `papers/blogs/rowan_openconf_2026.txt`, `papers/blogs/rdkit_release_notes_2024_03.txt`.
+  New snapshots: `papers/blogs/rowan_openconf_2026.txt`, `papers/blogs/rdkit_release_notes_2024_03.txt`,
+  `papers/blogs/condaforge_xtb_metadata_eval.txt` (P2, D-003).
+- P2 (2026-10-08): entries revised after V1's verdicts carry "Revised after D-0xx" with the original text kept as superseded;
+  new entries E-EVAL-055…059 are in section H. Responses are in `round3/ledger/disputes.md` under D-001…D-007.
 
 ---------------------------------------------------------------------------------------------------------------------
 ## A. Where current QM9 methods sit (TD protocol, GEOM-QM9, 1000-molecule test set)
@@ -128,17 +131,19 @@ Conventions used in this ledger
   - paper: papers/related/2024_hassan_etflow.pdf, PDF p. 7, Figure 3 caption
 - Exact quote:
   > "ET-Flow outperforms TorsionDiff by a large margin especially in a lower threshold region."
-- Shows vs infers: SHOWS (DRUGS only; INFERENCE that the same holds on QM9 is supported by our own sweeps, E-EVAL-038/040)
+- Shows vs infers: SHOWS (DRUGS only).
+- Revised after V1 note on E-EVAL-010 (P2): original side note "INFERENCE that the same holds on QM9 is supported by our own sweeps, E-EVAL-038/040" WITHDRAWN; our sweeps contain no ET-Flow run, so the QM9 low-threshold contrast rests only on FM-refiner's re-runs (E-EVAL-008) vs our TD sweep (different evaluators).
 - Supports card(s): C-EVAL-01
 - Confidence: high
 
 ### E-EVAL-011
-- Claim: In EnFlow, energy-based selection of EnFlow-SO(3) samples (50 steps, GEOM-QM9) lowers recall and raises precision: COV-R 96.26 → 90.91 %, AMR-R 0.076 → 0.119 Å, COV-P 95.48 → 96.15 %, AMR-P 0.083 → 0.069 Å.
+- Claim (Revised after D-007): In EnFlow, *selection* by a learned energy (3K candidates generated, the 2K with the lowest learned energy kept; no relaxation) lowers recall and raises precision for EnFlow-SO(3) at 50 steps on GEOM-QM9: COV-R 96.26 → 90.91 %, AMR-R 0.076 → 0.119 Å, COV-P 95.48 → 96.15 %, AMR-P 0.083 → 0.069 Å.
+- Original claim (superseded): "In EnFlow, energy-based selection of EnFlow-SO(3) samples (50 steps, GEOM-QM9) lowers recall and raises precision: ..." (mechanism not stated; C-EVAL-05 misused it as relaxation evidence).
 - Source type: paper
 - Locator:
-  - paper: papers/related/2025_xu_enflow.pdf, PDF p. 5, Table 1 (unselected EnFlow-SO(3) 50-step row identified from the non-layout text order; the EnergySel row carries its own label)
+  - paper: papers/related/2025_xu_enflow.pdf, PDF p. 5, Table 1 and its "Table notes" (unselected EnFlow-SO(3) 50-step row identified from the non-layout text order; the EnergySel row carries its own label)
 - Exact quote:
-  > "EnFlow-SO(3)-EnergySel 50 90.91 100.00 0.119 0.021 96.15 100.00 0.069 0.021" … "50 96.26 100.00 0.076 0.028 95.48 100.00 0.083 0.034"
+  > "EnFlow-SO(3)-EnergySel 50 90.91 100.00 0.119 0.021 96.15 100.00 0.069 0.021" … "50 96.26 100.00 0.076 0.028 95.48 100.00 0.083 0.034" … "3K candidate conformations are generated and the 2K conformations with the lowest learned energy are retained"
 - Shows vs infers: SHOWS (row mapping for the unselected row: medium confidence)
 - Supports card(s): C-EVAL-05
 - Confidence: medium
@@ -161,7 +166,7 @@ Conventions used in this ledger
 - Claim: For GEOM-QM9, the DFT geometries of QM9 were re-optimised with xTB before seeding CREST, i.e. the QM9 reference ensembles are at the GFN2-xTB level, not the QM9 DFT level.
 - Source type: paper
 - Locator:
-  - paper: papers/related/2022_axelrod_geom.pdf, PDF p. 5, Methods "Conformer generation" / "CREST simulation"
+  - paper: papers/related/2022_axelrod_geom.pdf, PDF p. 5, Methods "Conformer generation", sub-heading "Initial structure generation" (locator Revised after V1 verdict on E-EVAL-013; gas-phase CREST defaults: E-EVAL-055)
 - Exact quote:
   > "since it is recommended to seed CREST with a structure optimized at the GFN2-xTB level of theory, we re-optimized each QM9 geometry with xTB before using it in CREST."
 - Shows vs infers: SHOWS (closes the round-2 gap "for QM9 UNVERIFIED", round2/verify_A.md E14)
@@ -196,8 +201,8 @@ Conventions used in this ledger
 - Locator:
   - paper: papers/related/2022_axelrod_geom.pdf, PDF p. 2, Background & Summary
 - Exact quote:
-  > "Hence GEOM is an excellent benchmark for the recall and diversity of conformer generation methods. However, the CREST statistical weights for each conformer are rather inaccurate."
-- Shows vs infers: SHOWS
+  > "Hence GEOM is an excellent benchmark for the recall and diversity of conformer generation methods. However, the CREST statistical weights for each conformer are rather inaccurate. Therefore, benchmarks that include conformer probabilities should use the DFT weights provided in GEOM."
+- Shows vs infers: SHOWS. Revised after D-001 (P2): quote extended with GEOM's own recommendation; the DFT weights exist only for the BACE subset (E-EVAL-059).
 - Supports card(s): C-EVAL-06
 - Confidence: high
 
@@ -208,8 +213,9 @@ Conventions used in this ledger
   - paper: papers/related/2022_axelrod_geom.pdf, PDF p. 7, Technical Validation
 - Exact quote:
   > "The graph re-attribution procedure succeeded for 88.4% of the QM9 molecules" … "All of the failed QM9 graphs underwent some sort of reaction, which can be explained by the presence of highly strained and unstable molecules."
-- Shows vs infers: SHOWS. INFERENCE: strained QM9 molecules are also where ETKDG fails (our 60 cage failures, E-EVAL-046); reference quality and seed availability are both worst on the same strained subset.
-- Supports card(s): C-EVAL-01, C-EVAL-03, C-EVAL-04, C-EVAL-05
+- Shows vs infers: SHOWS.
+- Revised after D-006: original INFERENCE "strained QM9 molecules are also where ETKDG fails (our 60 cage failures); reference quality and seed availability are both worst on the same strained subset" WITHDRAWN. Nothing links GEOM's reacted graphs to our 60 cages, and molecules with changed graphs are largely removed by TD's SMILES filter (V1).
+- Supports card(s): C-EVAL-03, C-EVAL-04, C-EVAL-05
 - Confidence: high (quote); medium (inference)
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -246,6 +252,7 @@ Conventions used in this ledger
 - Exact quote:
   > "These results clearly demonstrate that diffusion-based models already surpass MMFF in structural precision."
 - Shows vs infers: SHOWS (text). Table numbers: SHOWS, medium confidence because the table layout is scrambled in extraction.
+- Revised after D-007: the same Table 2 shows the diffusion models' torsion deviations (EQGAT-diff 8.58°, JODO 6.01°, Megalodon 5.58°) are *larger* than MMFF→xTB's 4.89°, so "surpass MMFF" holds for bonds, angles and E_relax, not for torsions (column order as above; values confirmed by V1).
 - Supports card(s): C-EVAL-03, C-EVAL-04, C-EVAL-05
 - Confidence: high (quote); medium (table values)
 
@@ -267,12 +274,13 @@ Conventions used in this ledger
   - paper: papers/core/2022_jing_torsional_diffusion.pdf, PDF p. 27, Table 10 (columns: without relaxation E, μ, Δε, E_min; with relaxation E, μ, Δε, E_min)
 - Exact quote:
   > "Tor. Diff. 36.91 0.92 4.93 36.94 0.22 0.35 0.54 0.13"
-- Shows vs infers: SHOWS (DRUGS). INFERENCE: the unrelaxed energy error is dominated by frozen RDKit local structure, so an energy metric is far more sensitive to L quality than RMSD; a FlexiTors L should show up first there.
+- Shows vs infers: SHOWS (DRUGS). INFERENCE (Revised after V1 note, P2): unrelaxed energy errors are huge for every method in the table, including GeoMol, which predicts its own local structure (E_min 43.68); so the table shows that energies are very sensitive to small local-structure errors, not that RDKit's frozen L is the unique cause. Original wording "dominated by frozen RDKit local structure" withdrawn.
 - Supports card(s): C-EVAL-03, C-EVAL-05, C-EVAL-06
 - Confidence: high
 
 ### E-EVAL-023
-- Claim: TD states that without relaxation the property errors of all methods are too large to be chemically useful, and that after relaxation the errors from global flexibility dominate.
+- Claim (Revised after D-001): TD states that without relaxation the property errors of all methods are too large to be chemically useful, and that after relaxation the errors from global flexibility "become important".
+- Original claim (superseded): "... and that after relaxation the errors from global flexibility dominate." ("dominate" is not in the source.)
 - Source type: paper
 - Locator:
   - paper: papers/core/2022_jing_torsional_diffusion.pdf, PDF p. 28, App. H "Ensemble properties"
@@ -336,18 +344,19 @@ Conventions used in this ledger
   - paper: papers/related/2023_zhang_infinite_physical_monkey.pdf (arXiv 2304.10494), PDF p. 5 (no printed page numbers)
 - Exact quote:
   > "indicating that the comparison in the previous is unfair. At the very least, they should also sample 2000 conformations for DL methods followed by clustering."
-- Shows vs infers: SHOWS (argument; their Table 2 on PDF p. 9 reproduces Zhou's QM9 numbers)
+- Shows vs infers: SHOWS (argument). Revised after V1 note (P2): original side note "their Table 2 on PDF p. 9 reproduces Zhou's QM9 numbers" corrected: only the RDKit + Clustering row (97.65 / 0.1902) matches; their RDKit and CGCF rows differ from Zhou's.
 - Supports card(s): C-EVAL-04
 - Confidence: high
 
 ### E-EVAL-029
-- Claim: A practitioner blog (Rowan) reports that ETKDG misses conformers, produces high-energy conformers, and has "random pathologies" such as preferring twist boats over chairs; oversampling plus deduplication helps but is slow and redundant.
+- Claim (Revised after D-002): A practitioner blog (Rowan) reports that ETKDG often misses conformers or generates high-energy conformers *for large systems (e.g. PROTACs)* and, unscoped, mentions an anecdotal "curious preference for twist boats over chairs"; it says these problems "can be ameliorated" by generating thousands of conformers and deduplicating, at a cost in speed and redundancy. Only the twist-boat anecdote is relevant to QM9-size molecules.
+- Original claim (superseded): "... reports that ETKDG misses conformers, produces high-energy conformers, and has 'random pathologies' such as preferring twist boats over chairs; oversampling plus deduplication helps but is slow and redundant." (dropped the large-system scope)
 - Source type: blog
 - Locator:
-  - blog: https://rowansci.substack.com/p/openconf-and-other-open-source-projects, Rowan (page meta author: Corin Wagen), 2026-06-17, section "openconf: Rapid Monte Carlo–Based Conformer Generation", accessed 2026-10-08, snapshot papers/blogs/rowan_openconf_2026.txt
+  - blog: https://rowansci.substack.com/p/openconf-and-other-open-source-projects, Rowan; visible byline Corin Wagen, Nick Casetti, Jonathon Vandezande, Eli Mann (meta author Corin Wagen; byline per V1, D-002), 2026-06-17, section "openconf: Rapid Monte Carlo–Based Conformer Generation", accessed 2026-10-08, snapshot papers/blogs/rowan_openconf_2026.txt
 - Exact quote:
   > "ETKDG often misses conformers or generates high-energy conformers for large systems (e.g. PROTACs) and has additional random pathologies (e.g. a curious preference for twist boats over chairs)."
-- Shows vs infers: SHOWS (practitioner report, no numbers; counts as evidence for practice, not proof). INFERENCE: ring-pucker errors in ETKDG seeds are a known failure mode, consistent with our ring-heavy floor.
+- Shows vs infers: SHOWS (practitioner report, no numbers; evidence for practice, not proof). INFERENCE (weak, anecdote only): ring-pucker errors in ETKDG seeds are a known practitioner complaint, consistent with our ring-heavy floor; the large-system statements do not transfer to QM9.
 - Supports card(s): C-EVAL-04
 - Confidence: medium
 
@@ -377,10 +386,11 @@ Conventions used in this ledger
 - Claim: conda-forge provides linux-64 builds of the xtb program (latest 6.7.1), so a GFN2-xTB binary can be installed without compiling.
 - Source type: blog (package metadata snapshot)
 - Locator:
-  - blog: https://api.anaconda.org/package/conda-forge/xtb, anaconda.org, accessed 2026-10-08 (snapshot made by SCOUT GEOM), section "linux-64 versions", snapshot papers/blogs/condaforge_xtb_metadata.txt
-- Exact quote:
-  > "linux-64 versions: ['6.4.1', '6.5.0', '6.5.1', '6.6.0', '6.6.1', '6.7.1']"
-- Shows vs infers: SHOWS availability. Not shown: that it installs/runs on gnode118 (round 2 never ran it, round2/SHORTLIST.md:49).
+  - blog: https://api.anaconda.org/package/conda-forge/xtb, anaconda.org (conda-forge), JSON fields `latest_version` and `files[].basename`, accessed 2026-10-08, snapshot papers/blogs/condaforge_xtb_metadata_eval.txt (Revised after D-003: new verbatim snapshot by SCOUT EVAL; the earlier snapshot papers/blogs/condaforge_xtb_metadata.txt by SCOUT GEOM lists only 6.4.1 onward and is no longer cited here)
+- Exact quote (JSON values, verbatim):
+  > "latest_version": "6.7.1" ; "linux-64/xtb-6.2.3-h323e27b_0.tar.bz2" … (28 linux-64 files; versions 6.2.3, 6.3.0–6.3.3, 6.4.0, 6.4.1, 6.5.0, 6.5.1, 6.6.0, 6.6.1, 6.7.1)
+- Original quote (superseded, QUOTE MISMATCH per V1): "linux-64 versions: ['6.4.1', '6.5.0', '6.5.1', '6.6.0', '6.6.1', '6.7.1']" (a derived, incomplete list).
+- Shows vs infers: SHOWS availability, including xTB 6.2.3, the version GEOM used (E-EVAL-056), so the reference level can be matched exactly. Not shown: that it installs/runs on gnode118 (round 2 never ran it, round2/SHORTLIST.md:49).
 - Supports card(s): C-EVAL-03, C-EVAL-04, C-EVAL-05
 - Confidence: high (availability); UNVERIFIED (cluster install)
 
@@ -391,10 +401,10 @@ Conventions used in this ledger
 - Claim: Our evaluator counts a molecule with no generated conformers as 0 % coverage but leaves it out of AMR (nanmean), so AMR-R is averaged over successful molecules only.
 - Source type: code
 - Locator:
-  - code: torsional-diffusion/evaluate_confs.py:168-171 (COV with `[0] * num_failures`; `np.nanmean(amr_recall)`)
+  - code: torsional-diffusion/evaluate_confs.py:166-171 (COV with `[0] * num_failures` at :166; `np.nanmean(amr_recall)` at :171; the printed block uses the same convention at :152-155). Revised after D-004 (was :168-171).
 - Exact quote:
   > "_cr = [float(np.mean(np.min(r['rmsd'], axis=1) < report_thr)) for r in results.values()] + [0] * num_failures" … "'MAT-R_mean': float(np.nanmean(amr_recall))"
-- Shows vs infers: SHOWS. INFERENCE: TD's AMR-R excludes the ~65 hardest (cage) molecules that ML Cartesian generators must still score, which flatters TD in literature comparisons.
+- Shows vs infers: SHOWS. INFERENCE (Revised after D-006): TD's AMR-R excludes the ~65 molecules ETKDG cannot embed; whether this flatters TD relative to Cartesian models is NOT established, because those models also evaluate reduced sets (995 molecules, E-EVAL-005) and ET-Flow reports RDKit-related failures on GEOM-XL (E-EVAL-058). Original wording "that ML Cartesian generators must still score, which flatters TD" withdrawn.
 - Supports card(s): C-EVAL-01
 - Confidence: high
 
@@ -563,8 +573,9 @@ Conventions used in this ledger
   - our-data: cluster_sync/results/analysis/local_structure_test.csv (columns `floor_best_sym`, `n_ring_atoms`, `n_torsions_heavy`), computed by scratchpad `macro_micro.py` (group by SMILES, bin by number of rows)
 - Exact quote (script output):
   > "1 225 0.1364 0.9822 0.4267" ; "2-3 227 0.1315 0.9736 0.8987" ; ">10 213 0.0888 0.6573 2.7465" ; "share of molecules with n_gt<=3: 0.481 ; share of conformers from them: 0.102"
-- Shows vs infers: SHOWS (on the 940 molecules / 7554 GT conformers in that file). INFERENCE: the macro-averaged AMR-R we report is about half determined by rigid, ring-containing molecules where the torsion model has little to do, so it is mostly a ring-L metric; a conformer-level (micro) average weights flexible molecules instead.
-- Supports card(s): C-EVAL-02, C-EVAL-04, C-EVAL-05
+- Shows vs infers: SHOWS (on the 940 molecules / 7554 GT conformers in that file; V1 reproduced the numbers).
+- Revised after D-005: original INFERENCE "the macro-averaged AMR-R we report is about half determined by rigid, ring-containing molecules where the torsion model has little to do, so it is mostly a ring-L metric" WITHDRAWN. Few-conformer (n_gt ≤ 3) does not mean rigid: only 52.2 % of them have 0 heavy torsions; rigid molecules are 30.4 % of molecules and 26.0 % of the macro AMR-R sum (E-EVAL-057). Replacement INFERENCE: the per-molecule average gives few-conformer, ring-containing molecules ~5× the weight they have per conformer (48 % vs 10 %), so per-molecule and per-conformer averages can rank arms differently; the ring-L argument rests on E-EVAL-057, not on this entry.
+- Supports card(s): C-EVAL-02, C-EVAL-04
 - Confidence: high (calc); medium (inference)
 
 ### E-EVAL-049
@@ -630,6 +641,69 @@ Conventions used in this ledger
 - Exact quote:
   > "These conformers are then relaxed using GFN2-xTB (Bannwarth et al., 2019), and the Boltzmann-weighted properties of the generated and ground truth ensembles are compared."
 - Shows vs infers: SHOWS
+- Supports card(s): C-EVAL-06
+- Confidence: high
+
+---------------------------------------------------------------------------------------------------------------------
+## H. Entries added in P2 (answers to D-001 ... D-007)
+
+### E-EVAL-055
+- Claim: GEOM ran CREST with default settings except the molecular charge, i.e. without implicit solvent for the QM9 set (gas-phase GFN2-xTB).
+- Source type: paper
+- Locator:
+  - paper: papers/related/2022_axelrod_geom.pdf, PDF p. 5, Methods "CREST simulation"
+- Exact quote:
+  > "A single xTB-optimized structure was used as input to the CREST simulation of each species. Default values were used for all CREST arguments, except for the charge of each geometry."
+- Shows vs infers: SHOWS defaults; "gas phase" is the CREST/xTB default (no solvent flag), confirmed by V1 (implicit water only for BACE, GEOM pp. 2, 6).
+- Added in P2 (D-003, V1 note on E-EVAL-013).
+- Supports card(s): C-EVAL-03, C-EVAL-05
+- Confidence: high
+
+### E-EVAL-056
+- Claim: GEOM's initial conformer ensembles were generated with CREST 2.9 and xTB 6.2.3.
+- Source type: paper
+- Locator:
+  - paper: papers/related/2022_axelrod_geom.pdf, PDF p. 8, "Code availability"
+- Exact quote:
+  > "CREST version 2.9 was used with xTB version 6.2.3 to generate the initial CREs."
+- Shows vs infers: SHOWS. With E-EVAL-032 (xtb 6.2.3 on conda-forge linux-64), the reference xTB version can be matched exactly.
+- Added in P2 (D-003).
+- Supports card(s): C-EVAL-03, C-EVAL-04, C-EVAL-05
+- Confidence: high
+
+### E-EVAL-057
+- Claim: [EVAL-calc] Rigid molecules (0 heavy rotatable torsions) are 30.4 % of test molecules and carry 26.0 % of the macro AMR-R sum of CTRL_rematch s0 on ETKDG L (25.4 % on MMFF L; their mean AMR-R is 0.152 Å on ETKDG L and 0.127 Å on MMFF L, vs 0.177 / 0.152 Å over all molecules); few-conformer molecules (n_true ≤ 3) are 48.1 % of molecules and 46.1 % of the sum, and only 52.2 % of them are rigid. With true ring geometry (A5ring, ORACLE) rigid molecules fall from 0.185 Å (λ = 0 base, same 955 molecules) to 0.043 Å and carry 54.9 % of the total ring-oracle gain.
+- Source type: our-data
+- Locator:
+  - our-data: cluster_sync/round2/results/qm9_CTRL_rematch_100ep_e100_s0/{S1_etkdg2L, S1_etkdg2L_mmff, S1_lam0.00_cyc_ORACLE, S1_A5ring_cyc_ORACLE}/breakdown.log, tables "by n_rot_heavy" and "by n_true"; cluster_sync/results/analysis/local_structure_test.csv; computed by scratchpad `d005_recompute.py` (AMR-R sum = Σ n_bin × MAT_R_bin)
+- Exact quote (breakdown.log rows with padding whitespace collapsed, then script output):
+  > (S1_etkdg2L) "| 0 | 284 | 96.549 | 0.152 | 95.321 | 0.188 |" ; (S1_etkdg2L_mmff) "| 0 | 284 | 96.54 | 0.127 | 97.155 | 0.127 |" ; (A5ring) "| 0 | 289 | 100 | 0.043 | 99.913 | 0.053 |" ; (λ0.00) "| 0 | 289 | 94.871 | 0.185 | 95.199 | 0.193 |" ; "rigid among few 52.2%" ; "rigid share 54.9%"
+- Shows vs infers: SHOWS (ORACLE for A5ring). Same shares as V1's independent scripts (D-005). INFERENCE: ring L matters most for the rigid 30 % of molecules, which carry about a quarter of the macro AMR-R but more than half of the gain from true ring geometry.
+- Added in P2 (D-005).
+- Supports card(s): C-EVAL-02, C-EVAL-04, C-EVAL-05
+- Confidence: high
+
+### E-EVAL-058
+- Claim: ET-Flow reports generation failures attributed to RDKit on GEOM-XL (27 molecules), so Cartesian models can also lose molecules in evaluation.
+- Source type: paper
+- Locator:
+  - paper: papers/related/2024_hassan_etflow.pdf, PDF p. 19, App. D (GEOM-XL results, text after Table 8)
+- Exact quote:
+  > "we encountered 27 failed cases for generation likely due to RDKit failures, similar to the observations in MCF albeit with slightly different exact numbers."
+- Shows vs infers: SHOWS (GEOM-XL only; no failure count is reported for QM9). Used only to say the direction of the failure-accounting bias is unknown.
+- Added in P2 (D-006, source suggested by V1).
+- Supports card(s): C-EVAL-01
+- Confidence: high
+
+### E-EVAL-059
+- Claim: GEOM's DFT-level free energies (needed for accurate conformer weights) exist only for the 1,511 BACE species, not for QM9.
+- Source type: paper
+- Locator:
+  - paper: papers/related/2022_axelrod_geom.pdf, PDF p. 1, Abstract
+- Exact quote:
+  > "Ensembles of 1,511 species with BACE-1 inhibition data are also labeled with high-quality DFT free energies in an implicit water solvent"
+- Shows vs infers: SHOWS (BACE subset). INFERENCE: for QM9 only the CREST (xTB) weights exist, which GEOM calls inaccurate (E-EVAL-016).
+- Added in P2 (D-001).
 - Supports card(s): C-EVAL-06
 - Confidence: high
 

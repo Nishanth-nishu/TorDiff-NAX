@@ -15,11 +15,13 @@ to molecule. A blind model adapts per molecule; S4 needs one λ per source, pick
   pre-trained network gave results similar to no conditioning [E-ROBUST-039].
 
 ## 3. Why it could matter here (scout)
-- Our blind discrete model already infers the regime from L. S3 has no level input and still scores 0.182 on RDKit L
-  and 0.033 on true L (1 seed) [E-ROBUST-004].
+- S3 has no level input and still scores 0.182 on RDKit L and 0.033 on true L (1 seed) [E-ROBUST-004]. INFERENCE: it
+  infers the regime from L. The two endpoint scores are consistent with this but do not show it (revised after V2
+  card note).
 - S4's λ is one CLI value for every node of every molecule [E-ROBUST-017]. RDKit's ring error is very uneven across
-  molecules: 9% of seeds with smallest ring 3 have endocyclic-dihedral error > 10°, against 48-92% for smallest rings
-  of 4 to ≥ 7 atoms [E-ROBUST-007]. No single λ describes that L.
+  molecules: 48-92% of seeds with a smallest ring of 4 to ≥ 7 atoms have endocyclic-dihedral error > 10°, while
+  3-ring-only molecules have none by construction [E-ROBUST-007] (revised after D-101; the former "9% for ring 3" was a
+  dilution artefact). INFERENCE: no single λ describes that L.
 - The intermediate regime is where the models differ: B1 overtakes CTRL only at λ ≈ 0.75 [E-ROBUST-005].
 - S3 vs S4 is confounded. They differ in the continuum, in the λ input, and in the training conformers (only S4 drops
   pair_ok failures, about 8%) [E-ROBUST-058]. The blind arm shares S4's data path [E-ROBUST-014], so blind vs S4
@@ -40,7 +42,8 @@ to molecule. A blind model adapts per molecule; S4 needs one λ per source, pick
 ## 5. Minimal experiment (scout)
 - **Gate (pre-declared).** Run only if round-2 S4 (3 seeds; λ picked on validation molecules, never on test) beats S3
   by ≥ 0.005 Å AMR-R on MMFF L or on λ = 0.5, or comes closer to B1 at λ = 1 than S3 by ≥ 0.005 Å.
-- **Arm.** S4-blind: `paired | --l_interp --log_timing --fail_on_nan`, 100 epochs, 2 seeds.
+- **Arm.** S4-blind: `paired | --l_interp --log_timing --fail_on_nan`, 100 epochs, 2 seeds. The in-job generate fields
+  must not carry `--l_level` (generate_confs.py:107-110 exits otherwise; V2 note on E-ROBUST-018).
 - **Controls.** S4 (3 seeds, round 2) with λ = 0 on RDKit L, λ = 1 on GT L, and λ picked on validation for MMFF; S3
   (2 seeds). For like-for-like data, all arms are re-scored on S4's molecule subset, as round 2 already does for S4
   (user ruling, round2/DECISION.md) [E-ROBUST-058].

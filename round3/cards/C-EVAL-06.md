@@ -1,4 +1,4 @@
-# C-EVAL-06: Re-reference QM9 at DFT level and add Boltzmann ensemble-property errors (NO for round 3)
+# C-EVAL-06: Re-reference QM9 at DFT level (NO) and add Boltzmann ensemble-property errors (not for round 3)
 
 ## 1. Idea (scout)
 Two popular "make the benchmark more chemical" moves, assessed together because both are proposed as answers to
@@ -13,8 +13,9 @@ geometries) and re-score our arms against them; (b) add TD/ET-Flow-style Boltzma
   [E-EVAL-051].
 - TD (100 DRUGS molecules, min(2K, 32) conformers, GFN2-xTB relaxation) [E-EVAL-024] and ET-Flow (same design)
   [E-EVAL-054] use Boltzmann-weighted ensemble properties as a chemical check alongside RMSD.
-- GEOM's authors present GEOM as a recall/diversity benchmark and warn that CREST conformer weights are inaccurate
-  [E-EVAL-016].
+- GEOM's authors present GEOM as a recall/diversity benchmark, warn that CREST conformer weights are inaccurate, and
+  say probability benchmarks should use GEOM's DFT weights [E-EVAL-016], which exist only for the 1,511 BACE species
+  [E-EVAL-059]. (Revised after D-001: the recommendation was omitted before.)
 
 ## 3. Why it could matter here (scout)
 - Many of our AMR-R differences are a few thousandths to hundredths of an Å (e.g. S3 vs CTRL on ETKDG L: 0.1816 vs
@@ -26,10 +27,14 @@ geometries) and re-score our arms against them; (b) add TD/ET-Flow-style Boltzma
     references, and our oracle analyses (true L = xTB L) would no longer be oracles. QM9's DFT geometry is one structure
     per molecule, so ensemble recall cannot be scored against it (INFERENCE from E-EVAL-013: GEOM-QM9's other
     conformers exist only at xTB level).
-  - (b) after GFN2-xTB relaxation the L-related error largely disappears (TD E_min 36.94 → 0.13 kcal/mol
-    [E-EVAL-022]) and "errors from global flexibility become important" [E-EVAL-023], so the metric is by
-    construction insensitive to the thing FlexiTors changes; without relaxation the errors are "far too large" to be
-    meaningful [E-EVAL-023]. Boltzmann weights from CREST are themselves inaccurate [E-EVAL-016].
+  - (b) Without relaxation the property errors are "far too large" to be meaningful [E-EVAL-023]; with GFN2-xTB
+    relaxation they fall sharply (TD E_min 36.94 → 0.13 kcal/mol on DRUGS [E-EVAL-022]) and errors from global
+    flexibility "become important" [E-EVAL-023]. Relaxation is local, so the ring pucker and torsion basin an L choice
+    produces do survive it; the metric is therefore NOT insensitive to what FlexiTors changes (Revised after D-001:
+    the earlier "by construction insensitive" was WITHDRAWN). The remaining reasons not to add it in round 3: for QM9
+    the Boltzmann weights would come from CREST, which GEOM calls inaccurate, and GEOM's DFT weights exist only for BACE
+    [E-EVAL-016, E-EVAL-059]; and whether relaxed conformers land in the right basins is measured more directly, without
+    any weights, by re-scoring the relaxed structures against the references (C-EVAL-05) and by E_relax (C-EVAL-03).
 - The useful part of the concern, "is the generated L physically right without looking at GT?", is captured more
   cheaply and more sharply by E_relax and displacement-to-own-minimum (C-EVAL-03), which keeps the xTB level the
   benchmark was built on.
@@ -49,9 +54,13 @@ below the AMR-R differences we care about (≤ 0.01 Å), (a) is moot. CPU cost n
 cluster; availability not checked).
 
 ## 6. Scout's own call (scout)
-Worth trying: NO — re-referencing breaks comparability and the oracle analyses, and post-relaxation ensemble properties
-are by construction insensitive to local-structure changes; C-EVAL-03 covers the useful part at the right level of
-theory.
+Worth trying: NO for (a) — re-referencing breaks comparability with every published number and the oracle analyses.
+(b) not for round 3 (MAYBE for the DRUGS phase) — it is sensitive to basin choices, but on QM9 it rests on CREST
+weights GEOM calls inaccurate, and C-EVAL-03/05 measure the same thing more directly.
+
+Revision history (scout, P2): Revised after D-001. Original §3(b) and §6 argued that post-relaxation ensemble
+properties are "by construction insensitive to local-structure changes", based on the overstated E-EVAL-023 reading
+("dominate"); WITHDRAWN. The call for (b) changed from NO to "not for round 3 / MAYBE for DRUGS"; (a) stays NO.
 
 ## 7. Code grounding (grounder)
 ## 8. Predicted effect on our project (analyst)
