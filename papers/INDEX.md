@@ -52,4 +52,30 @@ Built 2026-09-29. Root: `papers/`. Every entry has a verified URL that was opene
 | 2021_ho_cascaded_diffusion (PDF + fulltext only; added round 2 by research agent A) | 2021 | JMLR 2022, arXiv 2106.15282 | G2 (technique) | — | Cascaded diffusion: a 2nd-stage model trained on GT conditioning fails on 1st-stage samples (train-test mismatch); fixed by Gaussian "conditioning augmentation", optionally amortised over the augmentation level fed as an extra embedding (p. 3, 6, 18). Template for an L-noise-augmented / L-level-conditioned torsion model. |
 | 2023_ning_input_perturbation (PDF + fulltext only; added round 2 by research agent A) | 2023 | ICML 2023, arXiv 2301.11706 | G2 (technique) | — | DDPM-IP: perturb ground-truth inputs during training to simulate inference-time prediction errors (exposure bias) (p. 1, 4). Second precedent for L-noise augmentation. |
 
-**Counts:** 1 core paper + 26 related entries (25 PDFs stored; LoQI note only).
+| 2022_axelrod_geom (PDF + fulltext only; added round 3 by SCOUT GEOM) | 2022 | Sci. Data 2022, arXiv 2006.05531 | data provenance (G1 reference level) | — | The GEOM dataset paper: QM9 conformers are CREST ensembles with GFN2-xTB-optimised geometries (QM9 seeds re-optimised with xTB, default gas-phase CREST settings; 0.5 core-h per QM9 molecule) (p. 3, 5). So an L relaxed with GFN2-xTB targets the reference level of our GT. |
+| 2023_kovacs_mace_off (PDF + fulltext only; added round 3 by SCOUT GEOM) | 2023/25 | arXiv 2312.15211 (v5) | technique (ML potential) | — | MACE-OFF transferable organic ML force fields trained on SPICE at ωB97M-D3(BJ)/def2-TZVPPD (p. 3): a DFT-level target, not the GFN2-xTB level of GEOM references. |
+
+| 2021_chan_ring_puckering (PDF + fulltext only; added round 3 by SCOUT GEOM; open-access author copy from ora.ox.ac.uk) | 2021 | J. Chem. Inf. Model. 61, 743–755 | G1 (rings) | CREST/GFN2 ring set | Cremer-Pople analysis of 140k molecules: ring conformations fall into relatively few canonical clusters; a knowledge-based pucker sampler reproduces CREST/GFN2 lowest-energy ring conformers at 0.09 Å mean RMSD, the residual being bond lengths/angles (p. 1, 11). Supports ring-template / pucker-library L sources. |
+
+| 2025_sun_noise_conditioning (PDF + fulltext only; added round 3 by SCOUT ROBUST) | 2025 | ICML 2025, arXiv 2502.13129 | G2 (technique) | — | Most denoising generative models degrade gracefully without noise-level conditioning, because the level is inferable from the input (dimension-dependent); a separately predicted level behaves like none (p. 1, 4, 8). Bears on whether a torsion model needs an explicit L-quality input (S4 λ). |
+| 2022_ho_classifier_free_guidance (PDF + fulltext only; added round 3 by SCOUT ROBUST) | 2022 | NeurIPS 2021 workshop, arXiv 2207.12598 | technique | — | CFG: joint conditional/unconditional training with a null token; p_uncond 0.1-0.2 beats 0.5; guidance trades diversity for fidelity (p. 4, 8, 9). |
+| 2023_du_reduce_reuse_recycle (PDF + fulltext only; added round 3 by SCOUT ROBUST) | 2023 | ICML 2023, arXiv 2302.11552 | technique | — | Composing diffusion scores and running the plain reverse process does not sample the composed distribution; MCMC correction needed (p. 5). |
+| 2015_bengio_scheduled_sampling (PDF + fulltext only; added round 3 by SCOUT ROBUST) | 2015 | NeurIPS 2015, arXiv 1506.03099 | G2 (analogy) | — | Scheduled sampling: curriculum from true to model-generated inputs to fight train/inference discrepancy (p. 1, 2). |
+| 2015_huszar_scheduled_sampling_critique (PDF + fulltext only; added round 3 by SCOUT ROBUST) | 2015 | arXiv 1511.05101 | G2 (analogy) | — | The scheduled-sampling objective is improper/inconsistent and pushes models to ignore the conditioning content (p. 1, 4). |
+| 2011_ross_dagger (PDF + fulltext only; added round 3 by SCOUT ROBUST) | 2011 | AISTATS 2011, arXiv 1011.0686 | G2 (analogy) | — | DAgger: train on the input distribution the learner induces, labelled by the expert (p. 1, 3); the template for "train on the deployed L source with re-matched torsions". |
+| 2017_tobin_domain_randomization (PDF + fulltext only; added round 3 by SCOUT ROBUST) | 2017 | IROS 2017, arXiv 1703.06907 | G2 (analogy) | — | Domain randomisation: with enough training variability the target looks like one more variation (p. 1). |
+| 2024_ni_sliced_denoising (PDF + fulltext only; added round 3 by SCOUT ROBUST) | 2024 | ICLR 2024, arXiv 2311.02124 | technique (molecular noise) | — | SliDe: isotropic coordinate noise is an inappropriate assumption for molecules; "BAT" noise on bond lengths, angles, torsions with force-field variances (p. 2). |
+| 2022_dauparas_proteinmpnn (PDF + fulltext only; added round 3 by SCOUT ROBUST; bioRxiv 2022.06.03.494563 v1) | 2022 | Science 2022 (preprint) | G2 (analogy, proteins) | — | 0.02 Å backbone-noise training: better recovery on AlphaFold models, worse on exact PDB structures; exact coordinates carry "memory" of the target (p. 3 Table 1, p. 7). |
+
+Round-3 fulltexts added by SCOUT ROBUST are reading-order extractions (`pdftotext` without `-layout`). A reading-order copy
+of the round-2 Ning et al. fulltext is at `related/fulltext/2023_ning_input_perturbation.readingorder.txt`. Blog snapshots
+added by SCOUT ROBUST (in `blogs/`): `song_2021_score.txt`, `weng_2019_domain_randomization.txt`,
+`dieleman_2022_guidance.txt`, `weng_2021_diffusion_models.txt`.
+
+| 2023_zhang_infinite_physical_monkey (PDF + fulltext only; added round 3 by SCOUT EVAL) | 2023 | arXiv 2304.10494 | eval | GD-P | Reply to Zhou et al.: a still more random "Infinite Stochastic Monkey" sampler also scores high COV/MAT with ~2000 samples; argues RDKit + Clustering is only a fair baseline if deep models get the same sample-and-cluster budget (p. 5, 9). |
+
+Blog/technical snapshots added by SCOUT EVAL (in `blogs/`): `rowan_openconf_2026.txt` (Rowan, ETKDG pathologies),
+`rdkit_release_notes_2024_03.txt` (RDKit default changed from ETKDGv1 to ETKDGv3 in 2024.03.1). SCOUT EVAL's fulltext
+is a `pdftotext -layout` extraction.
+
+**Counts:** 1 core paper + 39 related entries (38 PDFs stored; LoQI note only).
