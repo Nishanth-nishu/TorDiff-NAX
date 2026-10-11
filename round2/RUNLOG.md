@@ -8,3 +8,7 @@
 | 2026-10-07 | 11168 | Main training array, 10 runs (B6 x3 + B6 0.02, S3 x2, S4 x3, B1cap), 4 at a time | running |
 | 2026-10-07 | 11169 | S5 / B3 MMFF-matched training, 3 runs | queued |
 | 2026-10-07 | 11170-11180, 11185 | Post-training evaluation panels, one per model (afterok on its training task) | queued |
+| 2026-10-07 – 10 | 11168, 11169 | All 13 training runs | COMPLETED (10.7–11.9 h each, no failures, no resumes needed) |
+| 2026-10-08 – 10 | 11170–11180, 11185 | Post-training evaluation panels | 11/12 completed; 11176 (S4 s0) failed on 2 tags: CUDA OOM while another job held the GPU (ours used 2 GB of 24) — second occurrence, see 11155 |
+| 2026-10-11 | 16421 | Rerun of S4 s0 panel (2 failed tags only) | running |
+| 2026-10-11 | 16423 | Pre-declared round-2 analysis (`slurm/analyze_round2.sbatch`, afterok 16421) | queued |
