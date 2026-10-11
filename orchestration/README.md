@@ -35,6 +35,20 @@ resumes it to answer. No agent edits another agent's file.
 | P6 Build | implementer, code reviewer, conformance checker | commits, `IMPLEMENTATION.md`, `conformance.md` | Tests pass; reviewer has no blocker; conformance checker confirms each cited mechanism matches the code, quote by quote |
 | P7 Run & analyse | orchestrator + analysis driver | results, paired stats | Pre-declared comparisons only; verifier re-checks conclusions |
 
+## Protocol v2 additions (round 4 on)
+- **Consult channel.** `round<N>/consult/` holds one file per question: `Q-<FROM>-NNN.md` with the question, the
+  card or code it concerns, and what decision depends on it. The orchestrator routes it to the right research agent,
+  who appends `## Answer (<AGENT>)` with E-ID citations; the asker appends `## Follow-up` if needed. Coding agents must
+  consult before choosing any mechanism, hyperparameter or evaluation detail that a source specifies.
+- **Novelty gate.** Before the panel, a novelty red-teamer checks every proposed contribution claim against prior art
+  (search 2023–2026) and rules NOVEL / INCREMENTAL / PRIOR ART (with the citation). Only NOVEL or clearly-scoped
+  INCREMENTAL claims go into the paper plan.
+- **Conformance gate before push.** After implementation, the research agent that sourced each mechanism writes
+  `round<N>/conformance.md`: for each mechanism, the source quote (PDF page) beside the code that implements it
+  (`path:line`), ruled MATCHES / JUSTIFIED DEVIATION / MISMATCH. A MISMATCH blocks the push.
+- **Push.** The orchestrator pushes only after tests pass, reviewers report no blocker, and conformance has no
+  MISMATCH.
+
 ## Rules for every agent
 1. Never invent a quote, page, URL, number, or `path:line`. If unsure, write UNVERIFIED and say what is missing.
 2. Quotes are exact and ≤ 40 words. Paper locators give PDF page (and printed page if different). Blog locators give
