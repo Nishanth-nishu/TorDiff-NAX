@@ -1,0 +1,14 @@
+# Round-4 leak-free (split-half) oracle test: one array task per line (slurm/r4_leakfree_array.sbatch).
+#   MODEL_DIR ($VARS expanded) | extra generate_confs.py args
+# S4 is lambda-conditioned: --l_level 1 (true-L end, as its round-2 gtLcycle evaluation).
+$WORK/qm9_CTRL_rematch_100ep_e100_s0 |
+$WORK/qm9_CTRL_rematch_100ep_e100_s1 |
+$WORK/qm9_CTRL_rematch_100ep_e100_s2 |
+$WORK/qm9_B1_train_gtL_e100_s0 |
+$WORK/qm9_B1_train_gtL_e100_s1 |
+$WORK/qm9_B1_train_gtL_e100_s2 |
+$WORK/qm9_S3_mixL_p0.5_e100_s0 |
+$WORK/qm9_S3_mixL_p0.5_e100_s1 |
+$WORK/qm9_S4_lamcond_e100_s0 | --l_level 1
+$WORK/qm9_S4_lamcond_e100_s1 | --l_level 1
+$WORK/qm9_S4_lamcond_e100_s2 | --l_level 1
