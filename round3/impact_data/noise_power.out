@@ -1,0 +1,63 @@
+## Training-seed SD of AMR-R (arms with >= 2 seeds)
+                   arm                       tag  size   mean    std
+qm9_CTRL_rematch_100ep     S1_lam0.00_cyc_ORACLE     3 0.1966 0.0002
+qm9_CTRL_rematch_100ep S1_noise0.02pa_cyc_ORACLE     3 0.0976 0.0002
+qm9_CTRL_rematch_100ep     S1_lam1.00_cyc_ORACLE     3 0.0805 0.0003
+qm9_CTRL_rematch_100ep      S1_A5ring_cyc_ORACLE     3 0.1186 0.0003
+qm9_CTRL_rematch_100ep     S1_lam0.25_cyc_ORACLE     3 0.1596 0.0004
+qm9_CTRL_rematch_100ep                S1_etkdg2L     3 0.1779 0.0005
+      qm9_B1_train_gtL    steps20_seed0_gtLcycle     3 0.0212 0.0005
+qm9_CTRL_rematch_100ep    steps20_seed0_gtLcycle     3 0.0822 0.0006
+qm9_CTRL_rematch_100ep           S1_etkdg2L_mmff     3 0.1525 0.0006
+qm9_B2_DEonly_randpair             steps20_seed0     3 0.1808 0.0007
+    qm9_B5_match_heavy             steps20_seed0     3 0.1845 0.0009
+qm9_CTRL_rematch_100ep     S1_lam0.50_cyc_ORACLE     3 0.1364 0.0009
+qm9_CTRL_rematch_100ep     S1_lam0.75_cyc_ORACLE     3 0.1156 0.0009
+   qm9_CTRL_base_100ep    steps20_seed0_gtLcycle     3 0.0820 0.0010
+      qm9_B1_train_gtL      S1_A5acyc_cyc_ORACLE     3 0.1583 0.0011
+qm9_CTRL_rematch_100ep      S1_A5acyc_cyc_ORACLE     3 0.1824 0.0011
+qm9_CTRL_rematch_100ep S1_noise0.04pa_cyc_ORACLE     3 0.1186 0.0012
+qm9_CTRL_rematch_100ep           S5ctrl_pre_mmff     3 0.1540 0.0012
+   qm9_CTRL_base_100ep             steps20_seed0     3 0.1806 0.0013
+qm9_CTRL_rematch_100ep             steps20_seed0     3 0.1786 0.0014
+      qm9_B6_jit0.04pa    steps20_seed0_gtLcycle     3 0.0541 0.0014
+      qm9_B1_train_gtL     S1_lam0.50_cyc_ORACLE     3 0.1812 0.0016
+      qm9_B1_train_gtL         steps20_seed0_gtL     3 0.0369 0.0018
+   qm9_CTRL_base_100ep         steps20_seed0_gtL     3 0.0843 0.0020
+      qm9_B6_jit0.04pa             steps20_seed0     3 0.2060 0.0021
+      qm9_B1_train_gtL     S1_lam0.75_cyc_ORACLE     3 0.1146 0.0027
+      qm9_B1_train_gtL                S1_etkdg2L     3 0.2356 0.0027
+      qm9_B1_train_gtL           S1_etkdg2L_mmff     3 0.2323 0.0031
+      qm9_B1_train_gtL             steps20_seed0     3 0.2341 0.0037
+      qm9_B1_train_gtL     S1_lam0.25_cyc_ORACLE     3 0.2219 0.0047
+      qm9_B1_train_gtL      S1_A5ring_cyc_ORACLE     3 0.1877 0.0057
+      qm9_B1_train_gtL     S1_lam0.00_cyc_ORACLE     3 0.2614 0.0062
+      qm9_B1_train_gtL S1_noise0.04pa_cyc_ORACLE     3 0.1536 0.0140
+      qm9_B1_train_gtL S1_noise0.02pa_cyc_ORACLE     3 0.1170 0.0223
+
+CTRL-family seed SD: median 0.0009, max 0.0020; B1 seed SD: median 0.0031, max 0.0223
+sampling-seed SD (released model R0/R1/R2): 0.0008; A1 gtL sampling seeds: 0.0026
+
+## Paired-bootstrap CI half-widths (MAT-R) in round-1 paired tables
+  paired_A1c_vs_A1_qm9_default.md        A1c      n= 996 diff -0.0037 half-width 0.0025
+  paired_B1_vs_CTRLbase.md               B1       n= 934 diff +0.0536 half-width 0.0066
+  paired_B1_vs_CTRLbase.md               CTRL_rematch n= 934 diff -0.0020 half-width 0.0013
+  paired_B1_vs_CTRLbase_gtL.md           B1_gtL   n= 996 diff -0.0473 half-width 0.0057
+  paired_B1_vs_CTRLbase_gtLcycle.md      B1_gtLc  n= 996 diff -0.0608 half-width 0.0058
+  paired_B_vs_CTRLrematch.md             B2       n= 934 diff +0.0021 half-width 0.0016
+  paired_B_vs_CTRLrematch.md             B5       n= 934 diff +0.0058 half-width 0.0021
+  paired_vs_R0_qm9_default.md            A0_rdkit n= 927 diff +0.0535 half-width 0.0076
+  paired_vs_R0_qm9_default.md            A0_rand  n= 927 diff +0.0660 half-width 0.0065
+  paired_vs_R0_qm9_default.md            A1       n= 927 diff -0.0926 half-width 0.0064
+  paired_vs_R0_qm9_default.md            A1c      n= 927 diff -0.0963 half-width 0.0066
+  paired_vs_R0_qm9_default.md            A2       n= 927 diff -0.0262 half-width 0.0049
+  paired_vs_R0_qm9_default.md            A3       n= 927 diff +0.0098 half-width 0.0066
+  paired_vs_R0_qm9_default.md            G1       n= 922 diff +0.0001 half-width 0.0037
+
+## Seeds per arm for 80% power (seed noise only; add the molecule CI in quadrature)
+  sd 0.0005: delta 0.003: k>=1; delta 0.005: k>=1; delta 0.010: k>=1; delta 0.020: k>=1
+  sd 0.0010: delta 0.003: k>=2; delta 0.005: k>=1; delta 0.010: k>=1; delta 0.020: k>=1
+  sd 0.0015: delta 0.003: k>=4; delta 0.005: k>=2; delta 0.010: k>=1; delta 0.020: k>=1
+  sd 0.0020: delta 0.003: k>=7; delta 0.005: k>=3; delta 0.010: k>=1; delta 0.020: k>=1
+  sd 0.0030: delta 0.003: k>=16; delta 0.005: k>=6; delta 0.010: k>=2; delta 0.020: k>=1
+  sd 0.0050: delta 0.003: k>=44; delta 0.005: k>=16; delta 0.010: k>=4; delta 0.020: k>=1

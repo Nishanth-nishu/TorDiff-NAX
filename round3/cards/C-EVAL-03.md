@@ -74,5 +74,48 @@ Revision history (scout, P2): Revised after D-003 and D-007 (torsion qualificati
 ETKDG-failure scope, cost with validation subset). The call is unchanged.
 
 ## 7. Code grounding (grounder)
+- **Cluster check (2026-10-08/11):** **xtb 6.7.1 is already on gnode118** as the module binary
+  `/data3/u22/xtb-6.7.1/bin/xtb` (Ubuntu 22.04 node; call it by path, since `module` is not initialised in `srun`).
+  **No install is needed.**
+  - Probe (10 test molecules, 1 thread, `--opt normal --norestart`): median 0.135 s, max 0.38 s per optimisation.
+  - GT conformers converge in 1 cycle with 0.000 Å displacement, so the zero check holds on the probe.
+- **Touchpoints:** a fixed xTB runner (`tools/xtb_relax.py`, ~150 lines). TD's `utils/xtb.py` cannot be used as is:
+  1. it fixes its work dir at import (`:5-7`), so forked Pool workers share `xtb.xyz`, which silently swaps
+     coordinates between molecules;
+  2. no `--norestart` (`:49`);
+  3. no convergence check (use `.xtboptok`);
+  4. its runtime parse (`:51-52`) can fail **before** coordinates are written;
+  5. no `--chrg`.
+  Also needed:
+  - a 3D graph/stereo filter: the evaluator filters only GT conformers (`evaluate_confs.py:86`), never generated ones;
+  - a validation-set builder (none exists; `split.npy[1]` as `utils/dataset.py:167-179`) for the 200 validation
+    molecules, plus inference runs on them (~0.3–0.5 GPU-h; the card says 0).
+- **Transfer check:** gas phase, GFN2 default, as the references [E-EVAL-012/013/055]. Version 6.7.1, not 6.2.3
+  [E-EVAL-056]; the probe shows the references are minima under 6.7.1 too.
+- **Reuse:** existing `confs.pkl` of every listed arm; `lgeom.l_subset_errors`; `geometry_metrics.topology`.
+- **Size / risk:** ~280 lines + 4 tests. Risks: tmp-dir collision; unconverged counted as minima; graph changes scored.
+- **Verdict: IMPLEMENTABLE WITH CHANGES.**
+- **Cost:** ≈ 8 CPU-h (test + validation halves; the card said 22–67); ~0.3–0.5 GPU-h for validation generation.
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data and model: `round3/impact.md` §3c.
+- **Ceiling.** n/a (a metric; no AMR change).
+- **Expected outcome.** Arms that share ETKDG L (R0, CTRL, S3, B1) will have near-identical bond and angle terms,
+  and MMFF-L arms lower ones.
+  - INFERENCE: relaxation is local, so a wrong-pucker ring is still near a minimum. E_relax will largely miss the
+    ring tail, which is what drives CTRL's AMR-R (§3c).
+  - What it does measure is the bond/angle part. That matters for B1 (and ≤ 0.008 Å for CTRL), and it is a
+    reference-free check of whether an L source is "reference-like", the unknown that decides B1 on xTB or ET-Flow L.
+- **Detectability.** n/a.
+- **Decision value.** Medium. It is the only GT-free check of L quality, but it is blind to the pucker tail.
+- **Worth trying: YES.** The xtb 6.7.1 binary already runs on gnode118 (grounding.md 2.1), so no install is needed,
+  and the cost (≈ 8 CPU-h) is shared with C-GEOM-01's runner.
+
+**Revised after cross-read (2026-10-11).**
+- History: the call above changed in round 1 of the cross-read from "YES if C-GEOM-01's xtb install succeeds (shared
+  cost), otherwise MAYBE" to YES, because xtb 6.7.1 already runs on gnode118 (grounder 2.1).
+- Cost: ≈ 8 CPU-h, plus 0.3–0.5 GPU-h for the validation half (grounder).
+- Needs the S-1 runner fixes (temp-dir race) and the S-2 graph filter.
+- Call: **YES**.
+
 ## 9. Panel (judges)

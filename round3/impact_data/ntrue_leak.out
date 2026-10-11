@@ -1,0 +1,43 @@
+## Molecules per n_true bin (l_error.csv, 996) and mean P0 = P(no own-L draw) per bin
+  1: n=253 P0=0.000  2-3: n=243 P0=0.072  4-10: n=281 P0=0.111  11-30: n=135 P0=0.127  >30: n=84 P0=0.133
+  single-conformer share: 0.254; molecule-mean share of conformers WITH own L in gtL: 0.922
+
+## AMR-R (MAT-R) per n_true bin 1 / 2-3 / 4-10 / 11-30 / >30  [n seeds]
+  CTRL_gtL  0.025 0.076 0.105 0.133 0.138   n=253/243/281/135/84 [3]
+  CTRL_cyc  0.025 0.069 0.105 0.130 0.136   n=253/243/281/135/84 [3]
+  B1_gtL    0.004 0.040 0.047 0.054 0.062   n=253/243/281/135/84 [3]
+  B1_cyc    0.004 0.016 0.025 0.038 0.046   n=253/243/281/135/84 [3]
+  CTRL_H    0.164 0.210 0.186 0.170 0.161   n=228/232/278/133/84 [3]
+  B1_H      0.159 0.200 0.159 0.121 0.099   n=228/232/278/133/84 [3]
+  CTRL_E    0.151 0.189 0.186 0.185 0.182   n=223/227/274/127/84 [3]
+  CTRL_M    0.110 0.161 0.166 0.176 0.163   n=223/227/274/127/84 [3]
+  B1_E      0.163 0.236 0.267 0.257 0.291   n=223/227/274/127/84 [3]
+  B1_M      0.125 0.221 0.274 0.299 0.308   n=223/227/274/127/84 [3]
+
+CTRL: gtL - gtLcycle per bin: +0.0000 +0.0070 -0.0003 +0.0037 +0.0017  (bin 1 must be ~0: identical seeds)
+CTRL: implied other-conformer-L AMR per bin (A_other):   n/a  0.166 0.102 0.158 0.149
+
+B1: gtL - gtLcycle per bin: +0.0000 +0.0243 +0.0227 +0.0153 +0.0163  (bin 1 must be ~0: identical seeds)
+B1: implied other-conformer-L AMR per bin (A_other):   n/a  0.353 0.228 0.159 0.169
+
+## tail10 (ring>=4 rows) per n_true bin: A5acyc 0.378 0.426 0.462 0.464 0.747 | ETKDG 0.343 0.401 0.431 0.469 0.690 | MMFF 0.103 0.208 0.272 0.350 0.575
+
+## Validation (ETKDG / MMFF observed vs predicted), leaky G, by subset
+  CTRL [all      ] ETKDG pred 0.1757 obs 0.1780 | MMFF pred 0.1301 obs 0.1524
+  CTRL [n_true>=2] ETKDG pred 0.1833 obs 0.1863 | MMFF pred 0.1510 obs 0.1656
+  B1 [all      ] ETKDG pred 0.1504 obs 0.2357 | MMFF pred 0.0953 obs 0.2322
+  B1 [n_true>=2] ETKDG pred 0.1521 obs 0.2583 | MMFF pred 0.1105 obs 0.2656
+
+## xTB-type predictions, X = overall ring>=4 >10 deg share (bin tails = MMFF bin tails * X / 0.351)
+   G variants: leaky = gtL (own L almost always present); noleak = A_other (only other conformers' L);
+   bin 1 (single conformer) under noleak: [own] = gtL (right for rigid molecules: right pucker IS own L) or
+   [pess] = A_other of bin 2-3 (flexible single-conformer molecules whose torsional basin is not sampled).
+     X  CTRL_leaky_all  CTRL_leaky_multi  CTRL_noleak_multi  CTRL_noleak_all_own  CTRL_noleak_all_pess  B1_leaky_all  B1_leaky_multi  B1_noleak_multi  B1_noleak_all_own  B1_noleak_all_pess
+0.3510          0.1301            0.1510             0.1667               0.1421                0.1664        0.0954          0.1106           0.1976             0.1617              0.2221
+0.3000          0.1237            0.1443             0.1625               0.1376                0.1632        0.0870          0.1015           0.2050             0.1658              0.2296
+0.2500          0.1173            0.1377             0.1584               0.1332                0.1601        0.0787          0.0926           0.2123             0.1699              0.2369
+0.2000          0.1110            0.1311             0.1544               0.1288                0.1570        0.0705          0.0837           0.2196             0.1740              0.2442
+0.1500          0.1047            0.1244             0.1503               0.1244                0.1539        0.0623          0.0747           0.2268             0.1781              0.2515
+0.1000          0.0984            0.1178             0.1462               0.1199                0.1508        0.0540          0.0658           0.2341             0.1822              0.2589
+0.0500          0.0920            0.1112             0.1421               0.1155                0.1477        0.0458          0.0569           0.2413             0.1863              0.2662
+0.0000          0.0857            0.1046             0.1380               0.1111                0.1446        0.0376          0.0480           0.2486             0.1903              0.2735

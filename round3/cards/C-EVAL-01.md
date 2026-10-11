@@ -85,5 +85,64 @@ quoting the δ = 0.05 Å coverage of a 0.083-Å run; original §2 inference on r
 claim withdrawn; original §5 included S3 in the λ expectation. The call is unchanged.
 
 ## 7. Code grounding (grounder)
+- **Touchpoints:**
+  - new `tools/report_block.py` (~80 lines) on top of `paired_compare.py` (thresholds `:32`, intersection
+    `:41`/`:105-106`, failures `:107-113`);
+  - new `tools/l_error_regression.py` (~120 lines), which joins `eval.pkl` per-molecule AMR (keyed by corrected
+    SMILES) to `l_error.csv` (keyed by csv col 0) via `analyze_round2.py:166-167`, with an assert of ≥ 99 % join
+    coverage.
+- **Transfer check:**
+  - Literature δ = 0.5 Å AMR means over successes match our `nanmean`/failure convention (`evaluate_confs.py:166-171`,
+    [E-EVAL-033]).
+  - Three changes are needed for the L-error analysis:
+    1. fit **within molecules** across the λ series; a cross-molecule regression confounds L error with molecule
+       difficulty;
+    2. use one L-error statistic: ETKDG/MMFF rows cover only the L Hungarian-assigned seeds
+       (`make_l_seed_pickles.py:106-114`), while λ rows cover every seed;
+    3. restrict to the 906-molecule λ population and exclude or flag the 258 molecules whose λ 0.25–0.75 slots reuse
+       another pair's seed. Their error is measured against the source GT (`make_l_seed_pickles.py:218-231`; found by
+       the impact analyst).
+  - λ = 1 exists for CR ×3 and B1 s0 only.
+  - CR has no random-GT run (optional, 0.5 GPU-h).
+- **Slip (V1 R2-1):** "CTRL never reaches the ET-Flow range" is wrong as written, since 0.0803 Å is inside
+  0.073–0.083. Correct: it reaches the 0.083 Å re-run level only at λ ≈ 0.98 and never reaches the published 0.073 Å.
+- **Reuse:** all existing `eval.pkl` files, `l_error.csv`, `analyze_round2.py` helpers.
+- **Size / risk:** ~200 lines + 1 synthetic test. Risks: key mis-join; reading the cycled oracle as reachable.
+- **Verdict: IMPLEMENTABLE WITH CHANGES.**
+- **Cost:** 0 GPU-h (+0.5 optional); 1–2 CPU-h.
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data and model: `round3/impact.md` §1, §3f (`impact_data/mixture_model.out`). Round-2 numbers are PRELIMINARY.
+- **Ceiling.** n/a (analysis, 0 GPU-h).
+- **Already computable from synced data** (reference-like acyclic L, ETKDG population):
+  - CTRL's floor is 0.086 (random-GT-conformer L). It reaches neither the published ET-Flow 0.073 nor the 0.083
+    re-run level. The cycled λ = 1 value (0.080) includes conformer identity.
+  - B1 reaches 0.073 at a ring tail ≤ ≈ 14 %, 0.083 at ≤ 18 %, DMT-B 0.090 at ≤ 21 %, and MCF-B 0.103 at ≤ 26 %
+    (> 10° share, 49.6 % basis).
+  - These replace the λ interpolation (λ ≈ 0.84–0.86). In λ ∈ (0,1), 10 % of slots (258 molecules) reuse another GT
+    conformer's seed, and their l_error rows are measured against the source GT, so λ is not a clean L axis
+    (impact.md §1).
+- **Expected effect.** The per-molecule regression proposed in §5 needs the cluster's eval pickles or
+  `breakdown.csv` (not synced). I expect it to confirm that no CTRL arm reaches the published state of the art on any
+  L, and that B1-type models need a tail ≲ 15 % plus reference-like acyclic L. Worst case: nothing beyond this, at no
+  GPU cost.
+- **Detectability.** n/a.
+- **Decision value.** High: it sets the bar. Any CTRL-based FlexiTors arm is capped at ≈ 0.086 on QM9, so a
+  state-of-the-art claim needs a B1/S3-type model with near-reference L.
+  - Suggested change: use the random-GT-conformer oracle (`gtL`) as the reachable ceiling, and either drop the λ
+    interpolation or restrict it to non-replaced slots.
+- **Worth trying: YES.**
+
+**Revised after cross-read (2026-10-11).**
+1. **Leak.** The thresholds above (B1 reaches 0.073 at a tail ≤ 14 %; CTRL floor 0.086) assume every target gets its
+   own conformer's L, and the random-GT anchor is mostly leaky (grounder 5.2.1). Leak-corrected (impact.md §3g): with
+   other-conformer L only, the CTRL floor is 0.11–0.145 and B1's 0.19–0.27, so no literature level is reachable.
+   Reaching 0.073–0.103 needs an L source that puts seeds into the targets' own basins.
+2. **Fit population.** I agree with the grounder: a within-molecule fit, with the 648 molecules without replaced λ
+   slots as primary and the 906 as sensitivity. The λ axis is cycled (own-conformer identity), so add the leak
+   inversion.
+3. **Feasibility.** Possible on the cluster at CPU cost.
+
+Call unchanged: **YES**. Its value goes up: it now also states that the state of the art needs own-basin L.
+
 ## 9. Panel (judges)

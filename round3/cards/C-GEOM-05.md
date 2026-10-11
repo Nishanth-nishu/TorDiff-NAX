@@ -51,5 +51,28 @@ Worth trying: NO — for GEOM-QM9 an ML potential relaxes toward a DFT minimum i
 fix wrong pucker basins any better than xTB, and costs a separate environment; GFN2-xTB (C-GEOM-01) dominates it.
 
 ## 7. Code grounding (grounder)
+- **Environment (checked on gnode118):** TD venv python 3.9 / torch 1.13.1+cu117 / numpy 1.23.5 [E-GEOM-014]. A
+  separate env is technically possible ($PROJECT/micromamba, internet, driver 580.178.04, so CUDA-12 torch ≥ 2.8 as
+  AIMNet2 needs [E-GEOM-036] would run). The install argument in §4 is therefore weaker than written.
+- **Cost argument, now measured:** GFN2-xTB takes 0.14 s per QM9 seed on one core (module binary, no install), so an
+  ML potential has no speed case at QM9 size.
+- **Unchanged by code:** the level-of-theory argument (GFN2 references vs DFT-trained potentials [E-GEOM-015/027]).
+- **If overruled:** the §5 probe reuses the xTB/gate pipeline with the potential swapped in; separate venv + ~60 lines,
+  ≈ half a day.
+- **Verdict: NOT FEASIBLE THIS ROUND** (agrees with the scout).
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data and model: `round3/impact.md` §3.
+- **Ceiling.** A local relaxation reaches at best the same pucker basins as xTB, so CTRL follows the same tail line
+  as C-GEOM-01.
+- **Expected effect.**
+  - CTRL ≈ C-GEOM-01 (tail-driven). Different ring-strain preferences could move X slightly either way.
+  - B1: ML-potential minima follow DFT, not GFN2. The analogous MMFF→GFN2 offsets are 0.011 Å and 1.2°
+    (E-GEOM-019), and B1 fails on MMFF L (0.232). B1 therefore most likely lands in C-GEOM-01's branch (B), with no
+    B1 upside, which is xTB's main upside.
+  - Transfer: ML-potential accuracy claims are measured against DFT, and our references are GFN2.
+- **Worst case.** A separate environment for no gain over xTB.
+- **Detectability and decision value.** Low: anything it could show, C-GEOM-01 shows with the reference method.
+- **Worth trying: NO** (dominated by C-GEOM-01). Gain per GPU-h < C-GEOM-01.
+
 ## 9. Panel (judges)

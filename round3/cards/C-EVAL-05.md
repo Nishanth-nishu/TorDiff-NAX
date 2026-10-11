@@ -73,5 +73,43 @@ EnFlow relabelled as learned-energy selection; TD-unrelaxed claim now cites the 
 The call is unchanged: the core premise (xTB-after lands on the reference PES) was VERIFIED.
 
 ## 7. Code grounding (grounder)
+- **Touchpoints:** TD ships `optimize_confs.py` (xTB relaxation of a `confs.pkl`), but on QM9 it is wrong as is:
+  1. `:24` hard-codes `data/DRUGS/test_smiles_corrected.csv`;
+  2. `--limit 32` (`:16`, `:35`) silently truncates conformers per molecule;
+  3. `:40` tests `if xtb_energy:`, i.e. the imported function, not the flag;
+  4. failures are dropped uncounted (`:41-44`).
+  Fix it or use the shared fixed xTB runner. Add the 3D graph/stereo filter (the evaluator filters only GT,
+  `evaluate_confs.py:86`) and a distinct-conformer count (~30 lines). The relaxed `confs_xtb.pkl` keeps atom order, so
+  `evaluate_confs.py` is unchanged.
+- **Transfer check:**
+  - Our RMSDs are unrelaxed: `--post_mmff` is off by default (`generate_confs.py:19`) and never passed by `gen_eval`
+    (`common.sh:126-128`) [E-EVAL-035].
+  - The MMFF-after hook (`sampling.py:258-262`) is the A3 analogue; offline relaxation is equivalent.
+  - Pre-register how dropped conformers count (removed from both matrices; report `n_model`).
+- **Reuse:** every arm's `confs.pkl` exists (round-1 R0/A2; round-2 CTRL/S3/B1 `S1_etkdg2L`); C-EVAL-03's relaxed
+  subset.
+- **Verdict: IMPLEMENTABLE WITH CHANGES.**
+- **Cost:** 0 GPU-h; ≈ 2 CPU-h per arm on the full set (the card said 8–25), ≈ 11 CPU-h for 5 arms (measured 0.14 s/opt
+  on gnode118).
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data and model: `round3/impact.md` §3; round-1 A3 (`cluster_sync/results/analysis/paired_vs_R0_qm9_default.md`).
+- **Ceiling.** TD does not move rigid molecules, so in that stratum xTB-after equals xTB-relaxed seeds (0.10–0.13).
+  Flexible molecules move to the nearest xTB minimum.
+- **Expected effect: reasoning chain.**
+  1. A3 (MMFF-after) lost recall (AMR-R 0.186 vs 0.175) and gained precision (AMR-P 0.164 vs 0.221). Its
+     COV-R@0.05 was 15.5 % vs 3.9 %.
+  2. xTB minima are the reference minima (E-EVAL-018). Structures that relax into the right basin become
+     near-exact, so COV-R@0.05 should be ≫ 15 % (my guess 20–40 %).
+  3. AMR-R has two opposing forces: exact local structure helps, while samples collapsing into fewer minima, and
+     moves to wrong minima, hurt recall.
+  4. Expected CTRL + xTB-after: 0.13–0.17. P(≤ 0.150, the card's "strong") ≈ 35 %.
+- **Worst case.** A3-like, 0.186.
+- **Detectability.** Clear.
+- **Decision value.**
+  - Strong result: a learned L must beat cheap post-hoc relaxation, which reframes FlexiTors' value toward diversity
+    and cost.
+  - Weak result: confirms that L must be right during generation.
+- **Worth trying: YES** as a yardstick (CPU; shares the xTB runs with C-EVAL-03).
+
 ## 9. Panel (judges)

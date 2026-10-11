@@ -63,5 +63,22 @@ properties are "by construction insensitive to local-structure changes", based o
 ("dominate"); WITHDRAWN. The call for (b) changed from NO to "not for round 3 / MAYBE for DRUGS"; (a) stays NO.
 
 ## 7. Code grounding (grounder)
+- **(b) code state:** the hooks exist: `generate_confs.py --xtb` (`:35`, `:176-179`) → `populate_likelihood` /
+  `xtb_energy` (`diffusion/likelihood.py:114-130`), and `utils/boltzmann.py`. There is **no** ensemble-property
+  aggregation script in our repo (~100 lines). Running it also needs:
+  - `NO_ENERGY=0` (`common.sh:123`);
+  - `--ode --likelihood` (`generate_confs.py:60-61`), which drops 0-rotatable-bond molecules (`:171-174`) and so
+    changes the QM9 population.
+- **(a):** the `u22/orca/6.1.1` module is listed on ada; it is untested on gnode118 and its r2SCAN-3c cost is
+  unmeasured.
+- **Verdict: NOT FEASIBLE THIS ROUND** as a round-3 endpoint (agrees with the scout). If the panel overrules, it needs
+  the aggregation script, the population caveat and an ORACLE-free DFT probe of tens of CPU-h (UNVERIFIED).
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+- **Ceiling and expected effect.** No effect on any round-3 decision. Arm differences on our data are 0.003–0.06 Å
+  (`round3/impact_data/cond_means.txt`). No xTB-vs-DFT shift is measured for gas-phase QM9 (the 0.36 Å figure is
+  BACE in implicit water), and re-referencing would break every comparison and oracle.
+- **Detectability and decision value.** n/a this phase.
+- **Worth trying: NO** (agree with the scout; (b) MAYBE for the DRUGS phase).
+
 ## 9. Panel (judges)

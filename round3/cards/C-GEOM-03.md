@@ -78,5 +78,69 @@ corrected in the released model; CUDA 12 is not required). It is the cheapest di
 diagnostic, not a method, so it ranks below C-GEOM-01/02 in priority.
 
 ## 7. Code grounding (grounder)
+- **D-210 is a hard precondition.**
+  - TD's test set is `test_smiles.csv`; its split indexes the **sorted** raw file list (`utils/dataset.py:168, 171,
+    179`).
+  - `qm9-o3`'s `train_indices.npy` index ET-Flow's own processed order (V3).
+  - gnode118 holds **no GEOM `summary_qm9.json` and no ET-Flow file** (checked `data/QM9/`, `downloads/`).
+
+  Step 0(a) therefore needs `QM9.zip` (2.9 MB, Zenodo; a download, so **user permission** is required; gnode118 can
+  reach Zenodo). It passes only if `QM9.zip` carries SMILES that can be intersected with our test columns 0 and 2 and
+  the intersection is empty. Index arrays alone are **inconclusive, so STOP**. ORACLE relabelling is no substitute,
+  because memorised L would pass the very spec being tested.
+- **If step 0 passes:**
+  - Separate env: `$PROJECT/micromamba` exists; numpy 1.26.4, torch 2.x with cu121 or cu118 (driver 580.178.04 supports
+    both); internet OK. The install needs approval.
+  - `tools/etflow_seeds.py` in that env writes `.npz` arrays, not cross-version RDKit pickles.
+  - The TD-venv side maps atoms onto the GT-graph mol (`make_l_seed_pickles.py:84-85`), applies `stereo_ok` (`:104`,
+    `:116`; ET-Flow's whole-molecule flip [E-GEOM-053/054] can leave partial inversions), and writes `L_etflow.pkl` +
+    F5 rows. With `--seed_confs_cycle` fewer valid seeds still work (`sampling.py:86`).
+  - Raw ET-Flow conformers go into the unchanged evaluator as the reference row.
+  - ~200 lines + an atom-mapping round-trip test.
+- **Verdict: CONDITIONAL.**
+  - Conclusive step 0: IMPLEMENTABLE WITH CHANGES.
+  - Inconclusive, or download not permitted: **NOT FEASIBLE THIS ROUND**.
+
+  The environment risk is lower than §4 states.
+- **Cost:** ≤ 1 GPU-h of ET-Flow sampling (unmeasured) + 1.0–1.9 GPU-h inference; ~1 CPU-h; ~half a day env.
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data and model: `round3/impact.md` §3. Round-2 numbers are PRELIMINARY. D-210 is OPEN.
+- **Ceiling.** Same as C-GEOM-01: CTRL 0.086, B1 0.038 (random-GT-conformer L, ORACLE). Raw ET-Flow reports 0.073
+  (published) and 0.083 (FM-refiner re-run) (E-GEOM-028, E-EVAL-008). CTRL cannot go below ≈ 0.086 on any L, so
+  **TD + CTRL cannot beat raw ET-Flow**. Only a B1/S3-type model on near-reference L can: B1 reaches 0.073 at a tail
+  of ≤ ≈ 14 % if the L is reference-like (impact.md §3f).
+- **Expected effect: reasoning chain.**
+  1. ET-Flow's AMR of 0.073 implies most puckers are right; I assume a tail of X ≈ 5–15 %.
+  2. CTRL is tail-driven: 0.10–0.12 (impact.md §3d).
+  3. B1 depends on ET-Flow's bond/angle error. A generative Cartesian model does not land on the xTB minimum.
+     - At noise-0.01-level error, B1 ≈ 0.06–0.08.
+     - At noise-0.02-level error (0.027 Å), B1 ≈ 0.12. B1 on noise 0.02 is 0.092–0.134 across seeds.
+     So B1 lies between 0.05 and 0.15.
+  4. Transfer. ET-Flow's AMR is a whole-conformer number and does not separate L from torsions. The CPU gate
+     measures L directly.
+- **Worst case.**
+  - If `qm9-o3` saw any TD test molecule in training (D-210), ET-Flow L is partly memorised GT. Every number is
+    then ORACLE-contaminated and optimistic by an unknown amount, which is a validity blocker.
+  - With clean but noisy ET-Flow L: CTRL ≈ 0.12 and B1 ≥ CTRL.
+- **Detectability.** The effects vs ETKDG (≥ 0.06) are clear with 1 seed. B1 vs CTRL CI ≈ ±0.006.
+- **Decision value.** Diagnostic only.
+  - Positive: learned Cartesian L can meet the spec, which justifies a home-built refiner only if C-GEOM-01/02 fail
+    on rings.
+  - Negative: a refiner is unlikely to help.
+  - Inconclusive split check: no usable decision at all.
+  - Branch A of C-GEOM-01 (xTB L) answers most of the same question at the reference level of theory and without the
+    leakage risk.
+- **Worth trying: MAYBE.** YES only after step 0(a) conclusively shows no TD test molecule in `qm9-o3` train/val;
+  otherwise NO. Run it after C-GEOM-01. Gain per GPU-h: n/a (diagnostic; ≈ 2.5 GPU-h + 0.5 day env).
+
+**Revised after cross-read (2026-10-11).**
+- Leak correction (impact.md §3g): B1 needs each target's own-basin L.
+- ET-Flow's samples are conformer-specific and accurate (FM-refiner re-run COV-R@0.05 75.7 %, E-EVAL-008), so its
+  seeds may carry own-basin L for many targets. B1/S3 on ET-Flow L could then reach 0.05–0.08, but only by TD
+  re-using ET-Flow's own conformers (TD + B1 ≈ an ET-Flow resampler). CTRL 0.09–0.12.
+- D-210 still decides validity: memorised L would inflate exactly this own-basin share. Downloading `QM9.zip` needs
+  user permission (grounder).
+- Call unchanged: **MAYBE** (YES only after a conclusive step 0(a)).
+
 ## 9. Panel (judges)

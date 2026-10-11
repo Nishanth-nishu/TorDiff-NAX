@@ -77,5 +77,51 @@ largest MMFF gain in the rigid stratum, which the breakdown does not show. The c
 not depend on the withdrawn inference.
 
 ## 7. Code grounding (grounder)
+- **Touchpoints:**
+  - (a) `tools/geometry_metrics.py` `pair()` (`:103-122`): add `lgeom.l_subset_errors` on the RMSD-matched pair for
+    ring/acyclic bond/angle and endocyclic-dihedral RMSD (~25 lines);
+  - (b) micro AMR and strata from the `eval.pkl` matrices (~15 lines), with rigid = TD `edge_mask` empty
+    (`utils/torsion.py:9-39`), not `breakdown.py`'s corrected-SMILES bins (D-205);
+  - (c) per-conformer improve/downgrade (~40 lines).
+- **Transfer check:**
+  - Generated bonds and angles equal the seed's (rigid torsion rotations; X12 assert) [E-EVAL-036]. But (a) is **not
+    exactly constant** for arms sharing L, because the RMSD-matched GT conformer depends on the model's torsions.
+  - (c) pairing by index is valid: column k = conformer k (`generate_confs.py:170`), seed `k mod len` under cycle
+    (`sampling.py:86`), and the MMFF twin seed k = relaxed ETKDG seed k (`make_l_seed_pickles.py:93-103`). Check by
+    requiring bond lengths of conformer k to agree across arms (1e-5 Å).
+  - (d) S3/S4/CR have **no random-GT run** (round-2 `GT_EVAL=2`, `ablation_train_array.sbatch:127-137`). This needs
+    ~5 runs ≈ 0.9 GPU-h (the card says 0).
+- **Reuse:** `geometry_metrics.py`, `paired_compare.py`, round-1 `A1c_gtL_cycle_sanity` as the zero check.
+- **Size / risk:** ~150 lines + 2 tests. `geometry_metrics.py` runtime is unmeasured (up to 200 maps per molecule);
+  time one arm first.
+- **Verdict: IMPLEMENTABLE WITH CHANGES.**
+- **Cost:** ~0.9 GPU-h; 2–4 CPU-h (unmeasured).
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data: `round3/impact.md` §3a (`impact_data/cond_means.txt`, `lerror_profile.out`).
+- **Ceiling.** n/a (diagnostic, 0 GPU-h).
+- **Expected outcome.** The synced breakdown logs already show the diagnostics work.
+  - The rigid stratum (n_rot_heavy = 0; 316 of 318 molecules have a ring of ≥ 4 atoms) is a model-free L readout:
+    CTRL and B1 agree within 0.006 Å on every L. ETKDG 0.152, MMFF 0.128, noise 0.02 0.032, A5ring 0.043.
+  - Flexible bins carry the model effects. In bin 4+, B1 is 0.396 on ETKDG vs 0.075 on true L; CTRL is 0.243 vs
+    0.213.
+  - Item (a): TD keeps the seed's bonds and angles (E-EVAL-036), so for S1 arms the seed's error against its own
+    source GT is already in `l_error.csv`. The card's version, against the RMSD-matched GT, differs slightly between
+    arms that share L (grounding.md).
+  - Item (c), improvement/downgrade rates of S3 vs CTRL on ETKDG L, should be nearly symmetric (net +0.003).
+  - Worst case: CPU time only.
+- **Detectability.** n/a.
+- **Decision value.** Medium-high. It stops a rigid-stratum L gain (xTB, templates) being read as a model gain, and
+  vice versa. Suggested additions: per-arm ring-tail share and pucker coverage (minimum over seeds per GT conformer),
+  and per-bin AMR-R reweighted to the ETKDG bins (284/296/174/93/88) so that arms on different populations compare.
+- **Worth trying: YES.**
+
+**Revised after cross-read (2026-10-11).**
+- Item (d) needs ≈ 0.9 GPU-h (grounder), not 0.
+- I rate it YES. Random-GT runs for S3 and CTRL_rematch, combined with the per-n_true inversion of impact.md §3g,
+  measure each model's penalty for non-own L. That penalty decides whether S3/B1 gain on xTB or template L
+  (C-GEOM-01/02).
+- Random-GT is itself leaky (≈ 92 % own L), so report it with the inversion, not as a ceiling.
+- Call: **YES**.
+
 ## 9. Panel (judges)

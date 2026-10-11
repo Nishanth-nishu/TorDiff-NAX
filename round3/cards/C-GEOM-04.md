@@ -61,5 +61,35 @@ Worth trying: NO (this round) — right target, wrong price: off-domain for half
 gain even in-domain, and two cheaper GT-level sources (C-GEOM-01/02) must be measured first.
 
 ## 7. Code grounding (grounder)
+- **Joint factor:** a Cremer–Pople factor touches every TD layer:
+  - the score head returns per-rotatable-edge torsion scores only (`edge_pred`, `diffusion/sampling.py:188-192`);
+  - the transform perturbs torsions only (`utils/dataset.py:71-76`);
+  - the sampler and `modify_conformer` rotate only bridges (`sampling.py:290-298`, `utils/torsion.py:9-39`).
+
+  So it means a new manifold, head, transform and sampler update, at or above the round-2 300-line estimate
+  [E-GEOM-049].
+- **Two-stage reopen route** (pretrained pucker sampler → fixed ring substructures [E-GEOM-021]): **zero TD changes**.
+  It is one more `--seed_confs` pickle (`generate_confs.py:22`, `sampling.py:84-91`), built with C-GEOM-02's
+  transplant code. Reopen criteria 1 and 3 are computable with the seed-gate tool (tail share by ring class, common
+  rigid set).
+- **Verdict: NOT FEASIBLE THIS ROUND** (agrees with the scout).
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data and model: `round3/impact.md` §3.
+- **Ceiling.**
+  - If a pucker model fixed every bad seed inside its training domain (isolated 5–8 rings: 48 % of > 10° seeds,
+    E-GEOM-011) and nothing else: X 49.6 % → ≈ 26 %, CTRL ≈ 0.136–0.14 (−0.04 vs ETKDG, ≈ −0.015 vs MMFF;
+    impact.md §3d).
+  - If it fixed every pucker: CTRL floor ≈ 0.094 (0.086 + calibration).
+- **Expected effect.**
+  - PuckerFlow's own all-atom gain on its in-domain, substituent-free benchmark is 0.02 Å unrelaxed and 0.01 Å after
+    MMFF (E-GEOM-023).
+  - 832 of 885 QM9 ring molecules carry substituents, and half the tail is off-domain (4-rings, fused systems).
+  - Expected effect on our AMR-R without retraining: ≤ 0.01 Å. With a QM9 retrain (weeks), up to the ceiling above.
+    C-GEOM-01/02 attack the same tail at a fraction of the cost.
+- **Detectability.** n/a this round.
+- **Decision value.** Its pre-declared reopening conditions are right, and C-GEOM-01/02 produce the data they need
+  (tail by ring class after non-learned sources).
+- **Worth trying: NO this round.** Gain per GPU-h ≪ 1 (weeks of coding plus a training run).
+
 ## 9. Panel (judges)

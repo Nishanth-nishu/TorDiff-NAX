@@ -1,0 +1,43 @@
+tail10 (ring>=4 rows) per bin 0/1/2/3/4+:
+  A5acyc  0.597 0.470 0.522 0.627 0.792   bin-weighted 0.564
+  ETKDG   0.573 0.453 0.481 0.612 0.833   bin-weighted 0.546
+  MMFF    0.349 0.264 0.403 0.547 0.958   bin-weighted 0.409
+
+## Validation on the non-oracle points (not used in the fit)
+CTRL: anchors G=0.0864 H=0.1824 | ETKDG pred 0.1782 obs 0.1777 | MMFF pred 0.1446 obs 0.1525
+   per bin ETKDG pred/obs: 0.174/0.152 0.164/0.161 0.188/0.195 0.187/0.213 0.211/0.243
+   per bin MMFF  pred/obs: 0.113/0.128 0.124/0.132 0.178/0.172 0.183/0.190 0.210/0.224
+   population-level line: AMR = 0.0864 + 0.1701 * X (X = bin-weighted tail share)
+B1: anchors G=0.0380 H=0.1584 | ETKDG pred 0.1531 obs 0.2357 | MMFF pred 0.1124 obs 0.2323
+   per bin ETKDG pred/obs: 0.173/0.155 0.159/0.203 0.155/0.297 0.120/0.319 0.101/0.396
+   per bin MMFF  pred/obs: 0.109/0.127 0.102/0.203 0.140/0.307 0.115/0.356 0.101/0.391
+   population-level line: AMR = 0.0380 + 0.2134 * X (X = bin-weighted tail share)
+
+## Scenario grid: reference-like acyclic L (xTB-type), ring tail X (overall ring>=4 basis, the 49.6% metric); bin tails scaled from MMFF bins by X / 0.351
+ tail_X   CTRL  CTRL_rigid     B1  B1_rigid  B1_minus_CTRL
+ 0.4960 0.1687      0.1521 0.1433    0.1503        -0.0254
+ 0.3510 0.1446      0.1129 0.1125    0.1096        -0.0321
+ 0.3000 0.1362      0.0991 0.1017    0.0953        -0.0345
+ 0.2500 0.1279      0.0856 0.0911    0.0812        -0.0368
+ 0.2000 0.1196      0.0721 0.0804    0.0672        -0.0392
+ 0.1500 0.1113      0.0586 0.0698    0.0531        -0.0415
+ 0.1000 0.1030      0.0450 0.0592    0.0391        -0.0438
+ 0.0500 0.0947      0.0315 0.0486    0.0250        -0.0461
+ 0.0000 0.0864      0.0180 0.0380    0.0110        -0.0485
+
+## Tail share X at which each checkpoint reaches literature AMR-R levels (reference-like acyclic L)
+  CTRL cannot reach 0.073 (ET-Flow published): floor 0.0864
+  CTRL cannot reach 0.083 (ET-Flow re-run): floor 0.0864
+  CTRL reaches 0.090 (DMT-B) at X <= 0.021
+  CTRL reaches 0.103 (MCF-B) at X <= 0.097
+  CTRL reaches 0.152 (CTRL on MMFF today) at X <= 0.388
+  B1   reaches 0.073 (ET-Flow published) at X <= 0.164
+  B1   reaches 0.083 (ET-Flow re-run) at X <= 0.211
+  B1   reaches 0.090 (DMT-B) at X <= 0.244
+  B1   reaches 0.103 (MCF-B) at X <= 0.305
+  B1   reaches 0.152 (CTRL on MMFF today) at X <= 0.537
+
+## S3 (seed 0, in-job) endpoints vs CTRL / B1, bin-weighted:
+  RDKit L: S3 0.1813 | CTRL_rematch 0.1785 | B1 0.2338
+  true L cycled: S3 0.0343 | CTRL_rematch 0.0846 | B1 0.0218  -> S3 sits at fraction 0.20 of the way from B1 to CTRL
+  cycle -> random-GT leak (gtL - gtLcycle, bin-weighted): CTRL_base +0.0021, B1 +0.0161

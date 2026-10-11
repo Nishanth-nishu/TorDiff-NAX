@@ -1,0 +1,210 @@
+# AMR-R (MAT-R_mean, delta 0.5 A) per arm x tag, over training seeds (unpaired). r2 = PRELIMINARY
+round                    arm                         tag  n_seeds    amr  amr_sd  amr_min  amr_max        n  covR01  covR005
+   r1       qm9_B1_train_gtL               steps20_seed0        3 0.2341  0.0037   0.2299   0.2364 935.0000 27.7633   2.7567
+   r1       qm9_B1_train_gtL           steps20_seed0_gtL        3 0.0369  0.0018   0.0349   0.0385 996.0000 92.5400  87.3333
+   r1       qm9_B1_train_gtL      steps20_seed0_gtLcycle        3 0.0212  0.0005   0.0206   0.0215 996.0000 96.3967  91.9433
+   r1 qm9_B2_DEonly_randpair               steps20_seed0        3 0.1808  0.0007   0.1802   0.1815 935.0000 35.5300   3.8133
+   r1     qm9_B5_match_heavy               steps20_seed0        3 0.1845  0.0009   0.1838   0.1855 935.0000 34.0100   3.4333
+   r1    qm9_CTRL_base_100ep               steps20_seed0        3 0.1806  0.0013   0.1791   0.1815 935.0000 35.8367   3.7633
+   r1    qm9_CTRL_base_100ep           steps20_seed0_gtL        3 0.0843  0.0020   0.0823   0.0863 996.0000 78.0633  63.9467
+   r1    qm9_CTRL_base_100ep      steps20_seed0_gtLcycle        3 0.0820  0.0010   0.0810   0.0830 996.0000 78.7600  64.8400
+   r1 qm9_CTRL_rematch_100ep               steps20_seed0        3 0.1786  0.0014   0.1773   0.1800 935.0000 36.4167   3.7967
+   r1            qm9_default       A0_rdkitL_random_tors        1 0.2422     NaN   0.2422   0.2422 935.0000 22.5800   2.4800
+   r1            qm9_default         A0_rdkit_etkdg_only        1 0.2298     NaN   0.2298   0.2298 935.0000 28.6100   3.0500
+   r1            qm9_default                A1_gtL_model        1 0.0801     NaN   0.0801   0.0801 996.0000 80.1100  66.7200
+   r1            qm9_default          A1_gtL_model_seed1        1 0.0790     NaN   0.0790   0.0790 996.0000 80.2800  66.3500
+   r1            qm9_default          A1_gtL_model_seed2        1 0.0839     NaN   0.0839   0.0839 996.0000 79.4400  66.1400
+   r1            qm9_default          A1_gtL_random_tors        1 0.1573     NaN   0.1573   0.1573 996.0000 54.5700  44.9500
+   r1            qm9_default      A1_gtL_sanity_identity        1 0.0189     NaN   0.0189   0.0189 997.0000 95.7200  94.4900
+   r1            qm9_default         A1c_gtL_cycle_model        1 0.0762     NaN   0.0762   0.0762 996.0000 81.2300  67.7500
+   r1            qm9_default   A1c_gtL_cycle_model_seed1        1 0.0755     NaN   0.0755   0.0755 996.0000 80.9300  67.5200
+   r1            qm9_default   A1c_gtL_cycle_model_seed2        1 0.0801     NaN   0.0801   0.0801 996.0000 80.7000  67.3900
+   r1            qm9_default        A1c_gtL_cycle_sanity        1 0.0000     NaN   0.0000   0.0000 997.0000 99.7000  99.7000
+   r1            qm9_default                 A2_pre_mmff        1 0.1507     NaN   0.1507   0.1507 935.0000 49.9600  17.8900
+   r1            qm9_default           A2_pre_mmff_seed1        1 0.1485     NaN   0.1485   0.1485 931.0000 50.0900  17.8500
+   r1            qm9_default           A2_pre_mmff_seed2        1 0.1512     NaN   0.1512   0.1512 931.0000 49.2200  17.5800
+   r1            qm9_default                A3_post_mmff        1 0.1863     NaN   0.1863   0.1863 935.0000 43.2900  15.2400
+   r1            qm9_default          A3_post_mmff_seed1        1 0.1854     NaN   0.1854   0.1854 931.0000 43.7100  15.5700
+   r1            qm9_default          A3_post_mmff_seed2        1 0.1872     NaN   0.1872   0.1872 931.0000 43.1600  15.4600
+   r1            qm9_default       G1_gt_graph_seed_mols        1 0.1732     NaN   0.1732   0.1732 936.0000 37.7600   4.2700
+   r1            qm9_default G1_gt_graph_seed_mols_seed1        1 0.1739     NaN   0.1739   0.1739 933.0000 37.2500   3.6300
+   r1            qm9_default G1_gt_graph_seed_mols_seed2        1 0.1777     NaN   0.1777   0.1777 933.0000 37.7600   4.2400
+   r1            qm9_default               R0_base_seed0        1 0.1752     NaN   0.1752   0.1752 935.0000 37.6600   3.9100
+   r1            qm9_default               R1_base_seed1        1 0.1768     NaN   0.1768   0.1768 931.0000 36.9400   3.7700
+   r1            qm9_default               R2_base_seed2        1 0.1761     NaN   0.1761   0.1761 931.0000 37.5400   3.9400
+   r2       qm9_B1_train_gtL        S1_A5acyc_cyc_ORACLE        3 0.1583  0.0011   0.1573   0.1595 955.0000 50.4800  21.7267
+   r2       qm9_B1_train_gtL        S1_A5ring_cyc_ORACLE        3 0.1877  0.0057   0.1813   0.1922 955.0000 50.4167  26.0933
+   r2       qm9_B1_train_gtL                  S1_etkdg2L        3 0.2356  0.0027   0.2327   0.2381 936.0000 27.7967   3.0233
+   r2       qm9_B1_train_gtL             S1_etkdg2L_mmff        3 0.2323  0.0031   0.2293   0.2354 936.0000 38.1800  14.4733
+   r2       qm9_B1_train_gtL       S1_lam0.00_cyc_ORACLE        3 0.2614  0.0062   0.2556   0.2680 955.0000 23.2300   2.1467
+   r2       qm9_B1_train_gtL       S1_lam0.25_cyc_ORACLE        3 0.2219  0.0047   0.2167   0.2260 906.0000 33.8933   8.1300
+   r2       qm9_B1_train_gtL       S1_lam0.50_cyc_ORACLE        3 0.1812  0.0016   0.1800   0.1830 906.0000 46.3067  21.0367
+   r2       qm9_B1_train_gtL       S1_lam0.75_cyc_ORACLE        3 0.1146  0.0027   0.1116   0.1165 906.0000 66.9333  45.9200
+   r2       qm9_B1_train_gtL       S1_lam1.00_cyc_ORACLE        1 0.0199     NaN   0.0199   0.0199 955.0000 92.6100  87.6600
+   r2       qm9_B1_train_gtL   S1_noise0.02pa_cyc_ORACLE        3 0.1170  0.0223   0.0918   0.1341 996.0000 67.9033  54.5667
+   r2       qm9_B1_train_gtL   S1_noise0.04pa_cyc_ORACLE        3 0.1536  0.0140   0.1376   0.1635 996.0000 59.1100  12.1967
+   r2       qm9_B6_jit0.04pa               steps20_seed0        3 0.2060  0.0021   0.2037   0.2078 935.0000 36.8800   4.1600
+   r2       qm9_B6_jit0.04pa      steps20_seed0_gtLcycle        3 0.0541  0.0014   0.0532   0.0557 996.0000 87.5633  77.9200
+   r2    qm9_CTRL_base_100ep                  S1_etkdg2L        1 0.1781     NaN   0.1781   0.1781 936.0000 35.3500   3.8200
+   r2    qm9_CTRL_base_100ep             S1_etkdg2L_mmff        1 0.1525     NaN   0.1525   0.1525 936.0000 48.5900  16.4100
+   r2    qm9_CTRL_base_100ep       S1_lam0.00_cyc_ORACLE        1 0.1938     NaN   0.1938   0.1938 955.0000 32.3500   2.8700
+   r2    qm9_CTRL_base_100ep       S1_lam0.50_cyc_ORACLE        1 0.1366     NaN   0.1366   0.1366 906.0000 55.1700  23.6300
+   r2    qm9_CTRL_base_100ep   S1_noise0.02pa_cyc_ORACLE        1 0.0947     NaN   0.0947   0.0947 996.0000 78.2000  59.4600
+   r2    qm9_CTRL_base_100ep   S1_noise0.04pa_cyc_ORACLE        1 0.1167     NaN   0.1167   0.1167 996.0000 72.1200  13.8900
+   r2 qm9_CTRL_rematch_100ep        S1_A5acyc_cyc_ORACLE        3 0.1824  0.0011   0.1816   0.1837 955.0000 41.8367  12.1700
+   r2 qm9_CTRL_rematch_100ep        S1_A5ring_cyc_ORACLE        3 0.1186  0.0003   0.1183   0.1189 955.0000 62.6233  28.2267
+   r2 qm9_CTRL_rematch_100ep                  S1_etkdg2L        3 0.1779  0.0005   0.1774   0.1783 936.0000 35.9133   3.9367
+   r2 qm9_CTRL_rematch_100ep             S1_etkdg2L_mmff        3 0.1525  0.0006   0.1518   0.1528 936.0000 48.7567  16.7100
+   r2 qm9_CTRL_rematch_100ep       S1_lam0.00_cyc_ORACLE        3 0.1966  0.0002   0.1964   0.1968 955.0000 32.2767   2.6967
+   r2 qm9_CTRL_rematch_100ep       S1_lam0.25_cyc_ORACLE        3 0.1596  0.0004   0.1592   0.1599 906.0000 44.1000  10.2867
+   r2 qm9_CTRL_rematch_100ep       S1_lam0.50_cyc_ORACLE        3 0.1364  0.0009   0.1354   0.1372 906.0000 55.3200  24.0333
+   r2 qm9_CTRL_rematch_100ep       S1_lam0.75_cyc_ORACLE        3 0.1156  0.0009   0.1146   0.1164 906.0000 65.3167  43.1300
+   r2 qm9_CTRL_rematch_100ep       S1_lam1.00_cyc_ORACLE        3 0.0805  0.0003   0.0803   0.0808 955.0000 75.6733  61.8533
+   r2 qm9_CTRL_rematch_100ep   S1_noise0.02pa_cyc_ORACLE        3 0.0976  0.0002   0.0973   0.0977 996.0000 77.6400  60.0600
+   r2 qm9_CTRL_rematch_100ep   S1_noise0.04pa_cyc_ORACLE        3 0.1186  0.0012   0.1173   0.1196 996.0000 72.4400  13.7333
+   r2 qm9_CTRL_rematch_100ep             S5ctrl_pre_mmff        3 0.1540  0.0012   0.1531   0.1554 935.0000 48.3000  16.5700
+   r2 qm9_CTRL_rematch_100ep      steps20_seed0_gtLcycle        3 0.0822  0.0006   0.0816   0.0827 996.0000 79.0200  65.3167
+   r2       qm9_S3_mixL_p0.5               steps20_seed0        1 0.1816     NaN   0.1816   0.1816 935.0000 35.2600   3.5600
+   r2       qm9_S3_mixL_p0.5      steps20_seed0_gtLcycle        1 0.0331     NaN   0.0331   0.0331 996.0000 92.8600  85.2700
+   r2            qm9_default   A1c_gtL_cycle_random_tors        1 0.1544     NaN   0.1544   0.1544 996.0000 55.1100  45.8400
+
+# rigid bin (n_rot_heavy = 0) MAT-R per arm x tag (mean over seeds; n = molecules in bin)
+round                    arm                         tag        n  mat_r     sd
+   r1       qm9_B1_train_gtL               steps20_seed0 281.0000 0.1553 0.0012
+   r1       qm9_B1_train_gtL           steps20_seed0_gtL 318.0000 0.0110 0.0000
+   r1       qm9_B1_train_gtL      steps20_seed0_gtLcycle 318.0000 0.0003 0.0006
+   r1 qm9_B2_DEonly_randpair               steps20_seed0 281.0000 0.1513 0.0006
+   r1     qm9_B5_match_heavy               steps20_seed0 281.0000 0.1570 0.0000
+   r1    qm9_CTRL_base_100ep               steps20_seed0 281.0000 0.1527 0.0012
+   r1    qm9_CTRL_base_100ep           steps20_seed0_gtL 318.0000 0.0180 0.0000
+   r1    qm9_CTRL_base_100ep      steps20_seed0_gtLcycle 318.0000 0.0073 0.0006
+   r1 qm9_CTRL_rematch_100ep               steps20_seed0 281.0000 0.1510 0.0000
+   r1            qm9_default       A0_rdkitL_random_tors 281.0000 0.1610    NaN
+   r1            qm9_default         A0_rdkit_etkdg_only 281.0000 0.1480    NaN
+   r1            qm9_default                A1_gtL_model 318.0000 0.0180    NaN
+   r1            qm9_default          A1_gtL_model_seed1 318.0000 0.0180    NaN
+   r1            qm9_default          A1_gtL_model_seed2 318.0000 0.0160    NaN
+   r1            qm9_default          A1_gtL_random_tors 318.0000 0.0330    NaN
+   r1            qm9_default      A1_gtL_sanity_identity 319.0000 0.0070    NaN
+   r1            qm9_default         A1c_gtL_cycle_model 318.0000 0.0080    NaN
+   r1            qm9_default   A1c_gtL_cycle_model_seed1 318.0000 0.0100    NaN
+   r1            qm9_default   A1c_gtL_cycle_model_seed2 318.0000 0.0080    NaN
+   r1            qm9_default        A1c_gtL_cycle_sanity 319.0000 0.0000    NaN
+   r1            qm9_default                 A2_pre_mmff 281.0000 0.1210    NaN
+   r1            qm9_default           A2_pre_mmff_seed1 281.0000 0.1200    NaN
+   r1            qm9_default           A2_pre_mmff_seed2 278.0000 0.1270    NaN
+   r1            qm9_default                A3_post_mmff 281.0000 0.1190    NaN
+   r1            qm9_default          A3_post_mmff_seed1 281.0000 0.1210    NaN
+   r1            qm9_default          A3_post_mmff_seed2 278.0000 0.1240    NaN
+   r1            qm9_default       G1_gt_graph_seed_mols 284.0000 0.1510    NaN
+   r1            qm9_default G1_gt_graph_seed_mols_seed1 283.0000 0.1540    NaN
+   r1            qm9_default G1_gt_graph_seed_mols_seed2 283.0000 0.1500    NaN
+   r1            qm9_default               R0_base_seed0 281.0000 0.1490    NaN
+   r1            qm9_default               R1_base_seed1 281.0000 0.1520    NaN
+   r1            qm9_default               R2_base_seed2 278.0000 0.1530    NaN
+   r2       qm9_B1_train_gtL        S1_A5acyc_cyc_ORACLE 289.0000 0.1797 0.0012
+   r2       qm9_B1_train_gtL        S1_A5ring_cyc_ORACLE 289.0000 0.0480 0.0035
+   r2       qm9_B1_train_gtL                  S1_etkdg2L 284.0000 0.1553 0.0006
+   r2       qm9_B1_train_gtL             S1_etkdg2L_mmff 284.0000 0.1273 0.0025
+   r2       qm9_B1_train_gtL       S1_lam0.00_cyc_ORACLE 289.0000 0.1903 0.0015
+   r2       qm9_B1_train_gtL       S1_lam0.25_cyc_ORACLE 258.0000 0.1397 0.0006
+   r2       qm9_B1_train_gtL       S1_lam0.50_cyc_ORACLE 258.0000 0.1093 0.0012
+   r2       qm9_B1_train_gtL       S1_lam0.75_cyc_ORACLE 258.0000 0.0737 0.0015
+   r2       qm9_B1_train_gtL       S1_lam1.00_cyc_ORACLE 289.0000 0.0010    NaN
+   r2       qm9_B1_train_gtL   S1_noise0.02pa_cyc_ORACLE 318.0000 0.0287 0.0015
+   r2       qm9_B1_train_gtL   S1_noise0.04pa_cyc_ORACLE 318.0000 0.0570 0.0010
+   r2       qm9_B6_jit0.04pa               steps20_seed0 281.0000 0.1543 0.0015
+   r2       qm9_B6_jit0.04pa      steps20_seed0_gtLcycle 318.0000 0.0027 0.0006
+   r2    qm9_CTRL_base_100ep                  S1_etkdg2L 284.0000 0.1530    NaN
+   r2    qm9_CTRL_base_100ep             S1_etkdg2L_mmff 284.0000 0.1280    NaN
+   r2    qm9_CTRL_base_100ep       S1_lam0.00_cyc_ORACLE 289.0000 0.1850    NaN
+   r2    qm9_CTRL_base_100ep       S1_lam0.50_cyc_ORACLE 258.0000 0.1110    NaN
+   r2    qm9_CTRL_base_100ep   S1_noise0.02pa_cyc_ORACLE 318.0000 0.0330    NaN
+   r2    qm9_CTRL_base_100ep   S1_noise0.04pa_cyc_ORACLE 318.0000 0.0580    NaN
+   r2 qm9_CTRL_rematch_100ep        S1_A5acyc_cyc_ORACLE 289.0000 0.1803 0.0015
+   r2 qm9_CTRL_rematch_100ep        S1_A5ring_cyc_ORACLE 289.0000 0.0427 0.0006
+   r2 qm9_CTRL_rematch_100ep                  S1_etkdg2L 284.0000 0.1523 0.0015
+   r2 qm9_CTRL_rematch_100ep             S1_etkdg2L_mmff 284.0000 0.1277 0.0006
+   r2 qm9_CTRL_rematch_100ep       S1_lam0.00_cyc_ORACLE 289.0000 0.1843 0.0006
+   r2 qm9_CTRL_rematch_100ep       S1_lam0.25_cyc_ORACLE 258.0000 0.1377 0.0006
+   r2 qm9_CTRL_rematch_100ep       S1_lam0.50_cyc_ORACLE 258.0000 0.1067 0.0012
+   r2 qm9_CTRL_rematch_100ep       S1_lam0.75_cyc_ORACLE 258.0000 0.0773 0.0012
+   r2 qm9_CTRL_rematch_100ep       S1_lam1.00_cyc_ORACLE 289.0000 0.0050 0.0017
+   r2 qm9_CTRL_rematch_100ep   S1_noise0.02pa_cyc_ORACLE 318.0000 0.0317 0.0015
+   r2 qm9_CTRL_rematch_100ep   S1_noise0.04pa_cyc_ORACLE 318.0000 0.0580 0.0020
+   r2 qm9_CTRL_rematch_100ep             S5ctrl_pre_mmff 281.0000 0.1227 0.0012
+   r2 qm9_CTRL_rematch_100ep      steps20_seed0_gtLcycle 318.0000 0.0057 0.0015
+   r2       qm9_S3_mixL_p0.5               steps20_seed0 281.0000 0.1500    NaN
+   r2       qm9_S3_mixL_p0.5      steps20_seed0_gtLcycle 318.0000 0.0010    NaN
+   r2            qm9_default   A1c_gtL_cycle_random_tors 318.0000 0.0230    NaN
+
+# all bins, mean over seeds
+                                                          mat_0  mat_1  mat_2  mat_3  mat_4+     n_0     n_1     n_2    n_3   n_4+
+round arm                    tag                                                                                                  
+r1    qm9_B1_train_gtL       steps20_seed0                0.155  0.201  0.289  0.325   0.392 281.000 297.000 174.000 93.000 89.000
+                             steps20_seed0_gtL            0.011  0.022  0.061  0.073   0.097 318.000 316.000 178.000 93.000 91.000
+                             steps20_seed0_gtLcycle       0.000  0.012  0.032  0.045   0.080 318.000 316.000 178.000 93.000 91.000
+      qm9_B2_DEonly_randpair steps20_seed0                0.151  0.166  0.197  0.216   0.254 281.000 297.000 174.000 93.000 89.000
+      qm9_B5_match_heavy     steps20_seed0                0.157  0.168  0.201  0.218   0.257 281.000 297.000 174.000 93.000 89.000
+      qm9_CTRL_base_100ep    steps20_seed0                0.153  0.164  0.198  0.212   0.257 281.000 297.000 174.000 93.000 89.000
+                             steps20_seed0_gtL            0.018  0.067  0.127  0.156   0.218 318.000 316.000 178.000 93.000 91.000
+                             steps20_seed0_gtLcycle       0.007  0.061  0.139  0.163   0.221 318.000 316.000 178.000 93.000 91.000
+      qm9_CTRL_rematch_100ep steps20_seed0                0.151  0.164  0.195  0.210   0.249 281.000 297.000 174.000 93.000 89.000
+      qm9_default            A0_rdkitL_random_tors        0.161  0.207  0.280  0.354   0.422 281.000 297.000 174.000 93.000 89.000
+                             A0_rdkit_etkdg_only          0.148  0.197  0.284  0.328   0.391 281.000 297.000 174.000 93.000 89.000
+                             A1_gtL_model                 0.018  0.061  0.122  0.142   0.216 318.000 316.000 178.000 93.000 91.000
+                             A1_gtL_model_seed1           0.018  0.060  0.124  0.136   0.213 318.000 316.000 178.000 93.000 91.000
+                             A1_gtL_model_seed2           0.016  0.064  0.142  0.153   0.209 318.000 316.000 178.000 93.000 91.000
+                             A1_gtL_random_tors           0.033  0.118  0.240  0.320   0.401 318.000 316.000 178.000 93.000 91.000
+                             A1_gtL_sanity_identity       0.007  0.013  0.028  0.042   0.037 319.000 316.000 178.000 93.000 91.000
+                             A1c_gtL_cycle_model          0.008  0.057  0.129  0.149   0.202 318.000 316.000 178.000 93.000 91.000
+                             A1c_gtL_cycle_model_seed1    0.010  0.059  0.122  0.140   0.203 318.000 316.000 178.000 93.000 91.000
+                             A1c_gtL_cycle_model_seed2    0.008  0.059  0.140  0.155   0.211 318.000 316.000 178.000 93.000 91.000
+                             A1c_gtL_cycle_sanity         0.000  0.000  0.000  0.000   0.000 319.000 316.000 178.000 93.000 91.000
+                             A2_pre_mmff                  0.121  0.132  0.175  0.183   0.226 281.000 297.000 174.000 93.000 89.000
+                             A2_pre_mmff_seed1            0.120  0.133  0.175  0.176   0.213 281.000 294.000 173.000 93.000 89.000
+                             A2_pre_mmff_seed2            0.127  0.130  0.174  0.187   0.216 278.000 296.000 174.000 93.000 89.000
+                             A3_post_mmff                 0.119  0.175  0.227  0.246   0.296 281.000 297.000 174.000 93.000 89.000
+                             A3_post_mmff_seed1           0.121  0.166  0.235  0.249   0.289 281.000 294.000 173.000 93.000 89.000
+                             A3_post_mmff_seed2           0.124  0.169  0.230  0.258   0.287 278.000 296.000 174.000 93.000 89.000
+                             G1_gt_graph_seed_mols        0.151  0.160  0.188  0.199   0.232 284.000 296.000 174.000 93.000 88.000
+                             G1_gt_graph_seed_mols_seed1  0.154  0.160  0.187  0.207   0.224 283.000 295.000 173.000 93.000 88.000
+                             G1_gt_graph_seed_mols_seed2  0.150  0.169  0.203  0.198   0.225 283.000 295.000 173.000 93.000 88.000
+                             R0_base_seed0                0.149  0.161  0.192  0.204   0.240 281.000 297.000 174.000 93.000 89.000
+                             R1_base_seed1                0.152  0.164  0.197  0.199   0.233 281.000 294.000 173.000 93.000 89.000
+                             R2_base_seed2                0.153  0.158  0.198  0.204   0.235 278.000 296.000 174.000 93.000 89.000
+r2    qm9_B1_train_gtL       S1_A5acyc_cyc_ORACLE         0.180  0.164  0.163  0.121   0.101 289.000 306.000 177.000 93.000 90.000
+                             S1_A5ring_cyc_ORACLE         0.048  0.160  0.282  0.321   0.408 289.000 306.000 177.000 93.000 90.000
+                             S1_etkdg2L                   0.155  0.203  0.297  0.319   0.396 284.000 296.000 174.000 93.000 88.000
+                             S1_etkdg2L_mmff              0.127  0.203  0.307  0.356   0.391 284.000 296.000 174.000 93.000 88.000
+                             S1_lam0.00_cyc_ORACLE        0.190  0.229  0.318  0.337   0.413 289.000 306.000 177.000 93.000 90.000
+                             S1_lam0.25_cyc_ORACLE        0.140  0.183  0.286  0.311   0.369 258.000 293.000 173.000 93.000 89.000
+                             S1_lam0.50_cyc_ORACLE        0.109  0.143  0.238  0.271   0.312 258.000 293.000 173.000 93.000 89.000
+                             S1_lam0.75_cyc_ORACLE        0.074  0.094  0.136  0.170   0.202 258.000 293.000 173.000 93.000 89.000
+                             S1_lam1.00_cyc_ORACLE        0.001  0.010  0.028  0.044   0.075 289.000 306.000 177.000 93.000 90.000
+                             S1_noise0.02pa_cyc_ORACLE    0.029  0.084  0.164  0.240   0.320 318.000 316.000 178.000 93.000 91.000
+                             S1_noise0.04pa_cyc_ORACLE    0.057  0.118  0.213  0.285   0.366 318.000 316.000 178.000 93.000 91.000
+      qm9_B6_jit0.04pa       steps20_seed0                0.154  0.181  0.251  0.262   0.307 281.000 297.000 174.000 93.000 89.000
+                             steps20_seed0_gtLcycle       0.003  0.037  0.090  0.112   0.163 318.000 316.000 178.000 93.000 91.000
+      qm9_CTRL_base_100ep    S1_etkdg2L                   0.153  0.163  0.193  0.211   0.243 284.000 296.000 174.000 93.000 88.000
+                             S1_etkdg2L_mmff              0.128  0.130  0.173  0.192   0.224 284.000 296.000 174.000 93.000 88.000
+                             S1_lam0.00_cyc_ORACLE        0.185  0.176  0.205  0.209   0.246 289.000 306.000 177.000 93.000 90.000
+                             S1_lam0.50_cyc_ORACLE        0.111  0.105  0.163  0.176   0.221 258.000 293.000 173.000 93.000 89.000
+                             S1_noise0.02pa_cyc_ORACLE    0.033  0.077  0.134  0.168   0.222 318.000 316.000 178.000 93.000 91.000
+                             S1_noise0.04pa_cyc_ORACLE    0.058  0.098  0.155  0.188   0.240 318.000 316.000 178.000 93.000 91.000
+      qm9_CTRL_rematch_100ep S1_A5acyc_cyc_ORACLE         0.180  0.168  0.193  0.187   0.212 289.000 306.000 177.000 93.000 90.000
+                             S1_A5ring_cyc_ORACLE         0.043  0.104  0.162  0.193   0.249 289.000 306.000 177.000 93.000 90.000
+                             S1_etkdg2L                   0.152  0.161  0.195  0.213   0.243 284.000 296.000 174.000 93.000 88.000
+                             S1_etkdg2L_mmff              0.128  0.132  0.172  0.190   0.224 284.000 296.000 174.000 93.000 88.000
+                             S1_lam0.00_cyc_ORACLE        0.184  0.181  0.209  0.209   0.254 289.000 306.000 177.000 93.000 90.000
+                             S1_lam0.25_cyc_ORACLE        0.138  0.134  0.187  0.183   0.233 258.000 293.000 173.000 93.000 89.000
+                             S1_lam0.50_cyc_ORACLE        0.107  0.107  0.167  0.171   0.225 258.000 293.000 173.000 93.000 89.000
+                             S1_lam0.75_cyc_ORACLE        0.077  0.082  0.153  0.160   0.220 258.000 293.000 173.000 93.000 89.000
+                             S1_lam1.00_cyc_ORACLE        0.005  0.061  0.130  0.158   0.213 289.000 306.000 177.000 93.000 90.000
+                             S1_noise0.02pa_cyc_ORACLE    0.032  0.078  0.149  0.167   0.226 318.000 316.000 178.000 93.000 91.000
+                             S1_noise0.04pa_cyc_ORACLE    0.058  0.099  0.163  0.184   0.242 318.000 316.000 178.000 93.000 91.000
+                             S5ctrl_pre_mmff              0.123  0.134  0.180  0.188   0.234 281.000 297.000 174.000 93.000 89.000
+                             steps20_seed0_gtLcycle       0.006  0.064  0.140  0.160   0.220 318.000 316.000 178.000 93.000 91.000
+      qm9_S3_mixL_p0.5       steps20_seed0                0.150  0.168  0.200  0.216   0.253 281.000 297.000 174.000 93.000 89.000
+                             steps20_seed0_gtLcycle       0.001  0.019  0.051  0.076   0.116 318.000 316.000 178.000 93.000 91.000
+      qm9_default            A1c_gtL_cycle_random_tors    0.023  0.118  0.238  0.321   0.406 318.000 316.000 178.000 93.000 91.000

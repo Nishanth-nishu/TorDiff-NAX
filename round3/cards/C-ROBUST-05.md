@@ -60,5 +60,25 @@ Revision log (scout, 2026-10-08, after verify_V2.md). The call is unchanged; its
 - §2 "Some trade-off is inherent" and §3 "No ratio can gain more" are now labelled INFERENCE.
 
 ## 7. Code grounding (grounder)
+- **Ratio sweep: IMPLEMENTABLE AS SPECIFIED, zero code.** `--l_mix_p_gt` takes any value (`utils/dataset.py:45`,
+  `:98`); use one NAME per value so the resume check works. ≈ 6 × 11.7 + 18 × 0.17 ≈ 73 GPU-h.
+- **Curriculum: WITH CHANGES**, ~20 lines. The transform has no epoch access, so set
+  `train_loader.dataset.transform.l_mix_p_gt = p(epoch)` in `train.py:73-76`. Workers are re-forked each epoch
+  (`persistent_workers` not set, `dataset.py:363-366`), so the change propagates. Make p a pure function of the epoch
+  so `--resume` needs no new state.
+- **Data note:** S3 seed 1 is complete on gnode118, so S3's seed spread (§3: "unknown") is now computable.
+- **Verdict:** agrees with the scout's NO (a headroom question, not a code one).
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data: `round3/impact.md` §2; BRIEF 22:20 (S3 s1).
+- **Ceiling.** The endpoint gaps: S3 is 0.003 behind CTRL on RDKit L and 0.012 behind B1 on true L (ORACLE). S3
+  seed 1 replicates (0.182 / 0.034), so the gaps are real.
+- **Expected effect.** A monotone trade-off; the best case is a Pareto gain ≤ 0.003 on the primary endpoint. The
+  property that matters for deployment is S3's behaviour on reference-like L (impact.md §3c). Pushing p_gt toward B1
+  could gain up to 0.012 there, at ≈ +0.003–0.006 on RDKit L. Measuring S3 on xTB L (C-GEOM-01, ≈ 0.5 GPU-h) first
+  tells whether that side matters.
+- **Detectability.** 0.003 needs ≥ 4 seeds per arm (seed SD 0.0015).
+- **Decision value.** Low.
+- **Worth trying: NO** (≈ 0.03 mÅ per GPU-h: ≤ 3 mÅ for 72–96 GPU-h).
+
 ## 9. Panel (judges)

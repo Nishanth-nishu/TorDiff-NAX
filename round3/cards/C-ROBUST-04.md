@@ -50,5 +50,26 @@ Guidance gives away the recall we measure. Mixed training (S3, S4, C-ROBUST-01/0
 without a second network pass.
 
 ## 7. Code grounding (grounder)
+- **Guided single-model variant: NOT FEASIBLE THIS ROUND.** A weak-L score at the current torsion state needs a second
+  conformer with weak L *and* the current torsions at every step. TD tracks torsions only as updates relative to its
+  own seed (`total_perturb`, `diffusion/sampling.py:290-298`); there is no code path that transfers a torsion state
+  between two different L seeds. This confirms the §4 inference.
+- **Score-interpolation diagnostic: IMPLEMENTABLE WITH CHANGES**, ~40 lines:
+  - `--model_dir2` / `--score_w` in `generate_confs.py`;
+  - load the second model as at `:100-105`;
+  - `edge_pred = w·s1 + (1−w)·s2` at `sampling.py:186-192`.
+
+  CR and B1 share architecture and featurisation (`common.sh:48`). 2× forward per step ≈ 3–5 GPU-h for 9 runs.
+- **Verdict:** agrees with the scout's NO.
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data: `round3/impact_data/cond_means.txt`.
+- **Ceiling.** The lower envelope of CTRL and B1. On every non-oracle L measured, the envelope is CTRL (RDKit 0.178 vs
+  0.236; MMFF 0.1525 vs 0.232). B1 ties or beats CTRL only at λ ≥ 0.75 (ORACLE). The ceiling gain on non-oracle L is
+  0.
+- **Expected effect.** At best equal to CTRL: interpolation adds B1's errors, and guidance with w > 1 cuts the
+  diversity that AMR-R and COV-R reward. Worst case +0.01 or more.
+- **Detectability and decision value.** Low. S3 already gives the envelope and more (0.034 on true L).
+- **Worth trying: NO** (0 mÅ per GPU-h).
+
 ## 9. Panel (judges)

@@ -68,5 +68,53 @@ literature and DAgger agree. It is the recipe every Q1 L source will need. MMFF 
 S5 gate fails, downgrade to MAYBE and wait for a better L source from Q1.
 
 ## 7. Code grounding (grounder)
+- **Touchpoints:** zero TD code.
+  - `tools/build_paired_pickles.py --std_dir data/QM9/standardized_pickles_mmff --out_dir
+    data/QM9/standardized_pickles_paired_mmff` (`:50-56`). Its pairing check recomputes the stored
+    `AlignMol(RemoveHs(matched), RemoveHs(gt))` (`:88-94`). The MMFF variant stored exactly that, after `mmff_func`
+    (`standardize_confs.py:83-87, :108`), and `geom_id` comes from the raw dicts, so pairing transfers unchanged
+    [E-ROBUST-057].
+  - Add `QM9_PAIRED_MMFF` (`common.sh:46`) and a `paired_mmff` case in `featurize_qm9.sbatch:29-39` /
+    `ablation_train_array.sbatch:53-63`.
+  - Training line `S3mmff_mixL_p0.5 | paired_mmff | --l_mix_p_gt 0.5 ... | --pre_mmff | 2 | s |`.
+- **Transfer check:**
+  - Matching as domain adaptation [E-ROBUST-021/022] exists in code: MMFF std pickles are matched after relaxation
+    (`standardize_confs.py:83-107`).
+  - The GT half is aligned onto the MMFF conformer (`build_paired_pickles.py:136-146`).
+  - The pairing rate is UNVERIFIED (§4). The tool prints `PAIRING_CLEAN`/`PAIR_OK` (`:174-186`); require ≥ 98 %.
+  - **Silent failure:** `ConformerDataset` reuses any cache at the given path (`dataset.py:124-129`), and the stale
+    guard only checks `gt_pos` (`:141-144`). Use a new cache name and assert MMFF-level bond error in the RDKit half.
+- **Gate:** its data now exist (B3 s0–s2 in-job `--pre_mmff`; CR ×3 `S5ctrl_pre_mmff`).
+- **Verdict: IMPLEMENTABLE AS SPECIFIED** (config level).
+- **Cost:** CPU pairing 1–4 h + featurize ~1 h; GPU ≈ 26.1.
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data: `round3/impact.md` §2–3; `cluster_sync/results/qm9_default/A2_pre_mmff/floor_run.log`. PRELIMINARY round-2
+numbers.
+- **Ceiling.**
+  - On MMFF L the rigid stratum is fixed by L (0.128, model-free), so only flexible bins can move (CTRL on MMFF:
+    0.132 / 0.172 / 0.190 / 0.224).
+  - The torsion-oracle floor with MMFF L (A2) is a per-molecule mean of 0.097, against 0.143 observed.
+  - Training-scheme effects measured so far: B2/B5 +0.002/+0.006 (worse); S3 vs CTRL on RDKit L +0.003.
+- **Expected effect.** S3-MMFF vs CTRL + MMFF: 0 to −0.006.
+  - Matched targets remove CTRL's train/test L shift, but CTRL already uses MMFF L about as well as the matched-MMFF
+    control (0.1525 vs S5ctrl `--pre_mmff` 0.154).
+  - The true-L half pays off only on reference-like L. B1 cannot exploit MMFF L (0.232), so no B1-type gain is
+    expected here.
+  - MMFF's residual is the pucker tail (impact.md §3c), which this card cannot fix (card §4).
+  - P(S5 gate ≤ 0.150) ≈ 30 %.
+- **Worst case.** +0.003 (S3-like cost) for 28–36 GPU-h.
+- **Detectability.** −0.005 needs 3 seeds (CTRL seed SD 0.001; paired model contrast ±0.002).
+- **Decision value.** The principle (train on the deployed sampler with matched targets) is the right follow-up for
+  xTB L if C-GEOM-01 lands in branch (B), where B1 fails on xTB L. MMFF is the wrong test bed.
+- **Worth trying: MAYBE → NO for now** (≤ 0.2 mÅ per GPU-h). Redirect to an xTB-matched S3 after C-GEOM-01.
+
+**Revised after cross-read (2026-10-11).**
+- The gate data exist (B3 s0–s2 in-job `--pre_mmff`, CR ×3 `S5ctrl`). Compute S5 ≤ 0.150 on CPU before the panel; my
+  "P ≈ 30 %" is a prior.
+- Cost ≈ 26.1 GPU-h.
+- Leak note (impact.md §3g): the true-L half teaches the model to use own-conformer L, which MMFF L never provides.
+  This supports the expected gain of ≤ 0.006.
+- Call unchanged: **MAYBE → NO** unless the measured gate passes.
+
 ## 9. Panel (judges)

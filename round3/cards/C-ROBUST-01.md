@@ -113,5 +113,65 @@ isotropic noise; partial L never tested) rests on VERIFIED entries. Superseded w
 - §3/§4 B1 0.236/0.020 became the like-for-like in-job 0.234/0.021 [E-ROBUST-060].
 
 ## 7. Code grounding (grounder)
+- **Arm 0: config only.** The seed pickles and eval lines exist (A5 lines and `S1_lam0.75_cyc_ORACLE` in
+  `r2_evalsets.tsv`). Add a round-3 set label and a models TSV for S3 s0/s1 and B6 s0–s2. Those tags do not exist yet
+  for these models (checked on gnode118), so the provenance guard (`common.sh:107-122`) is satisfied. 15 packed runs
+  ≈ 2.6 GPU-h.
+- **Arm 1 touchpoints:**
+  - **Hybrids:** post-pass `tools/add_hybrids.py` over the existing `standardized_pickles_paired`, so the RDKit and GT
+    halves stay identical to S3's. `hyb_gtring = lgeom.set_internal_subset(mol, Y_al, X)` and
+    `hyb_rdring = lgeom.set_internal_subset(mol, X, Y_al)` (the A5 recipes, `make_l_seed_pickles.py:236-237`), plus
+    residual and clash checks. Output to a new std dir and `cache_paired_hyb`.
+  - **Dataset:** `utils/dataset.py` `featurize_mol` appends both lists in the same iteration as `pos`/`gt_pos`
+    (`:306-311`); extend the stale-cache guard `:141-144`.
+  - **Transform:** a new default-off `l_mix4` in `TorsionNoiseTransform` (`:38-47`). `_select_paired_L` (`:79-102`)
+    makes one `np.random` draw, so resume determinism is kept. Delete the lists after selection, as `:100-102` does.
+  - **Flags and slurm:** `--l_mix4` in `utils/parsing.py:30-37`; `construct_loader` `:347-352`; a `paired_hyb` case in
+    `featurize_qm9.sbatch:29-39` and `ablation_train_array.sbatch:53-63`.
+  - **Tests:** extend `test_round2_model.py` C7.
+- **Transfer check (torsions, as §4 asked):**
+  - The TD target is relative to the selected L (`dataset.py:74-76`), so every hybrid is self-consistent.
+  - `SetAngleDeg` preserves the dihedral through the angle's own atoms. Dihedrals about the same bond through other
+    substituents shift by up to the angle change (≈ 3–4°), so `hyb_gtring` carries GT torsions only approximately; log
+    the drift per hybrid.
+  - `set_internal_subset` swallows failures (`lgeom.py:358-366`), so pre-declare a residual threshold.
+- **Memory:** the cache grows ≈ 1.32 → ≈ 2.1 GB (each extra position list ≈ 0.37 GB); check MaxRSS in a smoke run.
+- **Verdict: IMPLEMENTABLE WITH CHANGES** (~200 lines incl. tests).
+- **Cost:** ≈ 1 CPU-h hybrids + ~1 h featurize; GPU 2.6 (Arm 0) + 23.4 (2 trainings × 11.7) + 3.4 (evaluation) ≈ 29.4
+  (the card said 33–40).
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data and model: `round3/impact.md` §2–3. Round-2 numbers are PRELIMINARY; S3 s1 and S4 are from BRIEF (22:20).
+- **Ceiling.**
+  - Best measured on the hybrids (λ0 base, ORACLE): A5ring CTRL 0.119; A5acyc B1 0.158. The full-L floor is
+    0.086 / 0.038 (random-GT L).
+  - On non-oracle RDKit/MMFF L the ceiling is ≈ CTRL (0.178 / 0.1525). No training-scheme change has moved CTRL
+    there by more than the B2/B5 sizes (+0.002/+0.006, worse).
+- **Expected effect.**
+  - Primary, RDKit L: ≈ S3 (0.182 ± 0.003; S3 s0/s1 0.182/0.182).
+  - A 25 % true-L share (S3: 50 %) likely costs on true L: S3 0.033 → 0.04–0.05, like S4's 0.041–0.044.
+  - A5ring: S3 is unmeasured; my guess is S3 ≈ 0.13–0.16 and the factorised model ≈ 0.115–0.125.
+  - A5acyc: factorised ≈ 0.15–0.16.
+  - Relevance: templates (C-GEOM-02) give A5ring-type L. xTB gives reference-like acyclic L with partly wrong rings,
+    which sits on the B1 line (impact.md §3c) rather than at A5acyc.
+  - Transfer: CDM, SliDe and ProteinMPNN have no structured, ring-heavy error.
+- **Worst case.** Worse than S3 at both endpoints with no partial-L benefit, for 33–40 GPU-h.
+- **Detectability.** Arm 0 effects (S3 vs CTRL on A5ring, likely ≥ 0.01) are clear with 2 seeds. Arm 1's
+  non-inferiority at +0.005 needs ≥ 3 seeds (S3-family seed SD unknown; CTRL 0.001).
+- **Decision value.** Arm 0 gives S3's response to partial L, which is needed anyway: my S3 prediction for xTB or
+  template L is a wide bracket for lack of it. Arm 1 matters only if an A5ring-type source (templates) is adopted.
+- **Worth trying:** Arm 0 **YES** (3 GPU-h, high information). Arm 1 **MAYBE**, gated on Arm 0 and on C-GEOM-02
+  showing that template L is worth deploying (≈ 0 mÅ per GPU-h on the primary endpoint).
+
+**Revised after cross-read (2026-10-11).**
+1. The sentence above, "xTB gives reference-like acyclic L ... which sits on the B1 line", is superseded.
+   - Per impact.md §3g, models trained on true L (B1, and S3's true-L half) use *own-conformer* L. For most targets,
+     xTB or template L is other-conformer L, on which B1 is at RDKit level.
+   - The four-way mixture never shows other-conformer GT L either.
+   - INFERENCE: a fifth source, "GT L of conformer j with the torsion target of conformer i (same molecule)", would
+     address this directly. I flag it in impact.md §5 D for the panel; it is not a card.
+2. Grounder cost: ≈ 29.4 GPU-h in total (Arm 0: 2.6).
+
+Calls unchanged: Arm 0 **YES**; Arm 1 **MAYBE**.
+
 ## 9. Panel (judges)

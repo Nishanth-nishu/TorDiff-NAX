@@ -52,5 +52,52 @@ Worth trying: MAYBE — near-free as a CPU arm and a necessary baseline for the 
 small all-atom effect, so it earns GPU time only through its CPU gate.
 
 ## 7. Code grounding (grounder)
+- **Touchpoints:** `tools/make_l_seed_pickles.py:89` calls `EmbedMultipleConfs(emb, numConfs=K, randomSeed=args.seed)`
+  with no params object, i.e. ETKDG v1 [E-GEOM-052]. Add `--etkdg_params {v1,v3,v3sr}` (default unchanged): set
+  `ps.randomSeed = args.seed`, call `EmbedMultipleConfs(emb, K, ps)`, and tag the outputs `L_etkdgv3_2L` /
+  `L_sretkdg2L` (+ `_mmff`), written into a new `round3_seeds` dir. ~30 lines.
+- **Transfer check (measured in the cluster venv, RDKit 2022.09.5):**
+
+  | params object | ETversion | small-ring | macrocycle |
+  |---|---|---|---|
+  | `ETKDG()` | 1 | off | off |
+  | `ETKDGv3()` | 2 | off | on |
+  | `srETKDGv3()` | 2 | on | **off** |
+
+  The card's "v3 → srv3 = small-ring terms only" therefore **also switches macrocycle torsions off**. For a true single
+  factor, use `ETKDGv3()` with `useSmallRingTorsions = True`.
+- **Pairing caveat:** the same `randomSeed` under different params gives different embeddings (not common random
+  numbers). Pair at molecule level, on the common set; embedding failures can differ (`:90-92`).
+- **Verdict: IMPLEMENTABLE WITH CHANGES.**
+- **Cost:** CPU ≈ 1–2 h of seeds + ≈ 1 h gate; GPU ≤ 1.0 only if the gate passes.
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data and model: `round3/impact.md` §3.
+- **Ceiling.** Tail-driven, as for C-GEOM-01 (CTRL line).
+- **Expected effect: reasoning chain.**
+  1. The small-ring torsion terms raise unrelaxed pucker coverage from 53.3 % to 60.1 % on PuckerFlow's
+     5–8-ring set, ≈ 15 % fewer misses (E-GEOM-022).
+  2. Mapping "15 % fewer bad seeds" onto our tail is generous: the rule coverage of 4-rings (60 % bad) is unknown,
+     and CSD-derived preferences target the wrong level of theory (E-GEOM-050). The result is X 49.6 % → 42–46 %.
+  3. That gives CTRL −0.007 to −0.014 on the tail line, or −0.005 to −0.011 after the 76 % realisation seen for
+     MMFF. After MMFF relaxation: 35.1 % → 30–33 %, i.e. −0.004 to −0.010.
+  4. The v1 → v3 step has no source and an unknown sign. CTRL was trained on v1-matched L, so there is a small
+     train/test shift.
+- **Worst case.** +0.005 (shift with no pucker gain). B1 gains nothing (acyclic L stays RDKit-like).
+- **Detectability.** The paired L-source MDE is ≈ 0.007 for relaxed twins of the same embeddings (A2 vs R0). The
+  srETKDG variants are different embeddings (grounding.md: same `randomSeed` is not common random numbers), so the
+  MDE is ≈ 0.008–0.010. The expected effect is therefore probably undetectable even with 3 checkpoints.
+- **Decision value.** Modest. It is the free baseline every ring-L source must beat.
+- **Worth trying: MAYBE.** The CPU part is YES: it is near-free inside the C-GEOM-01 builder. GPU only if the tail
+  (ring ≥ 4 basis) drops ≥ 5 points; the tail is the right gate metric here. ≈ 3–5 mÅ per GPU-h.
+
+**Revised after cross-read (2026-10-11).**
+- In RDKit 2022.9.5, `srETKDGv3()` also turns macrocycle torsions off (grounder). The estimate above (CTRL −0.005 to
+  −0.011) now refers to the single-factor contrast `ETKDGv3()` + `useSmallRingTorsions = True`. QM9 rings have
+  ≤ 9 atoms, so the macrocycle switch is probably inert.
+- The variants are different embeddings, with no common random numbers, so the MDE is ≈ 0.008–0.010 and the expected
+  effect is probably undetectable (already noted).
+- GPU ≤ 1.0 GPU-h.
+- Call unchanged: **MAYBE** (the CPU part yes; GPU only if the tail drops ≥ 5 points).
+
 ## 9. Panel (judges)

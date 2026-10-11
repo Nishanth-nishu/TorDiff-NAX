@@ -82,5 +82,40 @@ Revision history (scout, P2): Revised after D-002, D-003, D-005 and V1 notes (bl
 few-conformer, what Zhou's ablation shows about MMFF, B-clust wording). The calls are unchanged.
 
 ## 7. Code grounding (grounder)
+- **B-mmff: AS SPECIFIED, zero code.**
+  - `generate_confs.py --no_model --no_random --pre_mmff --seed {0,1,2}` (round-1 A0 line + `--pre_mmff`,
+    `ablations_inference.tsv:13`).
+  - Or, paired with CTRL: `--seed_confs L_etkdg2L_mmff.pkl --seed_confs_cycle --no_model --no_random`.
+  - CPU job; `--model_dir` is still needed for the yaml (`generate_confs.py:85-88`).
+- **B-xtb: WITH CHANGES.** It is C-GEOM-01's `L_etkdg2L_mmff_xtb` with `--no_model --no_random`, built with builder
+  seeds 1–3 (`make_l_seed_pickles.py:59`). xtb 6.7.1 is already on gnode118 (no install). Measured 0.14 s/opt gives
+  ≈ 6 CPU-h for 3 seeds (the card said 25–70). Needs the fixed xTB runner and the 3D graph/stereo filter: the
+  evaluator does not filter generated conformers (`evaluate_confs.py:86`).
+- **B-clust: WITH CHANGES.** New `tools/cluster_baseline.py` (~150 lines). The random-dihedral sampler is the
+  `--no_model` path. **The K-means feature space is not fixed by our evidence** (E-EVAL-025); pre-register it and
+  output the members nearest each centroid.
+- **TD + clustering** needs `--confs_factor` in `generate_confs.py:183-187` (~3 lines); ≈ 2.6 GPU-h.
+- **Slip (V1 R2-2):** "(30 % of all molecules) are rigid" should read "25 % of all molecules (few-conformer ∩ rigid);
+  30 % of molecules are rigid overall".
+- **Verdict:** B-mmff AS SPECIFIED; B-xtb, B-clust and TD+cluster IMPLEMENTABLE WITH CHANGES.
+- **Cost:** ≈ 2.6 GPU-h; ≈ 10–13 CPU-h.
+Detail, line numbers and cluster checks: `round3/grounding.md` §3 (shared pieces S-1…S-6 in §2.3).
 ## 8. Predicted effect on our project (analyst)
+Data and model: `round3/impact.md` §3 (`impact_data/cond_means.txt`).
+- **Ceiling.** n/a (baselines).
+- **Expected effect.**
+  - **B-mmff.** The rigid stratum equals the MMFF seeds, 0.128 (model-free, S1). Flexible bins start from A0 (ETKDG
+    only: 0.197 / 0.284 / 0.328 / 0.391), relaxed toward MMFF minima; A3 (TD then MMFF-after: 0.17 / 0.23 / 0.25 /
+    0.29) is the nearest analogue. Expected B-mmff ≈ 0.19–0.21, against A0 0.230 and TD + MMFF-before 0.151.
+  - **B-xtb.** Rigid stratum ≈ xTB seeds, 0.10–0.13 (impact.md §3d, X = 30–35 %). Flexible molecules relax their
+    torsions into xTB minima, which are GT basins when the seed is close. Overall 0.16–0.20; P(≤ 0.1525, i.e. it
+    becomes the bar) ≈ 20 %.
+  - **B-clust / TD + clustering.** Buys recall. Zhou's oversampling gain was ≈ 0.03 Å MAT on the GD protocol; for TD
+    I expect −0.005 to −0.02 AMR-R with worse precision.
+- **Detectability.** Differences vs TD (≥ 0.02) are clear.
+- **Decision value.** High. Without B-mmff and B-xtb, the torsion model's contribution on good L (and so any FlexiTors
+  L gain) cannot be attributed.
+- **Worth trying: YES** for B-mmff and B-xtb (CPU; B-xtb shares C-GEOM-01's install). **MAYBE** for B-clust
+  (3–4 GPU-h, a recall sanity check only).
+
 ## 9. Panel (judges)
