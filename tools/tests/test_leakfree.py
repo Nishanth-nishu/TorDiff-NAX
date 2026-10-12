@@ -210,7 +210,7 @@ def test_analysis_driver(tmp_path):
     sd = tmp_path / 'split'
     sd.mkdir()
     split.to_csv(sd / 'split.tsv', sep='\t', index=False)
-    nn = [dict(corrected_smiles=m, half=h, gt_idx=i, nn_rmsd=0.3) for m, n in mols.items()
+    nn = [dict(corrected_smiles=m, half=h, gt_idx=i, nn_rmsd=0.05 if m == 'm1' else 0.3) for m, n in mols.items()
           for h, idx in zip('AB', msh.split_indices(n)) for i in idx]
     pd.DataFrame(nn).to_csv(sd / 'nn.tsv', sep='\t', index=False)
     res = tmp_path / 'res'
@@ -244,10 +244,27 @@ def test_analysis_driver(tmp_path):
         assert get(fam, 'leak', 'AMR-R') == pytest.approx(-add)
         assert get(fam, 'split', 'COV-R@0.1') == pytest.approx(0.0)
         assert get(fam, 'own', 'COV-R@0.1') == pytest.approx(1.0 if base[fam] < 0.1 else 0.0)
-    assert get('COPY', 'split', 'AMR-R') == pytest.approx(0.3)
+    assert get('COPY', 'split', 'AMR-R') == pytest.approx((0.05 + 0.3 + 0.3) / 3)
+    # distinct-target views: m1's only targets have an other-half twin (nn 0.05 < 0.1) -> universe_d = {m2, m3}
+    assert get('COPY', 'split_d', 'AMR-R') == pytest.approx(0.3)
+    for fam in base:
+        assert get(fam, 'split_d', 'AMR-R') == pytest.approx(get(fam, 'split', 'AMR-R'))
+        assert int(models[(models.model == fam) & (models.view == 'split_d')].n.iloc[0]) == 2
+    assert set(C[C.view == 'split_d'].id) >= {'S.S3-CR.split_d', 'S.B1-CR.split_d', 'S.S4-CR.split_d'}
     row = C[(C.id == 'P1.S3-CR.split') & (C.metric == 'AMR-R')].iloc[0]
     assert row.n == 3 and row['diff'] == pytest.approx((0.06 + 0.2) - (0.10 + 0.05))
     assert row.ci_lo == pytest.approx(row['diff']) and row.hier_lo == pytest.approx(row['diff'])
     assert C.p_holm.notna().sum() == 4  # 2 primary contrasts x {AMR-R, COV-R@0.5}
     assert set(C[C.family == 'primary'].id) == {'P1.S3-CR.split', 'P2.B1-CR.split'}
     assert (out / 'leakfree_summary.txt').exists() and (out / 'per_mol.csv.gz').exists()
+
+
+def test_per_mol_distinct_mask(tmp_path):
+    M = np.array([[0.2, 0.3, 0.9, 0.9], [0.04, 0.5, 0.9, 0.9]])  # row minima 0.2 and 0.04
+    write_eval(str(tmp_path / 'e.pkl'), {'x': M})
+    df, _ = alf.per_mol(str(tmp_path / 'e.pkl'), {'x': np.array([True, False])})
+    r = df.loc['x']
+    assert r['AMR-R'] == pytest.approx(0.12) and r['COV-R@0.1'] == pytest.approx(0.5)
+    assert r['AMR-R_d'] == pytest.approx(0.2) and r['COV-R@0.1_d'] == 0.0 and r['COV-R@0.5_d'] == 1.0
+    df, _ = alf.per_mol(str(tmp_path / 'e.pkl'), {'x': np.array([False, False])})
+    assert np.isnan(df.loc['x', 'AMR-R_d'])

@@ -26,6 +26,12 @@ Pre-declared contrasts (arm - ref, paired by molecule):
          round-2 LIMITATION note: S4 trains on ~12 % fewer pairs than its controls)
     S3 - CR, B1 - CR, S4 - CR on own (the leaky version, for comparison with the split-half contrast)
     leak(m) = own - split within each model m (paired within model); leak(S3) - leak(CR), leak(B1) - leak(CR)
+  DISTINCT-TARGET SENSITIVITY (secondary; declared after the nn diagnostic of make_split_half.py, before any model
+    result): 39 % of eligible GT conformers have an other-half GT conformer within 0.1 A heavy-atom RMSD (QM9 GEOM
+    near-duplicates in heavy atoms, e.g. H-rotamers), so for them the "other" half still carries an own-like L and
+    torsions. Views split_d / own_d / leak_d repeat split / own / leak on targets with nn_rmsd >= NN_MIN = 0.1 A only
+    (per direction over those targets; per molecule the mean over directions that have >= 1 such target; same
+    targets for split and own, so still paired). Contrasts S3 - CR, B1 - CR, S4 - CR on split_d; leak_d per model.
   EXPLORATORY: S3 - B1 on split-half; per n_clean bin (2-3, 4-10, 11-30, >30; round3/impact.md §3g) means;
     model - COPY on split-half for CR, B1, S3, S4, where COPY is the model-free "copy the other half" baseline from
     make_split_half.py nn.tsv (the other half's GT conformers used as predictions; V-8 seed-vs-model contribution).
@@ -66,11 +72,21 @@ CONTRASTS = [
     ('E.S3-B1.split', 'exploratory', 'S3', 'B1', 'split'),
 ]
 N_BINS = ((2, 3), (4, 10), (11, 30), (31, 10 ** 9))
+NN_MIN = 0.1  # distinct-target sensitivity: other-half nearest GT conformer >= 0.1 A (heavy-atom GetBestRMS)
+TGT = {'split_AtoB': 'B', 'split_BtoA': 'A', 'own_BtoB': 'B', 'own_AtoA': 'A'}  # target half of each condition
+METRICS_D = [m + '_d' for m in METRICS]
+CONTRASTS += [
+    ('S.S3-CR.split_d', 'secondary', 'S3', 'CR', 'split_d'),
+    ('S.B1-CR.split_d', 'secondary', 'B1', 'CR', 'split_d'),
+    ('S.S4-CR.split_d', 'secondary', 'S4', 'CR', 'split_d'),
+]
 
 
 # ------------------------------------------------------------------------------------------------ helpers
-def per_mol(path):
-    """per-molecule recall metrics of one eval.pkl; returns (DataFrame indexed by corrected smiles, info dict)"""
+def per_mol(path, masks=None):
+    """per-molecule recall metrics of one eval.pkl; returns (DataFrame indexed by corrected smiles, info dict).
+    masks: {corrected smiles: bool array over the eval rows (= target half, cleaned-index order)} -> also the *_d
+    columns over the masked (distinct) targets only, NaN if a molecule has none."""
     with open(path, 'rb') as f:
         R = pickle.load(f)
     rows = {}
@@ -80,6 +96,13 @@ def per_mol(path):
         d = {'AMR-R': float(np.mean(rmin)), 'n_targets': int(res['n_true']), 'n_gen': int(res['n_model'])}
         for m, t in THRS.items():
             d[m] = float(np.mean(rmin < t))
+        if masks is not None:
+            mk = masks.get(corr)
+            assert mk is None or len(mk) == len(rmin), f'{path} {corr}: mask {len(mk)} != rows {len(rmin)}'
+            r = rmin[mk] if mk is not None else rmin[:0]
+            d['AMR-R_d'] = float(np.mean(r)) if len(r) else np.nan
+            for m, t in THRS.items():
+                d[m + '_d'] = float(np.mean(r < t)) if len(r) else np.nan
         n_nan += int(not np.isfinite(d['AMR-R']))
         rows[corr] = d
     info = dict(num_failures=int(R.get('num_failures', 0)), n_results=len(rows), n_nan=n_nan)
@@ -87,7 +110,14 @@ def per_mol(path):
 
 
 def view(d, v):
-    """d: {cond: DataFrame} for one run -> per-molecule split / own / leak frame (METRICS columns)"""
+    """d: {cond: DataFrame} for one run -> per-molecule split / own / leak frame (METRICS columns); the *_d views
+    (distinct targets) average the directions that have >= 1 distinct target"""
+    if v.endswith('_d'):
+        def avg(a, b):
+            x, y = d[a][METRICS_D].set_axis(METRICS, axis=1), d[b][METRICS_D].set_axis(METRICS, axis=1)
+            return pd.concat([x, y]).groupby(level=0).mean()  # skips NaN (direction without distinct targets)
+        split, own = avg('split_AtoB', 'split_BtoA'), avg('own_BtoB', 'own_AtoA')
+        return {'split_d': split, 'own_d': own, 'leak_d': own - split}[v]
     split = (d['split_AtoB'][METRICS] + d['split_BtoA'][METRICS]) / 2
     own = (d['own_BtoB'][METRICS] + d['own_AtoA'][METRICS]) / 2
     return {'split': split, 'own': own, 'leak': own - split}[v]
@@ -132,7 +162,19 @@ def n_bin(n):
     return 'n<2'
 
 
-def load_all(res, families):
+def nn_masks(split_dir):
+    """{half: {corrected smiles: bool array (nn_rmsd >= NN_MIN) in eval-row order}} from make_split_half.py nn.tsv"""
+    p = os.path.join(split_dir, 'nn.tsv')
+    if not os.path.exists(p):
+        return None, None
+    NN = pd.read_csv(p, sep='\t').sort_values(['corrected_smiles', 'half', 'gt_idx'])
+    out = {'A': {}, 'B': {}}
+    for (corr, h), g in NN.groupby(['corrected_smiles', 'half']):
+        out[h][corr] = g.nn_rmsd.values >= NN_MIN
+    return out, NN
+
+
+def load_all(res, families, masks=None):
     data, info, missing = {}, [], []
     for fam in families:
         for s in SEEDS[fam]:
@@ -143,7 +185,7 @@ def load_all(res, families):
                 if not os.path.exists(p):
                     missing.append(p)
                     continue
-                d[c], inf = per_mol(p)
+                d[c], inf = per_mol(p, masks[TGT[c]] if masks else None)
                 info.append(dict(model=fam, seed=s, cond=c, **inf))
             if len(d) == len(CONDS):
                 data[(fam, s)] = d
@@ -153,7 +195,8 @@ def load_all(res, families):
 def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=('CR', 'B1', 'S3', 'S4')):
     os.makedirs(out, exist_ok=True)
     split = pd.read_csv(os.path.join(split_dir, 'split.tsv'), sep='\t').set_index('corrected_smiles')
-    data, info, missing = load_all(res, families)
+    masks, NN = nn_masks(split_dir)
+    data, info, missing = load_all(res, families, masks)
     lines = ['# Leak-free (split-half) true-geometry oracle test: analysis (ORACLE; tools/analyze_leakfree.py)', '']
     if missing:
         lines += [f'MISSING {p}' for p in missing] + ['']
@@ -161,32 +204,40 @@ def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=(
     # universe: finite AMR-R in every file of every complete model
     sets = [set(df.index[np.isfinite(df['AMR-R'])]) for k in data if k[0] in fams for df in data[k].values()]
     universe = sorted(set.intersection(*sets) & set(split.index)) if sets else []
+    universe_d = [m for m in universe if masks and (masks['A'].get(m, np.zeros(0, bool)).any()
+                                                    or masks['B'].get(m, np.zeros(0, bool)).any())]
+    set_d = set(universe_d)
+    views = ['split', 'own', 'leak'] + (['split_d', 'own_d', 'leak_d'] if masks else [])
     lines += [f'eligible molecules (split.tsv, n_clean >= 2): {len(split)}',
               f'success intersection over {sum(len(SEEDS[f]) for f in fams)} runs x 4 conditions: {len(universe)}',
+              f'distinct-target universe (>= 1 target with other-half nn_rmsd >= {NN_MIN} A): {len(universe_d)}',
               f'models complete: {fams}', '']
+    if NN is not None and universe:
+        u = NN[NN.corrected_smiles.isin(universe)]
+        lines += [f'targets in universe: {len(u)}; with nn_rmsd >= {NN_MIN} A: {int((u.nn_rmsd >= NN_MIN).sum())}', '']
     info.to_csv(os.path.join(out, 'failures.csv'), index=False)
     # per-run, per-view per-molecule frames on the universe
     V = {}
     for (fam, s), d in data.items():
         if fam not in fams:
             continue
-        for v in ('split', 'own', 'leak'):
-            V[(fam, s, v)] = view(d, v).loc[universe]
+        for v in views:
+            V[(fam, s, v)] = view(d, v).loc[universe_d if v.endswith('_d') else universe]
         for c in CONDS:
             V[(fam, s, c)] = d[c].loc[universe, METRICS]
 
     def stack(fam, v, metric, mols=None):
-        mols = universe if mols is None else mols
+        mols = (universe_d if v.endswith('_d') else universe) if mols is None else mols
         return np.stack([V[(fam, s, v)].loc[mols, metric].values for s in SEEDS[fam]])
 
     # ---- per-model table
     rows = []
     for fam in fams:
-        for v in ['split', 'own', 'leak'] + CONDS:
+        for v in views + CONDS:
             for m in METRICS:
                 X = stack(fam, v, m)
                 per_seed = X.mean(axis=1)
-                rows.append(dict(model=fam, view=v, metric=m, n=len(universe), value=float(X.mean()),
+                rows.append(dict(model=fam, view=v, metric=m, n=X.shape[1], value=float(X.mean()),
                                  seed_sd=float(np.std(per_seed, ddof=1)) if len(per_seed) > 1 else np.nan,
                                  per_seed=' / '.join(f'{x:.4f}' for x in per_seed)))
     models = pd.DataFrame(rows)
@@ -210,48 +261,55 @@ def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=(
         for sname, mols in subsets:
             if sname == 'S4subset' and 'S4' not in (arm, ref):
                 continue
+            mv = [x for x in mols if x in set_d] if v.endswith('_d') else mols
+            if not mv:
+                continue
             for m in METRICS:
-                A, Rf = stack(arm, v, m, mols), stack(ref, v, m, mols)
+                A, Rf = stack(arm, v, m, mv), stack(ref, v, m, mv)
                 mean, lo, hi, p = boot(A.mean(0) - Rf.mean(0), rng, n_boot)
                 hlo, hhi = hier_ci(A, Rf, rng, n_boot)
                 sc = 1.0 if m == 'AMR-R' else 100.0
                 crow.append(dict(id=cid + ('@S4subset' if sname != 'all' else ''), family=family, metric=m,
-                                 n=len(mols), arm=arm, ref=ref, view=v, arm_value=A.mean() * sc,
+                                 n=len(mv), arm=arm, ref=ref, view=v, arm_value=A.mean() * sc,
                                  ref_value=Rf.mean() * sc, diff=mean * sc, ci_lo=lo * sc, ci_hi=hi * sc, p_boot=p,
                                  hier_lo=hlo * sc, hier_hi=hhi * sc,
                                  note='S4 LIMITATION (trains on pair_ok-safe pairs only)' if 'S4' in (arm, ref) else ''))
     # within-model leak with CI (paired own - split, same model)
     for fam in fams:
-        for m in METRICS:
-            A = stack(fam, 'leak', m)
-            mean, lo, hi, p = boot(A.mean(0), rng, n_boot)
-            hlo, hhi = hier_ci(A, None, rng, n_boot)
-            sc = 1.0 if m == 'AMR-R' else 100.0
-            crow.append(dict(id=f'S.leak.{fam}', family='secondary', metric=m, n=len(universe), arm=fam, ref='-',
-                             view='own-split', arm_value=stack(fam, 'own', m).mean() * sc,
-                             ref_value=stack(fam, 'split', m).mean() * sc, diff=mean * sc, ci_lo=lo * sc,
-                             ci_hi=hi * sc, p_boot=p, hier_lo=hlo * sc, hier_hi=hhi * sc, note=''))
-    # model-free COPY baseline (exploratory): other half's GT conformers as predictions, split view only
-    nn_path = os.path.join(split_dir, 'nn.tsv')
-    if os.path.exists(nn_path) and universe:
-        NN = pd.read_csv(nn_path, sep='\t')
-        g = NN.groupby(['corrected_smiles', 'half']).nn_rmsd
-        cp = {'AMR-R': g.mean()}
-        for m, t in THRS.items():
-            cp[m] = g.apply(lambda x, t=t: float(np.mean(x.values < t)))
-        copy = pd.DataFrame({m: s.groupby(level=0).mean() for m, s in cp.items()}).reindex(universe)
-        for m in METRICS:
-            sc = 1.0 if m == 'AMR-R' else 100.0
-            models = pd.concat([models, pd.DataFrame([dict(model='COPY', view='split', metric=m, n=len(universe),
-                                                           value=float(copy[m].mean()), seed_sd=np.nan,
-                                                           per_seed='model-free')])], ignore_index=True)
-            for fam in fams:
-                A = stack(fam, 'split', m)
-                mean, lo, hi, p = boot(A.mean(0) - copy[m].values, rng, n_boot)
-                crow.append(dict(id=f'E.{fam}-COPY.split', family='exploratory', metric=m, n=len(universe), arm=fam,
-                                 ref='COPY', view='split', arm_value=A.mean() * sc, ref_value=copy[m].mean() * sc,
-                                 diff=mean * sc, ci_lo=lo * sc, ci_hi=hi * sc, p_boot=p, hier_lo=np.nan,
-                                 hier_hi=np.nan, note='COPY = other-half GT conformers as predictions (no model)'))
+        for sfx in [''] + (['_d'] if masks else []):
+            for m in METRICS:
+                A = stack(fam, 'leak' + sfx, m)
+                mean, lo, hi, p = boot(A.mean(0), rng, n_boot)
+                hlo, hhi = hier_ci(A, None, rng, n_boot)
+                sc = 1.0 if m == 'AMR-R' else 100.0
+                crow.append(dict(id=f'S.leak{sfx}.{fam}', family='secondary', metric=m, n=A.shape[1], arm=fam,
+                                 ref='-', view='own' + sfx + '-split' + sfx,
+                                 arm_value=stack(fam, 'own' + sfx, m).mean() * sc,
+                                 ref_value=stack(fam, 'split' + sfx, m).mean() * sc, diff=mean * sc, ci_lo=lo * sc,
+                                 ci_hi=hi * sc, p_boot=p, hier_lo=hlo * sc, hier_hi=hhi * sc, note=''))
+    # model-free COPY baseline (exploratory): other half's GT conformers as predictions, split views only
+    if NN is not None and universe:
+        for sfx, U, NNv in (('', universe, NN), ('_d', universe_d, NN[NN.nn_rmsd >= NN_MIN])):
+            if not U:
+                continue
+            g = NNv.groupby(['corrected_smiles', 'half']).nn_rmsd
+            cp = {'AMR-R': g.mean()}
+            for m, t in THRS.items():
+                cp[m] = g.apply(lambda x, t=t: float(np.mean(x.values < t)))
+            copy = pd.DataFrame({m: q.groupby(level=0).mean() for m, q in cp.items()}).reindex(U)
+            for m in METRICS:
+                sc = 1.0 if m == 'AMR-R' else 100.0
+                models = pd.concat([models, pd.DataFrame([dict(model='COPY', view='split' + sfx, metric=m, n=len(U),
+                                                               value=float(copy[m].mean()), seed_sd=np.nan,
+                                                               per_seed='model-free')])], ignore_index=True)
+                for fam in fams:
+                    A = stack(fam, 'split' + sfx, m)
+                    mean, lo, hi, p = boot(A.mean(0) - copy[m].values, rng, n_boot)
+                    crow.append(dict(id=f'E.{fam}-COPY.split{sfx}', family='exploratory', metric=m, n=len(U),
+                                     arm=fam, ref='COPY', view='split' + sfx, arm_value=A.mean() * sc,
+                                     ref_value=copy[m].mean() * sc, diff=mean * sc, ci_lo=lo * sc, ci_hi=hi * sc,
+                                     p_boot=p, hier_lo=np.nan, hier_hi=np.nan,
+                                     note='COPY = other-half GT conformers as predictions (no model)'))
         models.to_csv(os.path.join(out, 'per_model.csv'), index=False)
     C = pd.DataFrame(crow)
     C['p_holm'] = np.nan
@@ -271,27 +329,32 @@ def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=(
             for v in ('split', 'own', 'leak'):
                 srow.append(dict(model=fam, n_bin=b, n=len(mols), view=v,
                                  **{m: float(stack(fam, v, m, mols).mean()) for m in METRICS}))
+            md = [x for x in mols if x in set_d]
+            for v in [w for w in views if w.endswith('_d') and md]:
+                srow.append(dict(model=fam, n_bin=b, n=len(md), view=v,
+                                 **{m: float(stack(fam, v, m, md).mean()) for m in METRICS}))
     S = pd.DataFrame(srow)
     S.to_csv(os.path.join(out, 'strata.csv'), index=False)
 
     # ---- per-molecule dump (seed-averaged; for later re-analysis without the cluster)
     pm = []
     for fam in fams:
-        for v in ['split', 'own'] + CONDS:
+        for v in [w for w in views if not w.startswith('leak')] + CONDS:
             X = {m: stack(fam, v, m).mean(0) for m in METRICS}
-            pm.append(pd.DataFrame(dict(model=fam, view=v, corrected_smiles=universe, **X)))
+            pm.append(pd.DataFrame(dict(model=fam, view=v, corrected_smiles=universe_d if v.endswith('_d')
+                                        else universe, **X)))
     if pm:
         pd.concat(pm).to_csv(os.path.join(out, 'per_mol.csv.gz'), index=False, compression='gzip')
 
     # ---- text report
     pd.set_option('display.width', 250)
     pd.set_option('display.max_columns', 30)
-    piv = models[models.view.isin(['split', 'own', 'leak'])].pivot_table(
+    piv = models[models.view.isin(views)].pivot_table(
         index='model', columns=['view', 'metric'], values='value', sort=False)
     lines += ['## Per model (seed-averaged; AMR-R in A, COV-R as fraction)', piv.round(4).to_string(), '',
               '## Per model and direction', models[models.view.isin(CONDS)].pivot_table(
                   index='model', columns=['view', 'metric'], values='value', sort=False).round(4).to_string(), '',
-              '## Per-seed values', models[models.view.isin(['split', 'own', 'leak'])][
+              '## Per-seed values', models[models.view.isin(views)][
                   ['model', 'view', 'metric', 'value', 'seed_sd', 'per_seed']].round(4).to_string(index=False), '',
               '## Contrasts (AMR-R in A, COV in %; diff = arm - ref; p_holm over the PRIMARY family only)',
               C.round(4).to_string(index=False), '',
