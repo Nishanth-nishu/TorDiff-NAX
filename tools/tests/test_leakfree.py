@@ -233,6 +233,9 @@ def test_analysis_driver(tmp_path):
                 if fam == 'S3' and s == 0 and c == 'split_BtoA':
                     del mats['m5']  # model failure -> m5 leaves the universe
                 write_eval(os.path.join(res, run, alf.TAG.format(c), 'eval.pkl'), mats)
+            # round-2 full-set own-L reference run of the same checkpoint (all n targets, 2n conformers)
+            write_eval(os.path.join(res, run, 'steps20_seed0_gtLcycle', 'eval.pkl'),
+                       {m: np.full((n, 2 * n), base[fam] / 2) for m, n in mols.items()})
         expect[fam] = base[fam]
     out = tmp_path / 'out'
     models, C, S = alf.analyse(str(res), str(sd), str(out), n_boot=200)
@@ -251,6 +254,10 @@ def test_analysis_driver(tmp_path):
         assert get(fam, 'split_d', 'AMR-R') == pytest.approx(get(fam, 'split', 'AMR-R'))
         assert int(models[(models.model == fam) & (models.view == 'split_d')].n.iloc[0]) == 2
     assert set(C[C.view == 'split_d'].id) >= {'S.S3-CR.split_d', 'S.B1-CR.split_d', 'S.S4-CR.split_d'}
+    for fam in base:
+        assert get(fam, 'ref_gtLcycle_full', 'AMR-R') == pytest.approx(base[fam] / 2)
+    r = C[(C.id == 'R.S3-CR.ref_gtLcycle_full') & (C.metric == 'AMR-R')].iloc[0]
+    assert r.n == 3 and r['diff'] == pytest.approx((0.06 - 0.10) / 2)
     row = C[(C.id == 'P1.S3-CR.split') & (C.metric == 'AMR-R')].iloc[0]
     assert row.n == 3 and row['diff'] == pytest.approx((0.06 + 0.2) - (0.10 + 0.05))
     assert row.ci_lo == pytest.approx(row['diff']) and row.hier_lo == pytest.approx(row['diff'])

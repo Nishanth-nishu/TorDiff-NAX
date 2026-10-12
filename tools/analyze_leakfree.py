@@ -32,6 +32,9 @@ Pre-declared contrasts (arm - ref, paired by molecule):
     torsions. Views split_d / own_d / leak_d repeat split / own / leak on targets with nn_rmsd >= NN_MIN = 0.1 A only
     (per direction over those targets; per molecule the mean over directions that have >= 1 such target; same
     targets for split and own, so still paired). Contrasts S3 - CR, B1 - CR, S4 - CR on split_d; leak_d per model.
+  REFERENCE (descriptive, same universe): the round-2 full-set runs of the same checkpoints, steps20_seed0 (RDKit L;
+    S4 at lambda 0) and steps20_seed0_gtLcycle (all own GT L cycled, 2 x n_csv conformers vs all n targets; S4 at
+    lambda 1), re-scored on the split-half universe; S3 - CR and B1 - CR on them (molecule bootstrap) for comparison.
   EXPLORATORY: S3 - B1 on split-half; per n_clean bin (2-3, 4-10, 11-30, >30; round3/impact.md §3g) means;
     model - COPY on split-half for CR, B1, S3, S4, where COPY is the model-free "copy the other half" baseline from
     make_split_half.py nn.tsv (the other half's GT conformers used as predictions; V-8 seed-vs-model contribution).
@@ -72,6 +75,7 @@ CONTRASTS = [
     ('E.S3-B1.split', 'exploratory', 'S3', 'B1', 'split'),
 ]
 N_BINS = ((2, 3), (4, 10), (11, 30), (31, 10 ** 9))
+REF_TAGS = {'ref_rdkitL': 'steps20_seed0', 'ref_gtLcycle_full': 'steps20_seed0_gtLcycle'}
 NN_MIN = 0.1  # distinct-target sensitivity: other-half nearest GT conformer >= 0.1 A (heavy-atom GetBestRMS)
 TGT = {'split_AtoB': 'B', 'split_BtoA': 'A', 'own_BtoB': 'B', 'own_AtoA': 'A'}  # target half of each condition
 METRICS_D = [m + '_d' for m in METRICS]
@@ -311,6 +315,37 @@ def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=(
                                      p_boot=p, hier_lo=np.nan, hier_hi=np.nan,
                                      note='COPY = other-half GT conformers as predictions (no model)'))
         models.to_csv(os.path.join(out, 'per_model.csv'), index=False)
+    # reference: round-2 full-set runs of the same checkpoints on this universe (descriptive)
+    REF = {}
+    for v, tag in REF_TAGS.items():
+        for fam in fams:
+            fr = []
+            for s in SEEDS[fam]:
+                pth = os.path.join(res, RUN[fam].format(s), tag, 'eval.pkl')
+                if os.path.exists(pth):
+                    fr.append(per_mol(pth)[0].reindex(universe)[METRICS])
+            if len(fr) == len(SEEDS[fam]):
+                REF[(fam, v)] = np.stack([f[METRICS].values for f in fr])  # (seeds, mols, metrics)
+                X = REF[(fam, v)]
+                for k, m in enumerate(METRICS):
+                    per_seed = np.nanmean(X[:, :, k], axis=1)
+                    models = pd.concat([models, pd.DataFrame([dict(
+                        model=fam, view=v, metric=m, n=int(np.isfinite(X[:, :, k]).all(0).sum()),
+                        value=float(np.nanmean(X[:, :, k].mean(0))), seed_sd=float(np.std(per_seed, ddof=1))
+                        if len(per_seed) > 1 else np.nan, per_seed=' / '.join(f'{x:.4f}' for x in per_seed))])],
+                        ignore_index=True)
+        for arm in ('S3', 'B1'):
+            if (arm, v) in REF and ('CR', v) in REF:
+                for k, m in enumerate(METRICS):
+                    a, r = REF[(arm, v)][:, :, k].mean(0), REF[('CR', v)][:, :, k].mean(0)
+                    ok = np.isfinite(a) & np.isfinite(r)
+                    mean, lo, hi, p = boot(a[ok] - r[ok], rng, n_boot)
+                    sc = 1.0 if m == 'AMR-R' else 100.0
+                    crow.append(dict(id=f'R.{arm}-CR.{v}', family='reference', metric=m, n=int(ok.sum()), arm=arm,
+                                     ref='CR', view=v, arm_value=a[ok].mean() * sc, ref_value=r[ok].mean() * sc,
+                                     diff=mean * sc, ci_lo=lo * sc, ci_hi=hi * sc, p_boot=p, hier_lo=np.nan,
+                                     hier_hi=np.nan, note=f'round-2 {REF_TAGS[v]} re-scored on this universe'))
+    models.to_csv(os.path.join(out, 'per_model.csv'), index=False)
     C = pd.DataFrame(crow)
     C['p_holm'] = np.nan
     prim = (C.family == 'primary') & C.metric.isin(PRIMARY_METRICS)
@@ -349,7 +384,7 @@ def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=(
     # ---- text report
     pd.set_option('display.width', 250)
     pd.set_option('display.max_columns', 30)
-    piv = models[models.view.isin(views)].pivot_table(
+    piv = models[models.view.isin(views + list(REF_TAGS))].pivot_table(
         index='model', columns=['view', 'metric'], values='value', sort=False)
     lines += ['## Per model (seed-averaged; AMR-R in A, COV-R as fraction)', piv.round(4).to_string(), '',
               '## Per model and direction', models[models.view.isin(CONDS)].pivot_table(
