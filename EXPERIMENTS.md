@@ -310,9 +310,22 @@ and useless on RDKit geometry. Round 2 asks two things:
 controls re-scored on S4's molecules (kept after the research agents showed it leaves a small training-set
 difference); inference packed 3 jobs per GPU; jobs may use the 4-day limit and resume from checkpoints.
 
-**Status:** all inference experiments (S1) are done. Training: S2, S3, S4 done; B1cap, S2-0.02 and S5 running;
-evaluation panels queued. **All round-2 numbers below are preliminary** (unpaired means) until the pre-declared paired
-analysis (`tools/analyze_round2.py`) runs on the finished set (~10 Oct).
+**Status (12 Oct):** all round-2 runs are done and the pre-declared paired analysis has run
+(`cluster_sync/round2/results/analysis_r2/contrasts.csv`). The per-arm numbers below are in-job averages; the final
+paired results are:
+
+| Contrast (AMR-R, arm − control, Å) | Difference [95% CI] | Verdict |
+|---|---|---|
+| S3 on RDKit L vs CTRL_rematch | **+0.0032 [+0.0013, +0.0052]**, Holm p = 0.0096 | Significantly worse |
+| S3 on MMFF L / at blend 0.5 / on noisy true L (0.04) | +0.039 / +0.004 / +0.007 | Worse |
+| S3 on own-conformer true L (oracle) | −0.049 | Better, but suspected identity leakage |
+| S2 (noise 0.04) on RDKit L vs CTRL_base | +0.025, non-inferiority (0.004) fails | Worse |
+| S4 on RDKit L vs CTRL_rematch | +0.0033 [−0.0009, +0.0078] | Not significant |
+| S5 (MMFF-trained) vs CTRL_rematch, both with MMFF at test | **−0.0041 [−0.0064, −0.0019]** | Small real gain |
+| S5 vs CTRL_rematch on RDKit L | −0.029 | Gain from MMFF geometry |
+
+**No learned training recipe improved real use. The only real-use gains came from better geometry.** A leak-free
+split-half test (round 4) is running to settle what remains of S3's oracle gain.
 
 ## S1. Geometry-quality sweep (inference only, existing models)
 
@@ -394,12 +407,14 @@ analysis (`tools/analyze_round2.py`) runs on the finished set (~10 Oct).
   true geometry (`tools/build_paired_pickles.py`; pairing verified on 99.999 % of pairs by recomputing each stored
   matching RMSD); `--l_mix_p_gt` in training (per-sample coin flip, both halves capped equally).
 - **Outcome (preliminary):** seed 0: RDKit **0.182**, true **0.033**; seed 1: **0.182** / **0.034**.
-- **What it says:** one model now matches standard TD on RDKit geometry (0.182 vs 0.181) **and** keeps most of the
-  true-geometry gain (0.033 vs 0.080 for the standard model). This is exactly the property FlexiTors' torsion part
-  needs: robust today, and better whenever the geometry gets better. It replicated across both seeds.
-- **What we do next:** confirm with the paired analysis; round 3 builds on it (S3 is the base recipe for the
-  error-shaped and deployed-source training cards).
-- **Worth it?** Yes. Currently the best result of round 2, ~23 GPU-h.
+- **What it seemed to say (preliminary):** one model matching TD on RDKit geometry and keeping most of the
+  true-geometry gain.
+- **What the final paired analysis says (12 Oct):** S3 is **+0.0032 Å [+0.0013, +0.0052] worse** than its control on
+  RDKit geometry (significant), +0.039 worse on MMFF geometry, +0.004 worse at blend 0.5, +0.007 worse on noisy true
+  geometry. It wins only on exact own-conformer true geometry (−0.049), the condition suspected of leaking conformer
+  identity. So S3 is **not** robust-and-better; at best it is a model that exploits exact geometry.
+- **What we do next:** the round-4 leak-free split-half test decides whether any of S3's oracle gain is real.
+- **Worth it?** Yes as a test (~23 GPU-h), but the preliminary reading was wrong; the paired analysis caught it.
 
 ## S4. Tell the model how good its geometry is (λ-conditioned training, 3 seeds)
 
@@ -523,9 +538,10 @@ disputes, which are being answered now. Next: code grounding, impact prediction,
 2. **The geometry that matters is ring geometry.** Floor split (E12) and, with the model in the loop, S1: true rings
    0.178 → 0.119, true acyclic geometry no gain. A FlexiTors that only diffuses acyclic angles would miss most of it.
 3. **Conformer matching, stereo and sampler settings are not the lever** (B2, B5, G1, E12 headroom).
-4. **A torsion model trained on true geometry is brittle** (B1). The fix that works so far is to train on a mix of
-   real RDKit and true geometry (S3: 0.182 on RDKit, 0.033 on true geometry, 2 seeds). Random noise (S2) and the
-   λ input (S4) were weaker.
+4. **A torsion model trained on true geometry is brittle** (B1), and no training fix tried so far works in real use:
+   the 50/50 mix (S3) is slightly but significantly worse than TD on RDKit geometry and much worse on MMFF geometry;
+   random noise (S2) and the λ input (S4) are no better. Every model trained on true or mixed geometry gets worse on
+   improved-but-imperfect geometry such as MMFF (final paired analysis, 12 Oct).
 5. **The accuracy target for a geometry generator** is roughly "blend 0.75": rings almost never twisted more than 10°,
    ring angles within ~0.7°, ring bonds within ~0.01 Å. RDKit and MMFF are far from it on rings.
 6. **Cheap physics already helps** (MMFF before diffusion: −15 %). GEOM's own level of theory is GFN2-xTB, so xTB
@@ -535,8 +551,8 @@ disputes, which are being answered now. Next: code grounding, impact prediction,
    classical generator; current learned models report 0.073–0.103 Å on the same protocol. The oracle results (0.020–
    0.033 Å) show the ceiling is far below that, if the geometry can be produced.
 
-**Experiments that were clearly worth it:** E1, E2, E6, E9, E12, E15, S1, S3. **Useful but expensive for what they
-showed:** B2, B5 (null results at ~33 GPU-h each), S4. **Informative failure:** S2 (showed random noise is the wrong
+**Experiments that were clearly worth it:** E1, E2, E6, E9, E12, E15, S1, S5. **Useful but expensive for what they
+showed:** B2, B5 (null results at ~33 GPU-h each), S3 and S4 (no real-use gain). **Informative failure:** S2 (showed random noise is the wrong
 augmentation, which led directly to the round-3 error-shaped idea).
 
 **Will this produce a real result?** The oracle experiments say the potential gain is large (0.18 → 0.02–0.03 Å) and
