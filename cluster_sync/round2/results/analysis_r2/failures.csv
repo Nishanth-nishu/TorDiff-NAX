@@ -1,0 +1,52 @@
+contrast,model,tag,num_failures,n_missing_files
+S2.rdkit_vs_CB,B6,steps20_seed0,"[65, 65, 65]",0
+S2.rdkit_vs_CB,CB,steps20_seed0,"[65, 65, 65]",0
+S2.gtLc_vs_CB_ORACLE,B6,steps20_seed0_gtLcycle,"[4, 4, 4]",0
+S2.gtLc_vs_CB_ORACLE,CB,steps20_seed0_gtLcycle,"[4, 4, 4]",0
+S2.rdkit_vs_B1,B1,steps20_seed0,"[65, 65, 65]",0
+S3.rdkit_vs_CR,S3,steps20_seed0,"[65, 65]",0
+S3.rdkit_vs_CR,CR,steps20_seed0,"[65, 65, 65]",0
+S3.gtLc_vs_CR_ORACLE,S3,steps20_seed0_gtLcycle,"[4, 4]",0
+S3.gtLc_vs_CR_ORACLE,CR,steps20_seed0_gtLcycle,"[4, 4, 4]",0
+S3.gtLc_vs_B1cap_ORACLE,B1cap,steps20_seed0_gtLcycle,[4],0
+S4.rdkit_l0_vs_CR,S4,steps20_seed0,"[65, 65, 65]",0
+S4.gtLc_l1_vs_CR_ORACLE,S4,steps20_seed0_gtLcycle,"[4, 4, 4]",0
+S4.gtLc_l1_vs_B1_ORACLE@S4subset,B1,steps20_seed0_gtLcycle,"[4, 4, 4]",0
+S5.premmff_vs_CRpremmff,B3,steps20_seed0,"[65, 65, 65]",0
+S5.premmff_vs_CRpremmff,CR,S5ctrl_pre_mmff,"[65, 65, 65]",0
+S5.nommff_vs_CR,B3,S5_nommff,"[65, 65, 65]",0
+B6b.rdkit_vs_CB,B6b,steps20_seed0,[65],0
+S1.B1_vs_CR.S1_etkdg2L,B1,S1_etkdg2L,"[64, 64, 64]",0
+S1.B1_vs_CR.S1_etkdg2L,CR,S1_etkdg2L,"[64, 64, 64]",0
+S1.B1_vs_CR.S1_etkdg2L_mmff,B1,S1_etkdg2L_mmff,"[64, 64, 64]",0
+S1.B1_vs_CR.S1_etkdg2L_mmff,CR,S1_etkdg2L_mmff,"[64, 64, 64]",0
+S1.B1_vs_CR.S1_noise0.02pa_cyc_ORACLE,B1,S1_noise0.02pa_cyc_ORACLE,"[4, 4, 4]",0
+S1.B1_vs_CR.S1_noise0.02pa_cyc_ORACLE,CR,S1_noise0.02pa_cyc_ORACLE,"[4, 4, 4]",0
+S1.B1_vs_CR.S1_noise0.04pa_cyc_ORACLE,B1,S1_noise0.04pa_cyc_ORACLE,"[4, 4, 4]",0
+S1.B1_vs_CR.S1_noise0.04pa_cyc_ORACLE,CR,S1_noise0.04pa_cyc_ORACLE,"[4, 4, 4]",0
+S1.B1_vs_CR.S1_lam0.00_cyc_ORACLE,B1,S1_lam0.00_cyc_ORACLE,"[45, 45, 45]",0
+S1.B1_vs_CR.S1_lam0.00_cyc_ORACLE,CR,S1_lam0.00_cyc_ORACLE,"[45, 45, 45]",0
+S1.B1_vs_CR.S1_lam0.25_cyc_ORACLE,B1,S1_lam0.25_cyc_ORACLE,"[94, 94, 94]",0
+S1.B1_vs_CR.S1_lam0.25_cyc_ORACLE,CR,S1_lam0.25_cyc_ORACLE,"[94, 94, 94]",0
+S1.B1_vs_CR.S1_lam0.50_cyc_ORACLE,B1,S1_lam0.50_cyc_ORACLE,"[94, 94, 94]",0
+S1.B1_vs_CR.S1_lam0.50_cyc_ORACLE,CR,S1_lam0.50_cyc_ORACLE,"[94, 94, 94]",0
+S1.B1_vs_CR.S1_lam0.75_cyc_ORACLE,B1,S1_lam0.75_cyc_ORACLE,"[94, 94, 94]",0
+S1.B1_vs_CR.S1_lam0.75_cyc_ORACLE,CR,S1_lam0.75_cyc_ORACLE,"[94, 94, 94]",0
+S1.B1_vs_CR.S1_A5ring_cyc_ORACLE,B1,S1_A5ring_cyc_ORACLE,"[45, 45, 45]",0
+S1.B1_vs_CR.S1_A5ring_cyc_ORACLE,CR,S1_A5ring_cyc_ORACLE,"[45, 45, 45]",0
+S1.B1_vs_CR.S1_A5acyc_cyc_ORACLE,B1,S1_A5acyc_cyc_ORACLE,"[45, 45, 45]",0
+S1.B1_vs_CR.S1_A5acyc_cyc_ORACLE,CR,S1_A5acyc_cyc_ORACLE,"[45, 45, 45]",0
+S1.B6_vs_CR.S1_etkdg2L,B6,S1_etkdg2L,"[64, 64, 64]",0
+S1.S3_vs_CR.S1_etkdg2L,S3,S1_etkdg2L,"[64, 64]",0
+S1.B6_vs_CR.S1_etkdg2L_mmff,B6,S1_etkdg2L_mmff,"[64, 64, 64]",0
+S1.S3_vs_CR.S1_etkdg2L_mmff,S3,S1_etkdg2L_mmff,"[64, 64]",0
+S1.B6_vs_CR.S1_noise0.02pa_cyc_ORACLE,B6,S1_noise0.02pa_cyc_ORACLE,"[4, 4, 4]",0
+S1.S3_vs_CR.S1_noise0.02pa_cyc_ORACLE,S3,S1_noise0.02pa_cyc_ORACLE,"[4, 4]",0
+S1.B6_vs_CR.S1_noise0.04pa_cyc_ORACLE,B6,S1_noise0.04pa_cyc_ORACLE,"[4, 4, 4]",0
+S1.S3_vs_CR.S1_noise0.04pa_cyc_ORACLE,S3,S1_noise0.04pa_cyc_ORACLE,"[4, 4]",0
+S1.B6_vs_CR.S1_lam0.00_cyc_ORACLE,B6,S1_lam0.00_cyc_ORACLE,"[45, 45, 45]",0
+S1.S3_vs_CR.S1_lam0.00_cyc_ORACLE,S3,S1_lam0.00_cyc_ORACLE,"[45, 45]",0
+S1.B6_vs_CR.S1_lam0.50_cyc_ORACLE,B6,S1_lam0.50_cyc_ORACLE,"[94, 94, 94]",0
+S1.S3_vs_CR.S1_lam0.50_cyc_ORACLE,S3,S1_lam0.50_cyc_ORACLE,"[94, 94]",0
+S4.lam0.00_vs_CR@S4subset,S4,S4_lam0.00_l0.00_cyc_ORACLE,"[45, 45, 45]",0
+S4.lam0.50_vs_CR@S4subset,S4,S4_lam0.50_l0.50_cyc_ORACLE,"[94, 94, 94]",0

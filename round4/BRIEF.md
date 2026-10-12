@@ -26,6 +26,22 @@ ledgers) and on our own measured numbers.
 - Closest prior art to FlexiTors (round-1 index): GO-Flow (flow matching on internal coordinates), PuckerFlow (ring
   pucker flow matching), Ringer, Corso's intrinsic-diffusion thesis, ET-Flow, Equivariant Blurring Diffusion.
 
+## Round-2 FINAL paired analysis (2026-10-12; `cluster_sync/round2/results/analysis_r2/contrasts.csv`)
+Pre-declared contrasts, paired molecule bootstrap, Holm over the primary family. AMR-R differences in Å (arm − ref).
+- **S3 (50/50 mix) on RDKit L vs CTRL_rematch: +0.0032 [+0.0013, +0.0052], Holm p = 0.0096 — significantly WORSE**,
+  not a tie. S3 on MMFF L: +0.039 worse (S3, like B1, cannot use MMFF geometry). S3 at blend λ=0.5: +0.0037 worse;
+  on noisy true L (0.04 Å): +0.007 worse. S3 is better than CTRL **only** on exact own-conformer true L (−0.049),
+  the condition suspected of conformer-identity leakage. The S3 "robust and better" claim is therefore NOT supported;
+  the leak-free test decides what remains.
+- S2 (noise σ 0.04): +0.025 worse than CTRL_base on RDKit L; non-inferiority (margin 0.004) fails.
+- S4 (λ-conditioned): +0.0033 [−0.0009, +0.0078] on RDKit L, not significant; −0.039 on own-conformer true L.
+- S5 (MMFF-matched training, tested with MMFF): −0.0041 [−0.0064, −0.0019] vs CTRL_rematch with MMFF at test —
+  a small real gain; −0.029 vs CTRL_rematch on RDKit L. Without MMFF at test: +0.003 worse.
+- B1 vs CTRL on RDKit L: +0.058; on MMFF L: +0.080; at λ=0.75: −0.001 (tie); on true acyclic-only L: −0.024.
+**Bottom line: no learned training recipe has improved real use. The only real-use gains are from geometry
+(MMFF, ~−0.026 to −0.029 Å). A publishable method must produce better geometry, and its torsion model must be able to
+use it — every model trained on true or mixed L so far gets WORSE on improved-but-imperfect geometry (MMFF).**
+
 ## Questions round 4 must answer
 - Q1 Novelty: what contribution is genuinely new relative to GO-Flow, PuckerFlow, ET-Flow, Ringer, TD and its
   follow-ups (search 2024–2026 thoroughly), and which claims would reviewers reject?

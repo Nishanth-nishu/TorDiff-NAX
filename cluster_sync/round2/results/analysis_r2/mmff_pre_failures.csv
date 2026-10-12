@@ -1,0 +1,7 @@
+model,tag,mols,mols_exception,confs,not_converged,setup_failed
+qm9_CTRL_rematch_100ep_e100_s0,S5ctrl_pre_mmff,935,0,25330,1202,0
+qm9_CTRL_rematch_100ep_e100_s1,S5ctrl_pre_mmff,935,0,25330,1202,0
+qm9_CTRL_rematch_100ep_e100_s2,S5ctrl_pre_mmff,935,0,25330,1202,0
+qm9_B3_match_mmff_e100_s0,steps20_seed0,935,0,25330,1202,0
+qm9_B3_match_mmff_e100_s1,steps20_seed0,935,0,25330,1202,0
+qm9_B3_match_mmff_e100_s2,steps20_seed0,935,0,25330,1202,0
