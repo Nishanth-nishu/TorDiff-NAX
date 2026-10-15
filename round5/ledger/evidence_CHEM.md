@@ -316,7 +316,8 @@ TD's `data/DRUGS/test_smiles.csv` not byte-checked: the 25 GB archive was not do
 - Claim: QM9 test set (996 molecules): 103 (10.3 %) have ≥ 1 potential stereo double bond (RDKit FindPotentialStereo),
   67 with the stereo specified in the corrected SMILES; every acyclic one is a C=N bond (106 bonds; 70 specified, 36
   unspecified); no acyclic C=C stereo bond exists in the test set. 100 molecules have a stereo double bond inside TD's
-  rotatable set (106 bonds = 3.7 % of 2,880 TD-rotatable bonds). Tetrahedral centres: 745 molecules (74.8 %), 1,945
+  rotatable set (106 bonds = 3.7 % of 2,880 TD-rotatable bonds; all 108 TD-rotatable double bonds = 3.75 %, in 102
+  molecules, added after D-008 item 4). Tetrahedral centres: 745 molecules (74.8 %), 1,945
   centres.
 - Source type: our-data
 - Locator: our-data: round5/ledger/chem_data/census_qm9_local.out (lines 2, 4, 5, 6) and chem_data/db_breakdown_qm9.out (lines 2-3)
@@ -378,6 +379,9 @@ TD's `data/DRUGS/test_smiles.csv` not byte-checked: the 25 GB archive was not do
   > CR      0.2195    0.8564    0.5019  0.1603    0.8891    0.6304 -0.0593 ...     0.1873    0.9447    0.3438 ...
   > B1      0.3046    0.7373    0.4002  0.0303    0.9911    0.9512 -0.2743 ...     0.2565    0.8670    0.2297 ...
   (rows truncated with "..."; the full rows are in the file)
+- Revised after D-001: the values stand, but split (2·|half| samples) vs ref_rdkitL (2·n samples) is not
+  budget-matched, so "worse than RDKit L" is descriptive/UNVERIFIED; only the own − split leak contrast is
+  budget-matched. EXP-2 now uses a budget-matched ref_half (EXP-2 §4).
 - Shows vs infers: SHOWS (ORACLE). INFERENCE for EXP-2: any matching-free variant must keep the training L
   distribution equal to the deployed one; pairing L with targets it was not built for (the split-half condition) is
   exactly what hurts.
@@ -434,7 +438,10 @@ TD's `data/DRUGS/test_smiles.csv` not byte-checked: the 25 GB archive was not do
 - Confidence: high
 
 ### E-CHEM-061
-- Claim: TD (released model, R0) on the 38 QM9 test molecules with a stereo double bond (RDKit 2022.09.5): 65 of 526
+- Revised after D-008 (history kept): the headline is now the three-seed mean. 65 / 54 / 55 of 526 for R0 / R1 / R2 =
+  12.4 / 10.3 / 10.5 %, mean 11.1 % (V5 recomputed the same from ezflip_qm9.csv). Coverage: 38 molecules perceived by
+  RDKit 2022.09.5, out of 102 test molecules with a TD-rotatable double bond.
+- Claim (original): TD (released model, R0) on the 38 QM9 test molecules with a stereo double bond (RDKit 2022.09.5): 65 of 526
   generated conformers (12.4 %) have a double-bond configuration found in no GT conformer; 42–50 % of these molecules
   have ≥ 1 such conformer (R0–R2). True stereo on the seeds (G1) does not fix it (31–36 wrong of 488–494). RDKit alone
   (A0) gives 147/526 wrong (unspecified stereo is embedded at random); random torsions 227/526.
@@ -462,7 +469,8 @@ TD's `data/DRUGS/test_smiles.csv` not byte-checked: the 25 GB archive was not do
 - Confidence: high
 
 ### E-CHEM-063
-- Claim: TD generates non-planar double bonds: on the 96 molecules with a TD-rotatable double bond, the mean deviation
+- Claim: TD generates non-planar double bonds: on the 96 molecules with a TD-rotatable double bond (those of the 102 in
+  the test set that have generated conformers in R0), the mean deviation
   of the double-bond dihedral from the nearest planar value is 16.6° for R0 (GT 1.8°, raw RDKit 1.5°), and 30.5 % of
   generated conformers have a double bond twisted > 20° (RDKit 2.1 %, random torsions 80.1 %). These molecules score
   AMR-R 0.257 vs 0.166 for the rest (R0; confounded by molecule type).
@@ -489,7 +497,16 @@ TD's `data/DRUGS/test_smiles.csv` not byte-checked: the 25 GB archive was not do
 - Confidence: high
 
 ### E-CHEM-065
-- Claim (framing for EXP-2, reused from R-JOINT): without a model, another GT conformer's L leaves only a 0.032 Å
+- Revised after D-003 (history kept). The 0.032 Å figure is biased low: `tools/local_structure_analysis.py:302` takes
+  the 3 cheapest transplant candidates including the target itself (its cost np.inf only sorts it last), so every row
+  with n_GT ≤ 3 has floor_gtother ≈ 0. On n_GT > 3 rows (unaffected) the corrected values (V5 and R-JOINT, identical)
+  are: ring 0.0359 Å mean (median 0.0165; 4,696 conformers, 391 molecules) vs floor_best_sym 0.1143 Å on the same rows;
+  acyclic 0.0138; all 0.0291. Definition corrected: oracle best of the 3 closest *other* GT conformers (by transplant
+  cost), then DE; not "another conformer's L" and not the split-half analogue. Inference corrected: the leak-free
+  result is explained by train/test L-distribution mismatch of the torsion model; it is not evidence that coupling is
+  necessary (D-005). For EXP-2 the use is unchanged in direction: the (L, τ) pairing a model is trained on decides
+  what L it can use. Also inherits D-001: the split vs ref_rdkitL comparison of E-CHEM-054 is not budget-matched.
+- Claim (original, superseded): without a model, another GT conformer's L leaves only a 0.032 Å
   torsion-optimised floor on ring molecules, yet trained models score 0.22–0.30 Å with it; the leak-free failure is a
   failure of torsion models to use L they were not trained on, not a property of the geometry.
 - Source type: our-data

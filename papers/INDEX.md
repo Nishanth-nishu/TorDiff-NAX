@@ -143,3 +143,20 @@ tetrahedral auxiliary stereo edges, stereo metric; accessed 2026-10-15). LoQI PD
 | 2023_qiang_hierdiff | 2023 | ICML 2023, arXiv 2305.13266 | none (de novo, coarse-to-fine) | — | Coarse-to-fine fragment diffusion for de novo 3D molecules; motivation: atom-level models get rings wrong (p. 1). |
 
 R-JOINT search log and scripts: `round5/ledger/joint_data/` (arXiv API, 18 queries).
+
+**Round 5, added by R-SAMPLE (2026-10-15; PDF + `pdftotext -layout` fulltext with form feeds):**
+
+| File (related/) | Year | Venue | Gaps | Protocol | One-line takeaway |
+|---|---|---|---|---|---|
+| 2026_cao_gains_global_scheduling | 2026 | arXiv 2609.22867 | technique (inference compute allocation) | images | Best-of-K search budget across denoising steps = separable concave integer program, water-filling optimal; adaptive policies have linear worst-case regret, so anchor offline + adapt online (p. 1). |
+| 2023_tang_adadiff | 2023/24 | ECCV 2024, arXiv 2309.17074 | technique (adaptive compute) | images | Uncertainty-estimation module decides layer-wise early exit per sampling step (p. 1). |
+| 2025_ma_inference_time_scaling_diffusion | 2025 | arXiv 2501.09732 | technique (test-time search) | images | Inference-time scaling by searching over noises with verifiers; step-count gains flatten after a few dozen steps (p. 1). |
+| 2021_jolicoeur_gotta_go_fast | 2021 | arXiv 2105.14080 | technique (adaptive step size) | images | Adaptive-step-size SDE solver for score-based models replaces fixed-step Euler–Maruyama (p. 1). |
+| 2013_koukos_good_turing_md | 2013 | arXiv 1309.1108 | convergence estimator | MD | Good–Turing estimate of the probability that an unseen configuration (RMSD > threshold from all seen) exists; a published sampling-convergence signal (p. 2). |
+| 2026_uncertainty_molecular_diffusion | 2026 | arXiv 2606.13451 | technique (uncertainty, test-time filtering) | QM9 / GEOM-Drugs de novo | Laplace-based per-sample uncertainty for molecular diffusion; oversample+filter helps on QM9, not on GEOM-Drugs vs random subsampling (p. 1, p. 4). |
+
+Snapshots added by R-SAMPLE (in `blogs/`): `omega_opt_params_snapshot.txt` (+ `omega_raw.html`; OMEGA `-maxConfRange`
+rotor-based conformer caps, `-ewindow`, `-maxconfs`), `crest_docs_keywords_snapshot.txt` (+ `crest_raw.html`; CREST
+`--mrest` restart cycles, `--scthr`/`--ssthr` ensemble-growth convergence thresholds). The CREST PCCP 2020 PDF
+(Pracht, Bohle, Grimme, doi 10.1039/C9CP06869D) could not be downloaded (publisher bot page). Analysis data:
+`round5/ledger/sample_data/`.

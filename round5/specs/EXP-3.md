@@ -9,14 +9,18 @@ relative to `C:\Users\HP\Desktop\tor_diff`.
 **What TD does wrong, measured.** TD's rotatable-bond rule has no bond-order test, so acyclic double bonds are
 diffused like single bonds [E-CHEM-001, E-CHEM-020, E-CHEM-021]; the model gets no E/Z input [E-CHEM-022]; and every
 double-bond torsion is re-randomised before sampling [E-CHEM-023]. On QM9 (released model, R0):
-- **12.4 % of generated conformers of the 38 stereo-double-bond molecules have an E/Z configuration absent from the GT
-  ensemble** (65/526); 42–50 % of those molecules get ≥ 1 such conformer; true stereo on the seeds (G1) does not help
-  [E-CHEM-061, E-CHEM-055].
+- **10–12 % of generated conformers of the stereo-double-bond molecules have an E/Z configuration absent from the GT
+  ensemble: 12.4 / 10.3 / 10.5 % for sampling seeds R0 / R1 / R2 (65, 54, 55 of 526), mean 11.1 %**; 42–50 % of those
+  molecules get ≥ 1 such conformer; true stereo on the seeds (G1) does not help [E-CHEM-061, E-CHEM-055].
+  Coverage: the E/Z analysis covers the 38 molecules that RDKit 2022.09.5 perceives as having a stereo double bond,
+  out of 102 QM9 test molecules with a TD-rotatable double bond. (Revised after D-008 item 3; previously "12.4 %",
+  the R0 seed only.)
 - **Double bonds are not planar**: mean deviation 16.6° from planar (GT 1.8°, raw RDKit 1.5°); 30.5 % of generated
-  conformers of the 96 molecules with a TD-rotatable double bond have one twisted > 20° [E-CHEM-063].
+  conformers of the 96 molecules with a TD-rotatable double bond that have generated conformers (of 102 in the test
+  set) have one twisted > 20° [E-CHEM-063].
 - Tetrahedral chirality is never changed (1.000) [E-CHEM-062], as TD claims [E-CHEM-005]; it is out of scope.
 
-**Stereo counts.** QM9 test (996 molecules): 108 TD-rotatable double bonds in 96–100 molecules; potential stereo
+**Stereo counts.** QM9 test (996 molecules): 108 TD-rotatable double bonds in 102 molecules (Revised after D-008: was "96–100"; 96 of them are in the evaluated 935-molecule set); potential stereo
 double bonds 103 molecules / 112 bonds with RDKit 2026.03.6 (67 molecules specified; all acyclic ones are C=N) but
 38 molecules / 42 bonds with the cluster's RDKit 2022.09.5 — the stereo flag for C=N is version-dependent
 [E-CHEM-050, E-CHEM-060]. Tetrahedral centres: 745 molecules (74.8 %). GEOM-DRUGS test (1000): 142 molecules (14.2 %)
@@ -56,10 +60,10 @@ GEOM-DRUGS with the released TD DRUGS checkpoint, plus an E/Z-enriched set from 
 
 | Quantity (QM9 test, released model unless stated) | Value | Evidence |
 |---|---|---|
-| TD-rotatable bonds / of which double / triple | 2,880 / 108 (3.7 %) / 123 (4.3 %) | E-CHEM-050, -060 |
+| TD-rotatable bonds / of which double / triple | 2,880 / 108 (3.75 %; was "3.7 %", the 106-bond stereo figure; Revised after D-008 item 4) / 123 (4.3 %) | E-CHEM-050, -060 |
 | TD rule replication vs TD code | 0 mismatches / 996 | E-CHEM-060 |
 | Stereo-DB molecules (RDKit 2022.09.5 / 2026.03.6) | 38 / 103 | E-CHEM-060, -050 |
-| Generated conformers with E/Z absent from GT (R0, R1, R2) | 65, 54, 55 of 526 (10–12 %) | E-CHEM-061 |
+| Generated conformers with E/Z absent from GT (R0, R1, R2; 38 molecules perceived by RDKit 2022.09.5) | 65, 54, 55 of 526 (12.4 / 10.3 / 10.5 %, mean 11.1 %) | E-CHEM-061 |
 | Same, G1 (true stereo seeds) | 31–36 of 488–494 | E-CHEM-061 |
 | Same, RDKit only (A0) / random torsions | 147 / 227 of 526 | E-CHEM-061 |
 | Chirality preserved | 1.000 (A2 MMFF seeds 0.970) | E-CHEM-062 |

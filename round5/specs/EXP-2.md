@@ -10,9 +10,15 @@ Hungarian assignment, then DE-fitted torsions [E-CHEM-009]. TD says the matched 
 makes the task "less physically interpretable and potentially more difficult" [E-CHEM-006, TD PDF p. 22, F.4]. Can a
 matching-free training recipe (no assignment, no DE fit) with a better objective do as well or better?
 
-**Framing after R-JOINT's finding.** Another conformer's true L leaves only a 0.032 Å torsion-optimised floor, yet
-trained models score 0.22–0.30 Å with it [E-CHEM-065 = E-JOINT-010; E-CHEM-054]. What fails is the torsion model's
-use of L it was not trained with. Conformer matching is a *training-distribution* device (which L is paired with which
+**Framing after R-JOINT's finding (Revised after D-001 and D-003; superseded text kept struck).**
+~~Another conformer's true L leaves only a 0.032 Å torsion-optimised floor, yet trained models score 0.22–0.30 Å with
+it [E-CHEM-065 = E-JOINT-010; E-CHEM-054].~~ Corrected: the torsion-optimised floor with the best of the 3 closest
+*other* GT conformers' L (an oracle best-of selection, not split-half) is 0.036 Å on ring molecules (n_GT > 3 rows;
+the published 0.032 included the target itself for n_GT ≤ 3, bug at `tools/local_structure_analysis.py:302`), vs
+0.114 Å with RDKit L on the same rows [E-CHEM-065 rev.]. Trained models score 0.22–0.30 Å on other-half L
+[E-CHEM-054], but the comparison with RDKit L (0.187) is not budget-matched (the split view has 2·|half| samples), so
+only the direction "other-conformer geometry is far better than what the models make of it" is used here [D-001].
+What fails is the torsion model's use of L it was not trained with. Conformer matching is a *training-distribution* device (which L is paired with which
 τ target) [E-CHEM-008, E-CHEM-009]. So Exp 2 is really about what the (L, τ) pairing teaches, and every variant must be
 read on several L sources (RDKit, MMFF, split-half other-conformer L), not only RDKit L.
 
@@ -50,8 +56,8 @@ generate L themselves; Exp 2 matters for any model that conditions on an externa
 | B2 random pairing + DE (≈ variant B) | +0.0021 [0.0006, 0.0037] | E-CHEM-052 |
 | B5 heavy-atom DE | +0.0058 [0.0038, 0.0080] | E-CHEM-052 |
 | B1 true L, no matching | +0.0536 [0.0469, 0.0600] | E-CHEM-053 |
-| Leak-free ORACLE, other-conformer L: CTRL 0.2195 vs RDKit-L 0.1873; B1 0.3046 | — | E-CHEM-054 |
-| Other-conformer L geometric floor (no model) | 0.032 Å (ring molecules) | E-CHEM-065 |
+| Leak-free ORACLE, other-conformer L: CTRL 0.2195 vs RDKit-L 0.1873; B1 0.3046 (split vs RDKit-L is not budget-matched, D-001: descriptive only; own-vs-split leak contrast stands) | — | E-CHEM-054 |
+| Other-conformer L geometric floor (no model; oracle best of 3 closest others, n_GT > 3) | ~~0.032~~ 0.036 Å ring molecules vs 0.114 RDKit L on the same rows (Revised after D-003) | E-CHEM-065 |
 | S5 (MMFF-matched training) on MMFF L | −0.0041 [−0.0064, −0.0019] | round4/BRIEF.md |
 Reading: what transfers is "train on the L you deploy" (S5); assignment details do not move AMR-R.
 
@@ -95,7 +101,9 @@ Notation: molecule G with GT conformers {C_l}; RDKit embeddings {L̂_j}; τ(C) T
   paired molecule bootstrap, 3 training seeds, two-level bootstrap (seeds × molecules).
 - **L-robustness panel (required by the framing):** each arm is evaluated on (i) RDKit L, (ii) MMFF-relaxed L,
   (iii) split-half other-conformer true L (ORACLE, `tools/make_split_half.py`, E-CHEM-054); report the robustness gap
-  AMR-R(split) − AMR-R(RDKit). A recipe "works" only if it is non-inferior on (i) and better on (ii) or (iii).
+  AMR-R(split) − AMR-R(ref_half), where ref_half re-scores the RDKit-L run with a random 2·|B| subset of generated
+  conformers against the same B targets, 10 draws (budget-matched; Revised after D-001, same re-score as EXP-1 §3.6;
+  the unmatched split − ref_rdkitL gap is reported only as descriptive). A recipe "works" only if it is non-inferior on (i) and better on (ii) or (iii).
 - Secondary: COV-R@0.1, AMR-P; MMFF/xTB energy of generated conformers relative to the GT minimum (ΔE distribution,
   `flexitors/eval/energy.py` from EXP-1); training-loss curves (TD reports matched training is harder, E-CHEM-006);
   per stratum by number of rotatable bonds; E/Z fidelity and planarity (shared with EXP-3).
