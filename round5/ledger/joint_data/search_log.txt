@@ -1,0 +1,247 @@
+# R-JOINT arXiv search log, run 2026-10-15 via export.arxiv.org API (arxq.py, newest first; rows >= 2023-01-01)
+=== QUERY: abs:hierarchical AND abs:conformer AND (abs:diffusion OR abs:"flow matching")
+2026-08-17 2608.16473v3 | Reference-free logged energy-oracle recovery for neural approximations of symmetric coercive variational problems: conforming Riesz reconstruction and archive-level selection
+2026-08-10 2608.10289v1 | SeFaR: Semantic Feature-aware Robustness Testing of Deep Neural Networks
+2026-05-25 2605.25577v1 | Geometric Flow Matching for Molecular Conformation Generation via Manifold Decomposition
+2026-04-08 2604.07162v2 | Cut Finite Element Methods for Convection-Diffusion in Mixed-Dimensional Domains
+2025-11-18 2511.14559v1 | Apo2Mol: 3D Molecule Generation via Dynamic Pocket-Aware Diffusion Models
+2025-09-24 2509.20542v1 | A Hierarchical Adaptive Diffusion Model for Flexible Protein-Protein Docking
+2025-08-11 2508.08244v2 | Cut2Next: Generating Next Shot via In-Context Tuning
+2025-04-11 2504.08859v2 | PolyConf: Unlocking Polymer Conformation Generation through Hierarchical Generative Models
+2024-10-26 2410.20255v1 | Equivariant Blurring Diffusion for Hierarchical Molecular Conformer Generation
+2024-07-01 2407.01059v1 | Nonequilibrium relaxation of soft responsive colloids
+2023-11-20 2311.11839v1 | Log-periodic oscillations as real-time signatures of hierarchical dynamics in proteins
+2023-10-04 2310.02508v2 | Ophiuchus: Scalable Modeling of Protein Structures through Hierarchical Coarse-graining SO(3)-Equivariant Autoencoders
+2023-04-27 2306.00706v1 | Oscillations in p-adic diffusion processes and simulation of the conformational dynamics of protein
+=== QUERY: abs:"multi-scale" AND abs:conformer
+2026-10-09 2610.13604v1 | Thyroid Nodule Segmentation in Ultrasound Images with Conformal Uncertainty Estimation
+2026-10-01 2610.01086v1 | Multi-Scale Temporal Flows for Peptide Trajectory Generation
+2026-09-21 2609.25334v1 | MT-ProtBERT: Multi-task Learning ProtBERT for Intrinsically Disordered Proteins Classification with Scarce Data
+2026-09-03 2609.04139v1 | The conformally invariant metric on CLE$_4$ II: existence of geodesics
+2026-08-06 2608.06604v1 | The Maunder Model and Catalog: Stellar Rotation, Bimodal Activity, and Magnetic Braking in Kepler Main-Sequence Stars
+2026-08-05 2608.04433v1 | MERaLiON-GR: Speech Gender Recognition Model for English and SEA Languages
+2026-08-04 2608.03176v2 | Frequency-Decorrelated Temporal Ensembles for EEG--fNIRS Imagined-Handwriting Decoding
+2026-07-15 2609.17548v1 | Myovox: Reading Speech from the Muscles of the Face
+2026-06-16 2606.17969v1 | High-Order Simulation of Particle-Laden Flows in Moving Domains Using Coupled ALE and Sliding Mesh Approaches
+2026-05-26 2605.27530v2 | Observing Conformal Floquet Dynamics on a Digital Quantum Processor
+2026-04-29 2604.26658v1 | Simulation of complex DNA damage enhancement and biological effect validation for Proton-CAT
+2026-04-24 2605.00871v1 | NAKUL-Med: Spectral-Graph State Space Models with Dynamics Kernels for Medical Signals
+2026-04-09 2604.08386v2 | Harmonic morphisms and dynamical invariants in network renormalization
+2026-04-07 2604.16441v1 | iPhoneme: Brain-to-Text Communication for ALS Using ConformerXL Decoding
+2026-03-07 2603.07325v1 | Covariant Multi-Scale Negative Coupling on Dynamic Riemannian Manifolds: A Geometric Framework for Topological Persistence in Infinite-Dimensional Systems
+2026-02-09 2602.08904v1 | Denoise Stepwise Signals by Diffusion Model Based Approach
+2026-01-13 2601.08190v2 | Human-inspired Global-to-Parallel Multi-scale Encoding for Lightweight Vision Models
+2025-12-19 2512.17512v1 | BHiCect 2.0: Multi-resolution clustering of Hi-C data
+2025-12-03 2512.03706v3 | Consistent Projection of Langevin Dynamics: Preserving Thermodynamics and Kinetics in Coarse-Grained Models
+2025-11-13 2511.11758v2 | Protein Structure Tokenization via Geometric Byte Pair Encoding
+2025-11-03 2511.01366v3 | Symmetry-Resolved Entanglement Entropy from Heat Kernels
+2025-10-24 2511.05510v1 | TEMPO: Temporal Multi-scale Autoregressive Generation of Protein Conformational Ensembles
+2025-10-18 2510.16510v1 | CryoDyna: Multiscale end-to-end modeling of cryo-EM macromolecule dynamics with physics-aware neural network
+2025-09-05 2509.18102v1 | XMUspeech Systems for the ASVspoof 5 Challenge
+2025-08-12 2508.09372v1 | A Signer-Invariant Conformer and Multi-Scale Fusion Transformer for Continuous Sign Language Recognition
+2025-07-21 2507.15970v3 | CIS-BWE: Chaos-Informed Speech Bandwidth Extension
+2025-06-17 2506.14434v1 | Unifying Streaming and Non-streaming Zipformer-based ASR
+2025-03-11 2503.08115v1 | The standard coil or globule phases cannot describe the denatured state of structured proteins and intrinsically disordered proteins
+2025-03-07 2503.05458v1 | De Novo Design of Protein-Binding Peptides by Quantum Computing
+2025-02-27 2502.19906v1 | PrimeK-Net: Multi-scale Spectral Learning via Group Prime-Kernel Convolutional Neural Networks for Single Channel Speech Enhancement
+2025-02-19 2502.14121v2 | Multi-Objective Bayesian Optimization for Networked Black-Box Systems: A Path to Greener Profits and Smarter Designs
+2025-02-11 2502.19391v1 | Towards More Accurate Full-Atom Antibody Co-Design
+2025-02-08 2502.05565v1 | Multi-Scale Conformal Prediction: A Theoretical Framework with Coverage Guarantees
+2025-01-30 2501.18152v2 | StructuredField: Unifying Structured Geometry and Radiance Field
+2025-01-07 2501.03908v2 | Steady-state and transient thermal stress analysis using a polygonal finite element method
+2025-01-06 2501.03084v1 | Stable excitations and holographic transportation in tensor networks of critical spin chains
+2024-10-19 2410.15141v1 | Mimicking the Gas-Phase to Transport Odorants through the Nasal Mucus: Functional Insights into Odorant Binding Proteins
+2024-10-07 2410.05037v1 | Improving Speaker Representations Using Contrastive Losses on Multi-scale Features
+2024-09-18 2409.12080v1 | Design of Ligand-Binding Proteins with Atomic Flow Matching
+2024-09-03 2409.02029v2 | Bulk-boundary correspondence from hyper-invariant tensor networks
+2024-08-07 2408.03662v1 | Molecular dynamics characterization of the free and encapsidated RNA2 of CCMV with the oxRNA model
+2024-08-03 2408.01658v1 | Flow Reconstruction Using Spatially Restricted Domains Based on Enhanced Super-Resolution Generative Adversarial Networks
+2024-04-12 2404.08425v1 | Universal time and length scales of polar active polymer melts
+2024-04-08 2404.05466v2 | Enhancing Lip Reading with Multi-Scale Video and Multi-Encoder
+2024-01-24 2401.13595v1 | Emergent Holographic Forces from Tensor Networks and Criticality
+2023-12-29 2312.17580v1 | Modeling polyelectrolyte hydration from a multi scale polarizable pseudo particle solvent coarse grained approach
+2023-11-30 2311.18574v1 | Multi-scale Iterative Refinement towards Robust and Versatile Molecular Docking
+2023-10-30 2310.19376v1 | Inhomogeneous quenches as state preparation in two-dimensional conformal field theories
+2023-10-09 2310.05768v2 | DANet: Enhancing Small Object Detection through an Efficient Deformable Attention Network
+2023-09-14 2309.07500v1 | Outlier-aware Inlier Modeling and Multi-scale Scoring for Anomalous Sound Detection via Multitask Learning
+2023-09-07 2309.03985v1 | Dimension of diagonal self-affine sets and measures via non-conformal partitions
+2023-09-01 2309.00409v1 | Multiple Mellin-Barnes integrals and triangulations of point configurations
+2023-06-17 2306.10332v1 | Direct observational evidence of the multi-scale, dynamical mass accretion toward a high-mass star forming hub-filament system
+2023-02-11 2302.05690v1 | Attention does not guarantee best performance in speech enhancement
+=== QUERY: abs:multiscale AND abs:conformer AND abs:generative
+2026-08-04 2608.03587v1 | A 100x Faster Beam Propagation Method for Nonlinear Optical Wave Propagation Based on Discrete Exterior Calculus
+2026-08-03 2608.01925v1 | A numerical study to analyze the interplay of Weissenberg number and viscosity ratio in a log-strain tensorial model for viscoelastic fluids
+2026-07-05 2607.04134v1 | Spectral Diffusion for Protein Dynamics
+2026-06-02 2606.04078v1 | Quantifying Electronic and Vibronic Contributions to Charge Transfer at the Nanoscale
+2026-04-16 2604.15144v1 | A post-processed higher-order multiscale method for nondivergence-form elliptic equations
+2026-03-07 2603.07325v1 | Covariant Multi-Scale Negative Coupling on Dynamic Riemannian Manifolds: A Geometric Framework for Topological Persistence in Infinite-Dimensional Systems
+2026-02-16 2602.15193v1 | Equivalence of mixed and nonconforming methods on general polytopal partitions. Part I: Multiscale and projection methods
+2025-06-24 2506.19462v1 | A Generalized Framework for Higher-Order Localized Orthogonal Decomposition Methods
+2025-06-09 2506.07381v1 | Multiscale model reduction and two-level Schwarz preconditioner for H(curl) elliptic problems
+2025-02-09 2502.05976v4 | Self-similar Features in Secondary Breakup of a Droplet and Ligament Mediated Fragmentation under Extreme Conditions
+2024-12-30 2412.20962v3 | Conservation-informed Graph Learning for Spatiotemporal Dynamics Prediction
+2024-10-27 2410.20317v2 | ProtScape: A molecular structure and energy-aware representation for protein conformation generation
+2024-10-26 2410.20255v1 | Equivariant Blurring Diffusion for Hierarchical Molecular Conformer Generation
+2024-03-29 2404.00160v2 | Flow dichroism of DNA can be quantitatively predicted via coarse-grained molecular simulations
+2023-11-14 2311.08076v6 | Determining the optimal structural resolution of proteins through an information-theoretic analysis of their conformational ensemble
+2023-09-21 2309.12225v2 | Conformations, correlations, and instabilities of a flexible fiber in an active fluid
+=== QUERY: abs:"coarse-to-fine" AND (abs:conformer OR abs:molecular)
+2026-10-14 2610.19920v1 | MolHop: Scaffold-Hopping Molecular Design with Agentic Reinforcement Learning
+2026-10-12 2610.16586v1 | OctMole: Multiscale 3D Molecular Generation with Hierarchical Spatial Flows
+2026-08-07 2608.06956v1 | How Molecular Generative Models Organize Molecular Identity
+2026-08-04 2608.05199v1 | Post-Hoc Trajectory-Risk Certification for Modular LLM-Based Security Agents
+2026-08-04 2608.04052v1 | When Modalities Fail to Tango: Conformal Backdoor Detection in Multimodal Contrastive Learning
+2026-06-22 2606.23830v1 | Deciphering Fingerprints of 3D Molecular Surfaces for Accurate Epitope Prediction
+2026-05-20 2605.21617v3 | $\textit{BlockFormer}$ : Transformer-based inference from genomic contact maps
+2026-05-06 2605.04524v1 | High-Fidelity Single-Image Head Modeling with Industry-Grade Topology
+2026-05-04 2605.02657v1 | CARD: Coarse-to-fine Autoregressive Modeling with Radix-based Decomposition for Transferable Free Energy Estimation
+2026-02-18 2603.03342v1 | Cryo-SWAN: the Multi-Scale Wavelet-decomposition-inspired Autoencoder Network for molecular density representation of molecular volumes
+2026-01-30 2602.11189v2 | MuCO: Generative Peptide Cyclization Empowered by Multi-stage Conformation Optimization
+2026-01-27 2601.20043v2 | Regime-Adaptive Bayesian Optimization via Dirichlet Process Mixtures of Gaussian Processes
+2025-10-05 2510.04315v1 | GenAR: Next-Scale Autoregressive Generation for Spatial Gene Expression Prediction
+2025-08-14 2508.10775v1 | IBEX: Information-Bottleneck-EXplored Coarse-to-Fine Molecular Generation under Limited Data
+2025-03-20 2503.16278v3 | Unified Cross-Scale 3D Generation and Understanding via Autoregressive Modeling
+2025-03-10 2503.07014v4 | Vib2Mol: from vibrational spectra to molecular structures-a unified deep learning framework
+2025-02-19 2502.15805v4 | FragFM: Hierarchical Framework for Efficient Molecule Generation via Fragment-Level Discrete Flow Matching
+2024-10-26 2410.20255v1 | Equivariant Blurring Diffusion for Hierarchical Molecular Conformer Generation
+2024-10-15 2410.11224v2 | DeltaDock: A Unified Framework for Accurate, Efficient, and Physically Reliable Molecular Docking
+2024-07-08 2407.05736v1 | TransMA: an explainable multi-modal deep learning model for predicting properties of ionizable lipid nanoparticles in mRNA delivery
+2024-05-17 2405.10642v2 | Hi-GMAE: Hierarchical Graph Masked Autoencoders
+2024-05-05 2405.02845v3 | Data-Efficient Molecular Generation with Hierarchical Textual Inversion
+2024-03-18 2403.11904v3 | CICLe: Conformal In-Context Learning for Largescale Multi-Class Food Risk Classification
+2024-01-06 2401.03153v1 | An Event-Oriented Diffusion-Refinement Method for Sparse Events Completion
+2023-06-15 2306.09025v1 | CoverHunter: Cover Song Identification with Refined Attention and Alignments
+2023-05-15 2305.08457v1 | MolHF: A Hierarchical Normalizing Flow for Molecular Graph Generation
+2023-05-05 2305.13266v2 | Coarse-to-Fine: a Hierarchical Diffusion Model for Molecule Generation in 3D
+2023-05-02 2305.01243v2 | Invertible Coarse Graining with Physics-Informed Generative Artificial Intelligence
+2023-03-06 2303.03293v2 | On Hierarchical Multi-Resolution Graph Generative Models
+=== QUERY: abs:"coarse-grained" AND abs:conformer AND abs:generation
+2026-09-30 2609.39773v1 | Riemannian Flow Models with Reinforcement Learning for Molecular Crystal Structure Prediction
+2026-09-28 2609.34640v1 | DNA geometry around highly transcribed bacterial genes
+2026-09-11 2609.12952v2 | Geometric theory of elastic curves constrained on rigid curved surfaces
+2026-09-03 2609.04432v1 | Recovering molecules from coarse-grained beads: free-energy-conditioned generative backmapping across chemical space
+2026-08-24 2608.23490v1 | PHASE: encoding global protein ensembles with local Hamiltonians and all-atom backmapping
+2026-08-21 2608.21617v2 | Electrostatic Persistence Length Revisited. I. Theory
+2026-08-03 2608.02150v3 | PhyCheck: Fine-Grained Evidence-Grounded Dataset for Physical Law Understanding in Video-LLMs
+2026-06-26 2606.28289v1 | Optimal parameterization of nonequilibrium generalized master equations from discrete-time experimental data
+2026-06-12 2606.14449v1 | Measurement-limited learning of conformational heterogeneity in cryo-electron microscopy
+2026-06-03 2606.04766v1 | Tunable supramolecular polymerization from protein charge heterogeneity and architecture
+2026-05-24 2605.25136v1 | A particle-resolved rheological study of chirality transfer and odd transport
+2026-05-15 2605.16070v1 | Biophysical Considerations for Rational Antibody and ADC Design
+2026-04-28 2604.25244v1 | Learning Structure, Energy, and Dynamics: A Survey of Artificial Intelligence for Protein Dynamics
+2026-04-19 2604.17508v2 | Augmenting unit test suites from integration tests
+2026-03-29 2603.27485v1 | Microscopic Pathways to Helix Formation: Packing Stabilization and Sticky Interactions in Chiral Polymer Condensates
+2026-03-08 2603.07472v1 | Contact-Guided 3D Genome Structure Generation of E. coli via Diffusion Transformers
+2026-03-02 2603.01333v1 | Generator Histories and Parity-Odd Curvature in Lorentzian Topology Change
+2026-01-13 2601.08968v3 | Emergent Elasticity and Quasiconformal Flow in Active Solids
+2025-12-18 2512.16150v1 | Predicting the Interfacial Energy and Morphology of DNA Condensates
+2025-12-03 2512.03706v3 | Consistent Projection of Langevin Dynamics: Preserving Thermodynamics and Kinetics in Coarse-Grained Models
+2025-12-01 2512.01903v1 | Realistic Transition Paths for Large Biomolecular Systems: A Langevin Bridge Approach
+2025-11-23 2511.18462v2 | Evolving fractal dimensions in iterative bicolored percolation
+2025-11-12 2511.09514v2 | Force-induced Elastic Softening and Conformational Transitions in a Polyampholyte Chain
+2025-10-18 2510.16510v1 | CryoDyna: Multiscale end-to-end modeling of cryo-EM macromolecule dynamics with physics-aware neural network
+2025-10-14 2510.12091v1 | ToPolyAgent: AI Agents for Coarse-Grained Topological Polymer Simulations
+2025-10-09 2510.07738v2 | Elucidation of the Correlation between Molecular Conformation and Shear Viscosity of Polymer Melts under Steady-State Shear Flow
+2025-10-01 2510.00774v2 | GeoGraph: Geometric and Graph-based Ensemble Descriptors for Intrinsically Disordered Proteins
+2025-09-21 2509.17208v3 | Active Learning for Machine Learning Driven Molecular Dynamics
+2025-09-18 2509.14600v1 | TICA-Based Free Energy Matching for Machine-Learned Molecular Dynamics
+2025-09-09 2509.08077v3 | Self-organized hyperuniformity in a minimal model of population dynamics
+2025-08-16 2508.12060v2 | Applied causality to infer protein dynamics and kinetics
+2025-06-24 2506.19628v1 | Operator Forces For Coarse-Grained Molecular Dynamics
+2025-02-17 2502.11326v2 | Deep Learning of Proteins with Local and Global Regions of Disorder
+2025-02-07 2502.04725v1 | Can Diffusion Models Learn Hidden Inter-Feature Rules Behind Images?
+2025-01-07 2501.03686v2 | Confinement and Activity-Driven Dynamics of Semiflexible Polymers in Motility Assays
+2024-10-26 2410.20255v1 | Equivariant Blurring Diffusion for Hierarchical Molecular Conformer Generation
+2024-10-17 2410.13264v2 | Constraint Decoupled Latent Diffusion for Protein Backmapping
+2024-10-10 2410.07539v1 | Efficient Generation of Molecular Clusters with Dual-Scale Equivariant Flow Matching
+2024-10-08 2410.14708v1 | Coarse grained modeling of a metal-organic framework/polymer composite and its gas adsorption at the nanoparticle level
+2024-06-27 2406.19115v1 | Coagulation-flocculation process on a lattice: Monte Carlo simulations
+2024-06-20 2406.14098v2 | HeartBeat: Towards Controllable Echocardiography Video Synthesis with Multimodal Conditions-Guided Diffusion Models
+2024-05-20 2405.12356v1 | Coarse-graining conformational dynamics with multi-dimensional generalized Langevin equation: how, when, and why
+2024-05-01 2405.00751v1 | F$^3$low: Frame-to-Frame Coarse-grained Molecular Dynamics with SE(3) Guided Flow Matching
+2024-04-25 2404.16799v1 | Model-free inference of memory in conformational dynamics of a multi-domain protein
+2024-04-25 2404.16911v1 | HEroBM: a deep equivariant graph neural network for universal backmapping from coarse-grained to all-atom representations
+2024-02-15 2402.10147v1 | Thermodynamically Stable Knots in Semiflexible Polymers
+2023-11-14 2311.08076v6 | Determining the optimal structural resolution of proteins through an information-theoretic analysis of their conformational ensemble
+2023-10-04 2310.02508v2 | Ophiuchus: Scalable Modeling of Protein Structures through Hierarchical Coarse-graining SO(3)-Equivariant Autoencoders
+2023-10-03 2310.01768v2 | Backdiff: a diffusion model for generalized transferable protein backmapping
+2023-09-28 2309.16120v3 | Fixing Large Language Models' Specification Misunderstanding for Better Code Generation
+2023-06-26 2306.14852v2 | CoarsenConf: Equivariant Coarsening with Aggregated Attention for Molecular Conformer Generation
+2023-06-06 2306.03332v1 | Impact of bending stiffness on ground-state conformations for semiflexible polymers
+2023-02-21 2302.10728v1 | Intergranular Hotspots: A Molecular Dynamics Study on the Influence of Compressive and Shear Work
+2023-01-03 2301.00984v2 | Protein-Ligand Complex Generator &amp; Drug Screening via Tiered Tensor Transform
+=== QUERY: abs:fragment AND abs:conformer AND (abs:diffusion OR abs:"flow matching")
+2026-03-27 2603.26378v1 | Generative Modeling in Protein Design: Neural Representations, Conditional Generation, and Evaluation Standards
+2026-01-26 2601.18997v1 | Anatomically-aware conformal prediction for medical image segmentation with random walks
+2025-11-15 2511.12182v1 | Chemistry-Enhanced Diffusion-Based Framework for Small-to-Large Molecular Conformation Generation
+2024-10-26 2410.20255v1 | Equivariant Blurring Diffusion for Hierarchical Molecular Conformer Generation
+2024-06-15 2406.10513v1 | Lift Your Molecules: Molecular Graph Generation in Latent Euclidean Space
+2024-06-07 2406.08511v1 | Diffusion Models in $\textit{De Novo}$ Drug Design
+2024-04-02 2404.02003v2 | AUTODIFF: Autoregressive Diffusion Modeling for Structure-based Drug Design
+=== QUERY: abs:"Boltzmann generator" AND abs:torsion
+=== QUERY: abs:"Boltzmann generator" AND abs:conformer
+2026-04-28 2604.25244v1 | Learning Structure, Energy, and Dynamics: A Survey of Artificial Intelligence for Protein Dynamics
+2025-06-01 2506.01158v2 | Efficient Regression-Based Training of Normalizing Flows for Boltzmann Generators
+2024-10-10 2410.07539v1 | Efficient Generation of Molecular Clusters with Dual-Scale Equivariant Flow Matching
+2024-01-08 2401.04246v1 | Scalable Normalizing Flows Enable Boltzmann Generators for Macromolecules
+=== QUERY: abs:"Boltzmann generator" AND abs:"internal coordinates"
+2024-01-08 2401.04246v1 | Scalable Normalizing Flows Enable Boltzmann Generators for Macromolecules
+2023-06-26 2306.15030v2 | Equivariant flow matching
+=== QUERY: abs:torsion AND abs:"bond angle" AND (abs:diffusion OR abs:"flow matching")
+2026-05-25 2605.25577v1 | Geometric Flow Matching for Molecular Conformation Generation via Manifold Decomposition
+2026-04-22 2604.20821v4 | Autonomous Emergence of Hamiltonian in Deep Generative Models
+2024-04-02 2404.02003v2 | AUTODIFF: Autoregressive Diffusion Modeling for Structure-based Drug Design
+=== QUERY: abs:puckering AND (abs:generative OR abs:diffusion OR abs:"flow matching")
+2025-10-16 2510.14193v2 | Ferroelasticity tunable altermagnets
+2024-12-08 2412.05944v1 | ASb3Mn9O19 (A = K or Rb): New Mn-Based Two-Dimensional Magnetoplumbites with Geometric and Magnetic Frustration
+2024-09-26 2409.18322v1 | Kekulé distortions in graphene on cadmium sulfide
+2024-05-14 2405.08966v1 | 2D Nitride Ordered Alloys: A Novel Class of Ultra-Wide Bandgap Semiconductors
+2023-10-31 2310.20164v1 | Highly Anisotropic Elastic Properties of Suspended Black Arsenic Nanoribbons
+2023-09-08 2309.04058v1 | Intralayer Negative Poisson's Ratio in Two-Dimensional Black Arsenic by Strain Engineering
+=== QUERY: abs:"product manifold" AND (abs:molecule OR abs:molecular OR abs:conformer)
+2026-09-15 2609.17078v1 | Conformal structures and rigidity of complete stable minimal hypersurfaces
+2026-08-14 2608.14248v1 | Lyra Almost Ricci-Bourguignon Solitons on Twisted Warped Product Manifolds
+2026-06-08 2606.09305v1 | Conformal product structures on $S^3$
+2025-11-28 2511.23107v1 | The characteristic group of Lie LCP manifolds
+2025-11-13 2511.09994v3 | Uniqueness results for positive harmonic functions on manifolds with nonnegative Ricci curvature and strictly convex boundary
+2025-08-15 2508.11413v2 | Geometry of Clairaut Riemannian warped product submersions
+2025-06-18 2506.15099v1 | On H-Conformal Semi-invariant Submersion
+2025-05-30 2505.24316v1 | Some Characteristics of Almost $ω$-Bach Solitons
+2025-05-03 2505.01865v1 | On the geometry of Riemannian warped product maps
+2024-12-22 2412.17060v1 | Conformal vector fields on LCP manifolds
+2024-10-09 2410.06706v3 | Higher Fundamental Forms and Warped Product Hypersurfaces
+2024-09-29 2409.19626v2 | Three-dimensional Riemannian manifolds associated with locally conformal Riemannian product manifolds
+2024-05-29 2405.18865v3 | Curvature properties of pseudosymmetry type of some 2-quasi-Einstein manifolds
+2024-01-25 2401.14097v2 | Prescribed mean curvature hypersurfaces in conformal product manifolds
+2023-08-07 2308.03469v1 | Conformal Warped Product Submersion
+2023-06-01 2306.00679v2 | Nonuniqueness results for constant sixth order $Q$-curvature metrics on spheres with higher dimensional singularities
+2023-04-29 2305.00185v2 | Adapted metrics on locally conformally product manifolds
+=== QUERY: abs:stereochemistry AND abs:conformer AND abs:generation
+2026-10-08 2610.12523v1 | The Reference Set Is Not the Answer Set: GEOM-DRUGS Is Missing Low-Energy Conformers on Its Own Energy Surface
+2026-08-19 2608.18982v1 | Monroe: A Molecular Foundation Model for In-Context Probabilistic Inference
+2026-03-25 2603.24848v1 | Interstellar stereoisomerism
+2026-01-21 2601.14732v1 | DeepMoLM: Leveraging Visual and Geometric Structural Information for Molecule-Text Modeling
+2023-02-11 2302.05592v1 | Windowed Fourier Analysis for Signal Processing on Graph Bundles
+=== QUERY: abs:"ring closure" AND (abs:generative OR abs:diffusion OR abs:"flow matching")
+2026-10-01 2610.01086v1 | Multi-Scale Temporal Flows for Peptide Trajectory Generation
+2026-09-26 2609.32502v1 | TreeRef-BFN: Equivariance-Free De Novo Molecule Generation based on 2D Topology and Internal 3D Geometry
+2026-06-19 2606.21719v1 | A Topology-Preserving Python Framework for Reliable Initialization of Star and Cyclic Polymer Architectures in Molecular Dynamics (LAMMPS) Simulations
+2026-06-12 2606.14510v1 | PepALD: Macrocyclic Peptide Generation via Autoregressive Latent Diffusion
+2026-04-06 2604.04403v2 | MolDA: Molecular Understanding and Generation via Large Language Diffusion Model
+=== QUERY: abs:"redundant internal coordinates" AND abs:generative
+2026-07-17 2607.16550v1 | SONIC: Symmetry-Oriented Non-redundant Internal Coordinates
+2023-05-30 2305.19800v2 | Accurate and Efficient Structural Ensemble Generation of Macrocyclic Peptides using Internal Coordinate Diffusion
+=== QUERY: abs:conformer AND abs:"joint" AND abs:"local structure"
+2024-07-09 2407.07261v1 | Compact plane waves with parallel Weyl curvature
+2023-10-02 2310.00850v1 | Compact Weyl-parallel manifolds
+=== QUERY: abs:"torsional diffusion" AND abs:extension
+2024-09-21 2409.14014v1 | Mitigating Exposure Bias in Score-Based Generation of Molecular Conformations
+=== QUERY: abs:"effective sample size" AND abs:conformer
+2026-08-17 2608.17079v1 | Dynamic Regime-Aware Conformal Calibration for Reliable Economic Forecast Intervals under Multiple Distribution Shifts
+2026-06-14 2606.15953v2 | Drift-Aware Spectral Conformal Prediction for Non-Exchangeable Streaming Data
+2026-06-14 2606.15950v2 | Spectral Adaptive Conformal Prediction for Structured Non-Exchangeable Data
+2026-06-12 2606.14417v2 | Stable Multivariate Functional Time Series Prediction for Major Geomagnetic Indices
+2026-05-30 2606.00717v1 | Multi-Agent Conformal Prediction with Personalized Statistical Validity
+2026-03-24 2603.23205v1 | Between Resolution Collapse and Variance Inflation: Weighted Conformal Anomaly Detection in Low-Data Regimes
+2026-03-08 2603.07522v1 | Beyond Data Splitting: Full-Data Conformal Prediction by Differential Privacy
+# done

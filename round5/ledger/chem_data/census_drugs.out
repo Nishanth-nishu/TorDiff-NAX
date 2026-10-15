@@ -1,0 +1,12 @@
+csv=drugs_test_smiles_corrected_geomol.csv molecules=1000 unparsable_or_multifrag=0
+mols with >=1 potential stereo double bond: 142 (14.2%); with >=1 SPECIFIED in SMILES: 127; stereo DB in rings: 6 bonds
+total potential stereo double bonds: 163; specified: 144
+mols with >=1 potential tetrahedral centre: 299 (29.9%); with >=1 specified: 280; total centres 461, specified 430
+TD-rotatable bonds total 7965; mols with >=1: 1000
+       double_stereo:    157 bonds (2.0%), in 141 mols
+    double_nonstereo:     19 bonds (0.2%), in 18 mols
+              triple:      6 bonds (0.1%), in 6 mols
+   single_amide_like:   1002 bonds (12.6%), in 693 mols
+   single_conjugated:   1996 bonds (25.1%), in 859 mols
+        single_other:   4785 bonds (60.1%), in 953 mols
+mols whose TD-rotatable set contains a stereo double bond: 141

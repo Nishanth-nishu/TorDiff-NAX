@@ -1,0 +1,19 @@
+M=927 budget B=25304 mean n/mol=27.3
+                                    allocator  budget  COV-R@0.5  COV-R@0.1  COV-R@0.25  AMR-R  min n  max n/n_model  share at cap
+                                   TD 2K rule   25304     0.9493     0.3950      0.7876 0.1783      2         1.0000        0.0000
+                               uniform (no K)   25304     0.9692     0.5051      0.8631 0.1450      6         3.0000        0.7066
+                        ORACLE greedy obj=0.5   25304     0.9858     0.3761      0.8013 0.1666      1         3.0000        0.0561
+                        ORACLE greedy obj=0.1   25304     0.8614     0.5258      0.7538 0.2313      1         3.0000        0.2675
+                       ORACLE greedy obj=0.25   25304     0.9698     0.4260      0.8855 0.1528      1         3.0000        0.1359
+                        ORACLE greedy obj=amr   25304     0.9809     0.4917      0.8783 0.1400      1         3.0000        0.3085
+feature (n_rot x K strata, cross-fit) obj=0.5   25304     0.9774     0.4770      0.8587 0.1463      4         3.0000        0.1564
+feature (n_rot x K strata, cross-fit) obj=0.1   25304     0.9550     0.5051      0.8557 0.1577      1         3.0000        0.6731
+feature (n_rot x K strata, cross-fit) obj=amr   25304     0.9766     0.4967      0.8680 0.1428      6         3.0000        0.5210
+
+TD rule scaled: n_i = round(s * n_model_i)
+s=0.25: budget/B=0.255 COV-R@0.5=0.7758 COV-R@0.1=0.2320 AMR-R=0.3108
+s=0.5: budget/B=0.500 COV-R@0.5=0.8792 COV-R@0.1=0.2950 AMR-R=0.2399
+s=1.0: budget/B=1.000 COV-R@0.5=0.9493 COV-R@0.1=0.3950 AMR-R=0.1783
+s=1.5: budget/B=1.500 COV-R@0.5=0.9704 COV-R@0.1=0.4561 AMR-R=0.1535
+s=2.0: budget/B=2.000 COV-R@0.5=0.9796 COV-R@0.1=0.4987 AMR-R=0.1400
+s=3.0: budget/B=3.000 COV-R@0.5=0.9878 COV-R@0.1=0.5540 AMR-R=0.1255

@@ -1,0 +1,12 @@
+csv=qm9_test_smiles_from_local_structure_test.csv molecules=996 unparsable_or_multifrag=1
+mols with >=1 potential stereo double bond: 103 (10.3%); with >=1 SPECIFIED in SMILES: 67; stereo DB in rings: 6 bonds
+total potential stereo double bonds: 112; specified: 70
+mols with >=1 potential tetrahedral centre: 745 (74.8%); with >=1 specified: 744; total centres 1945, specified 1867
+TD-rotatable bonds total 2880; mols with >=1: 919
+       double_stereo:    106 bonds (3.7%), in 100 mols
+    double_nonstereo:      2 bonds (0.1%), in 2 mols
+              triple:    123 bonds (4.3%), in 113 mols
+   single_amide_like:    159 bonds (5.5%), in 129 mols
+   single_conjugated:    160 bonds (5.6%), in 138 mols
+        single_other:   2330 bonds (80.9%), in 865 mols
+mols whose TD-rotatable set contains a stereo double bond: 100

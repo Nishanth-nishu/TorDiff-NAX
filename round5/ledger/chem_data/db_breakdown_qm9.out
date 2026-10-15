@@ -1,0 +1,6 @@
+('CC_ring', 'unspecified') 2
+('CN', 'specified') 70
+('CN', 'unspecified') 36
+('CN_ring', 'unspecified') 4
+molecules with >=1 acyclic stereo DB specified: 67 ; with >=1 acyclic unspecified: 33
+rdkit 2026.03.6

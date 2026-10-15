@@ -116,3 +116,28 @@ Drive listing, archive sizes, released `drugs_default` config), `td_github_issue
 
 Blog snapshot added by SCOUT TRAIN (in `blogs/`): `chen_2024_diffusion_forcing_page.txt` (Diffusion Forcing project
 page, accessed 2026-10-12).
+
+### Added by R-CHEM (round 5, 2026-10-15): Exp 2 (matching-free training) and Exp 3 (stereo)
+| File | Year | Venue | Gaps | Protocol | Takeaway |
+|---|---|---|---|---|---|
+| 2025_havens_adjoint_sampling | 2025 | arXiv 2504.11713 (v3) | G2 (data-free) | SPICE; GEOM-DRUGS subset at δ = 1.25 Å | Adjoint Sampling: diffusion sampler trained from an energy model only; a torsional variant samples torsions given bond lengths/angles with no conformer data (p. 12). Prior art for matching-free, energy-trained torsion models. |
+| 2025_debortoli_distributional_diffusion | 2025 | ICML 2025, arXiv 2502.02483 | technique (distribution loss) | — | Replaces the diffusion regression loss with energy-score / kernel scoring rules so the denoiser learns p(x0 \| xt) (p. 3). Loss family for Exp 2 variant C. |
+| 2024_akhoundsadegh_idem | 2024 | ICML 2024, arXiv 2402.06121 | technique (Boltzmann sampling) | toy n-body | iDEM: diffusion sampler for unnormalised densities from a replay buffer and an MC energy-score estimate (p. 1); costly in energy calls (Adjoint Sampling p. 11). |
+| 2025_balcerak_energy_matching | 2025 | arXiv 2504.10612 | technique (EBM + flow) | images, proteins | Energy Matching: unifies flow matching and EBMs; the objective EnFlow uses for its energy model. |
+
+Code/blog snapshot added by R-CHEM (in `blogs/`): `loqi_repo_stereo.txt` (isayevlab/LoQI @ 04f3caef: E/Z and
+tetrahedral auxiliary stereo edges, stereo metric; accessed 2026-10-15). LoQI PDF still blocked (403).
+
+**Round 5, added by R-JOINT (2026-10-15; PDF + `pdftotext -layout` fulltext with form feeds):**
+
+| File (related/) | Year | Venue | Gaps | Protocol | One-line takeaway |
+|---|---|---|---|---|---|
+| 2019_noe_boltzmann_generators | 2019 | Science 2019, arXiv 1812.01729 | technique (BG) | — | Original Boltzmann generator; Cartesian training distorted bonds/angles, fixed by normalised internal coordinates (p. 14, 25). A BG over bonds/angles is not new. |
+| 2024_klein_transferable_boltzmann | 2024 | NeurIPS 2024, arXiv 2406.14426 | technique (BG) | dipeptides | First transferable BG; says TD's BG is conditioned on one fixed local structure and cannot sample the full Euclidean Boltzmann distribution (p. 2). |
+| 2025_boltznce | 2025 | NeurIPS 2025, arXiv 2507.00846 | technique (BG likelihood) | dipeptides | Exact-likelihood Jacobians are impractical for large systems; learned EBM likelihood ~100x faster (p. 1). |
+| 2026_schopmans_cg_boltzmann | 2026 | arXiv 2602.10637 | technique (BG) | peptides | Overlap and ESS collapse as system size grows (p. 1, 5). |
+| 2026_geom_drugs_missing_conformers | 2026 | arXiv 2610.12523 | eval | GEOM-DRUGS | 2.3-7.0 % of generated conformers removed for reflection / stereo / post-relaxation connectivity change; reference sets are incomplete (p. 1). |
+| 2026_jin_octmole | 2026 | arXiv 2610.16586 | none (de novo, multiscale) | QM9/DRUG generation | Multiscale octree flow for de novo generation; no torsion or local-structure factor (p. 1-2). |
+| 2023_qiang_hierdiff | 2023 | ICML 2023, arXiv 2305.13266 | none (de novo, coarse-to-fine) | — | Coarse-to-fine fragment diffusion for de novo 3D molecules; motivation: atom-level models get rings wrong (p. 1). |
+
+R-JOINT search log and scripts: `round5/ledger/joint_data/` (arXiv API, 18 queries).
