@@ -1,0 +1,19 @@
+done R0
+done R1
+done R2
+done G1s0
+done G1s1
+done G1s2
+done A0_rdkit
+done A0_rand
+done A2_mmff
+R0: mols=935 | stereoDB mols=38: mean frac gen E/Z-ok=0.878, mols with any E/Z-wrong=0.421, gen confs E/Z-wrong=65/526 | tet mols=687: frac gen CH-ok=1.000 | rot-double mols=96: gen planarity dev mean=16.6 deg (GT 1.8), frac gen with a double bond twisted >20 deg=0.305 | stereoDB mols AMR-R=0.2417 filtered(no replacement)=0.2472 AMR-P=0.3300 filtered=0.2870; frac GT argmin E/Z-wrong=0.025; all-mol AMR-R=0.1752
+R1: mols=931 | stereoDB mols=38: mean frac gen E/Z-ok=0.901, mols with any E/Z-wrong=0.500, gen confs E/Z-wrong=54/526 | tet mols=683: frac gen CH-ok=1.000 | rot-double mols=96: gen planarity dev mean=16.6 deg (GT 1.8), frac gen with a double bond twisted >20 deg=0.299 | stereoDB mols AMR-R=0.2313 filtered(no replacement)=0.2320 AMR-P=0.3291 filtered=0.2943; frac GT argmin E/Z-wrong=0.010; all-mol AMR-R=0.1768
+R2: mols=931 | stereoDB mols=38: mean frac gen E/Z-ok=0.882, mols with any E/Z-wrong=0.500, gen confs E/Z-wrong=55/526 | tet mols=683: frac gen CH-ok=1.000 | rot-double mols=96: gen planarity dev mean=16.9 deg (GT 1.8), frac gen with a double bond twisted >20 deg=0.307 | stereoDB mols AMR-R=0.2371 filtered(no replacement)=0.2429 AMR-P=0.3350 filtered=0.3000; frac GT argmin E/Z-wrong=0.034; all-mol AMR-R=0.1761
+G1s0: mols=936 | stereoDB mols=37: mean frac gen E/Z-ok=0.895, mols with any E/Z-wrong=0.459, gen confs E/Z-wrong=36/494 | tet mols=688: frac gen CH-ok=1.000 | rot-double mols=95: gen planarity dev mean=16.8 deg (GT 1.8), frac gen with a double bond twisted >20 deg=0.304 | stereoDB mols AMR-R=0.2224 filtered(no replacement)=0.2224 AMR-P=0.3262 filtered=0.2759; frac GT argmin E/Z-wrong=0.000; all-mol AMR-R=0.1732
+G1s1: mols=933 | stereoDB mols=36: mean frac gen E/Z-ok=0.897, mols with any E/Z-wrong=0.444, gen confs E/Z-wrong=32/488 | tet mols=685: frac gen CH-ok=1.000 | rot-double mols=94: gen planarity dev mean=16.0 deg (GT 1.8), frac gen with a double bond twisted >20 deg=0.293 | stereoDB mols AMR-R=0.2573 filtered(no replacement)=0.2573 AMR-P=0.3354 filtered=0.3149; frac GT argmin E/Z-wrong=0.028; all-mol AMR-R=0.1739
+G1s2: mols=933 | stereoDB mols=36: mean frac gen E/Z-ok=0.888, mols with any E/Z-wrong=0.444, gen confs E/Z-wrong=31/488 | tet mols=685: frac gen CH-ok=1.000 | rot-double mols=94: gen planarity dev mean=17.9 deg (GT 1.8), frac gen with a double bond twisted >20 deg=0.310 | stereoDB mols AMR-R=0.2060 filtered(no replacement)=0.2070 AMR-P=0.3252 filtered=0.2791; frac GT argmin E/Z-wrong=0.008; all-mol AMR-R=0.1777
+A0_rdkit: mols=935 | stereoDB mols=38: mean frac gen E/Z-ok=0.743, mols with any E/Z-wrong=0.632, gen confs E/Z-wrong=147/526 | tet mols=687: frac gen CH-ok=1.000 | rot-double mols=96: gen planarity dev mean=1.5 deg (GT 1.8), frac gen with a double bond twisted >20 deg=0.021 | stereoDB mols AMR-R=0.3403 filtered(no replacement)=0.3473 AMR-P=0.4160 filtered=0.3364; frac GT argmin E/Z-wrong=0.049; all-mol AMR-R=0.2298
+A0_rand: mols=935 | stereoDB mols=38: mean frac gen E/Z-ok=0.618, mols with any E/Z-wrong=0.763, gen confs E/Z-wrong=227/526 | tet mols=687: frac gen CH-ok=1.000 | rot-double mols=96: gen planarity dev mean=47.1 deg (GT 1.8), frac gen with a double bond twisted >20 deg=0.801 | stereoDB mols AMR-R=0.4000 filtered(no replacement)=0.4168 AMR-P=0.5267 filtered=0.4554; frac GT argmin E/Z-wrong=0.116; all-mol AMR-R=0.2422
+A2_mmff: mols=935 | stereoDB mols=38: mean frac gen E/Z-ok=0.912, mols with any E/Z-wrong=0.368, gen confs E/Z-wrong=43/526 | tet mols=687: frac gen CH-ok=0.970 | rot-double mols=96: gen planarity dev mean=14.3 deg (GT 1.8), frac gen with a double bond twisted >20 deg=0.240 | stereoDB mols AMR-R=0.1966 filtered(no replacement)=0.1969 AMR-P=0.2910 filtered=0.2474; frac GT argmin E/Z-wrong=0.006; all-mol AMR-R=0.1507
+2022.09.5

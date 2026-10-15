@@ -1,0 +1,12 @@
+M=927 (3 random pool orders)
+                       AMR_R  COV_R05  COV_R01  AMR_P  COV_P05
+compute selector                                              
+1x      random        0.1773   0.9500   0.3974 0.2198   0.9130
+2x      random        0.1773   0.9500   0.3974 0.2198   0.9130
+        torsion FPS   0.1677   0.9656   0.3917 0.2373   0.8971
+        lowest MMFF E 0.1861   0.9189   0.4379 0.1899   0.9346
+        ORACLE greedy 0.1402   0.9793   0.4964 0.1955   0.9341
+3x      random        0.1773   0.9500   0.3974 0.2198   0.9130
+        torsion FPS   0.1668   0.9676   0.3821 0.2456   0.8878
+        lowest MMFF E 0.1960   0.9001   0.4521 0.1796   0.9409
+        ORACLE greedy 0.1255   0.9878   0.5540 0.1844   0.9425

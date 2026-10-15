@@ -123,6 +123,8 @@ page, accessed 2026-10-12).
 | 2025_havens_adjoint_sampling | 2025 | arXiv 2504.11713 (v3) | G2 (data-free) | SPICE; GEOM-DRUGS subset at δ = 1.25 Å | Adjoint Sampling: diffusion sampler trained from an energy model only; a torsional variant samples torsions given bond lengths/angles with no conformer data (p. 12). Prior art for matching-free, energy-trained torsion models. |
 | 2025_debortoli_distributional_diffusion | 2025 | ICML 2025, arXiv 2502.02483 | technique (distribution loss) | — | Replaces the diffusion regression loss with energy-score / kernel scoring rules so the denoiser learns p(x0 \| xt) (p. 3). Loss family for Exp 2 variant C. |
 | 2024_akhoundsadegh_idem | 2024 | ICML 2024, arXiv 2402.06121 | technique (Boltzmann sampling) | toy n-body | iDEM: diffusion sampler for unnormalised densities from a replay buffer and an MC energy-score estimate (p. 1); costly in energy calls (Adjoint Sampling p. 11). |
+| 2023_lou_reflected_diffusion | 2023 | ICML 2023, arXiv 2304.04740 | technique (constrained kernel) | images | Reflected diffusion: reflected SDE + constrained DSM keep samples in a bounded domain (p. 1). Basis for an E/Z half-circle kernel (Exp 3 K2). |
+| 2023_fishman_constrained_domains | 2023 | TMLR 2023, arXiv 2304.05364 | technique (constrained kernel) | — | Diffusion on constrained domains (log-barrier, reflected Brownian motion). |
 | 2025_balcerak_energy_matching | 2025 | arXiv 2504.10612 | technique (EBM + flow) | images, proteins | Energy Matching: unifies flow matching and EBMs; the objective EnFlow uses for its energy model. |
 
 Code/blog snapshot added by R-CHEM (in `blogs/`): `loqi_repo_stereo.txt` (isayevlab/LoQI @ 04f3caef: E/Z and

@@ -1,0 +1,13 @@
+csv=data/QM9/test_smiles.csv molecules=996 unparsable_or_multifrag=4
+TD get_transformation_mask count != this replication: 0 molecules
+mols with >=1 potential stereo double bond: 38 (3.8%); with >=1 SPECIFIED in SMILES: 3; stereo DB in rings: 6 bonds
+total potential stereo double bonds: 42; specified: 3
+mols with >=1 potential tetrahedral centre: 745 (74.8%); with >=1 specified: 744; total centres 1959, specified 1867
+TD-rotatable bonds total 2880; mols with >=1: 919
+       double_stereo:     36 bonds (1.2%), in 35 mols
+    double_nonstereo:     72 bonds (2.5%), in 69 mols
+              triple:    123 bonds (4.3%), in 113 mols
+   single_amide_like:    159 bonds (5.5%), in 129 mols
+   single_conjugated:    160 bonds (5.6%), in 138 mols
+        single_other:   2330 bonds (80.9%), in 865 mols
+mols whose TD-rotatable set contains a stereo double bond: 35

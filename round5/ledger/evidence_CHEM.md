@@ -10,7 +10,7 @@ Conventions
   feeds between pages; PDF page = printed page for that file (checked: printed "7" closes the page holding §4.1).
 - Reused entries carry `Reused from: <ID> (VERIFIED in <file>)` and were RE-CHECKED against the source this round.
 - ORACLE marks conditions built from test-set true geometry.
-- Status: IN PROGRESS (skeleton first).
+- Status: COMPLETE for P1 (2026-10-15); awaiting verifier. Entries E-CHEM-001…071 (numbering has gaps by section).
 
 ---------------------------------------------------------------------------------------------------------------------
 ## A. Torsional Diffusion (core paper): conformer matching, E/Z, chirality, energy training
@@ -326,7 +326,7 @@ TD's `data/DRUGS/test_smiles.csv` not byte-checked: the 25 GB archive was not do
   > ('CN', 'specified') 70
   > ('CN', 'unspecified') 36
 - Shows vs infers: SHOWS (graph-level counts; the TD-rule replication is cross-checked against TD's own mask in
-  the cluster run, E-CHEM-063 when it lands)
+  the cluster run: 0 mismatches, E-CHEM-060; stereo counts are RDKit-version dependent, see E-CHEM-060)
 - Supports: EXP-3 §2 (QM9 is the wrong test bed for E/Z: ~100 molecules, all C=N)
 - Confidence: high
 
@@ -414,7 +414,110 @@ TD's `data/DRUGS/test_smiles.csv` not byte-checked: the 25 GB archive was not do
 - Supports: EXP-3 §2
 - Confidence: high (numbers); medium (attribution to E/Z until E-CHEM-062)
 
+### E-CHEM-060
+- Claim: The RDKit-based replication of TD's rotatable-bond rule (stereo_census.py) agrees with TD's own
+  get_transformation_mask on every QM9 test molecule (0 mismatches of 996); with the cluster's RDKit 2022.09.5 the
+  stereo counts differ from RDKit 2026.03.6: 38 molecules / 42 potential stereo double bonds (3 specified), with the
+  same 108 TD-rotatable double bonds split 36 "stereo" + 72 "non-stereo" (vs 106 + 2 locally). Stereo-bond counts are
+  RDKit-version dependent for C=N; the TD-rotatable double-bond count (108 bonds) is not.
+- Source type: our-data
+- Locator: our-data: round5/ledger/chem_data/census_qm9_cluster.out lines 2-8 (cluster run, job 22730, RDKit
+  2022.09.5, QM9 test_smiles.csv), vs census_qm9_local.out lines 2-7
+- Exact quote:
+  > TD get_transformation_mask count != this replication: 0 molecules
+  > mols with >=1 potential stereo double bond: 38 (3.8%); with >=1 SPECIFIED in SMILES: 3; stereo DB in rings: 6 bonds
+  > double_stereo:     36 bonds (1.2%), in 35 mols
+  > double_nonstereo:     72 bonds (2.5%), in 69 mols
+- Shows vs infers: SHOWS. INFERENCE: any E/Z spec must pin the RDKit version (perception of C=N stereo changed
+  between versions) and should classify bonds by bond order + substituent count, not only by RDKit's stereo flag.
+- Supports: EXP-3 §2, §3, §6
+- Confidence: high
+
+### E-CHEM-061
+- Claim: TD (released model, R0) on the 38 QM9 test molecules with a stereo double bond (RDKit 2022.09.5): 65 of 526
+  generated conformers (12.4 %) have a double-bond configuration found in no GT conformer; 42–50 % of these molecules
+  have ≥ 1 such conformer (R0–R2). True stereo on the seeds (G1) does not fix it (31–36 wrong of 488–494). RDKit alone
+  (A0) gives 147/526 wrong (unspecified stereo is embedded at random); random torsions 227/526.
+- Source type: our-data
+- Locator: our-data: round5/ledger/chem_data/ezflip_qm9.out lines 10-18 (cluster job 22730; per-molecule rows in
+  ezflip_qm9.csv)
+- Exact quote (line 10, truncated after the E/Z field):
+  > R0: mols=935 | stereoDB mols=38: mean frac gen E/Z-ok=0.878, mols with any E/Z-wrong=0.421, gen confs E/Z-wrong=65/526
+- Shows vs infers: SHOWS. E/Z label = canonical SMILES with chiral tags cleared, stereo from 3D, compared with the set
+  of GT labels (3 of 38 molecules have > 1 GT E/Z label, so "wrong" means "absent from the GT ensemble").
+- Supports: EXP-3 §2
+- Confidence: high
+
+### E-CHEM-062
+- Claim: Tetrahedral chirality is never changed by TD: fraction of generated conformers whose chirality-only label is in
+  the GT set = 1.000 for R0–R2, G1 and A0 (687 molecules); only MMFF pre-relaxation (A2) changes it (0.970).
+- Source type: our-data
+- Locator: our-data: round5/ledger/chem_data/ezflip_qm9.out lines 10-18, field "frac gen CH-ok"
+- Exact quote (fragments of lines 10 and 18):
+  > tet mols=687: frac gen CH-ok=1.000
+  > A2_mmff: ... tet mols=687: frac gen CH-ok=0.970
+- Shows vs infers: SHOWS; confirms E-CHEM-005 on our runs. The round-1 "chiral-centre mismatch" (E-CHEM-056) was E/Z,
+  not chirality. (A2's 3 % is an aside: MMFF relaxation of seeds can invert stereocentres, likely N; not followed up.)
+- Supports: EXP-3 §1 (chirality is out of scope for the TD sampler)
+- Confidence: high
+
+### E-CHEM-063
+- Claim: TD generates non-planar double bonds: on the 96 molecules with a TD-rotatable double bond, the mean deviation
+  of the double-bond dihedral from the nearest planar value is 16.6° for R0 (GT 1.8°, raw RDKit 1.5°), and 30.5 % of
+  generated conformers have a double bond twisted > 20° (RDKit 2.1 %, random torsions 80.1 %). These molecules score
+  AMR-R 0.257 vs 0.166 for the rest (R0; confounded by molecule type).
+- Source type: our-data
+- Locator: our-data: round5/ledger/chem_data/ezflip_qm9.out lines 10, 16, 17 (field "rot-double mols=96");
+  per-group AMR-R recomputed from ezflip_qm9.csv (one-liner in this session: mean amr_r by n_rot_double > 0 for run R0)
+- Exact quote (line 10 fragment):
+  > rot-double mols=96: gen planarity dev mean=16.6 deg (GT 1.8), frac gen with a double bond twisted >20 deg=0.305
+- Shows vs infers: SHOWS. INFERENCE: planarity, not only E/Z, is lost because the score is learned on a torus with no
+  bond-order prior; a constrained double-bond operator fixes both (EXP-3 K arms).
+- Supports: EXP-3 §2, §3, §5
+- Confidence: high (numbers); medium (AMR attribution)
+
+### E-CHEM-064
+- Claim: Dropping E/Z-wrong conformers without replacement makes recall slightly worse and precision better on the
+  stereo molecules (R0 AMR-R 0.2417 → 0.2472, AMR-P 0.3300 → 0.2870); E/Z-wrong conformers are the recall-argmin of
+  only 2.5 % of GT conformers. So a post-hoc filter needs resampling to help recall.
+- Source type: our-data
+- Locator: our-data: round5/ledger/chem_data/ezflip_qm9.out line 10 (final fields)
+- Exact quote:
+  > stereoDB mols AMR-R=0.2417 filtered(no replacement)=0.2472 AMR-P=0.3300 filtered=0.2870; frac GT argmin E/Z-wrong=0.025
+- Shows vs infers: SHOWS (38 molecules; small)
+- Supports: EXP-3 §4, §5 (filter arm must resample to K = 2L)
+- Confidence: high
+
+### E-CHEM-065
+- Claim (framing for EXP-2, reused from R-JOINT): without a model, another GT conformer's L leaves only a 0.032 Å
+  torsion-optimised floor on ring molecules, yet trained models score 0.22–0.30 Å with it; the leak-free failure is a
+  failure of torsion models to use L they were not trained on, not a property of the geometry.
+- Source type: our-data
+- Locator: our-data: round5/ledger/evidence_JOINT.md E-JOINT-010 (cluster_sync/results/analysis/local_structure_test.csv;
+  round2/research_A.md:28, VERIFIED in round2/verify_A.md:79-82)
+- Exact quote (round2/research_A.md:28):
+  > | any ring (5444) | 0.1171 | 0.1072 | 0.0989 | 0.0323 | 3.76 |
+- Shows vs infers: SHOWS (floor). INFERENCE for EXP-2: what the training pairs teach (which L goes with which τ) is the
+  lever, so EXP-2 must measure each variant's robustness across L sources (RDKit, MMFF, split-half), not only RDKit-L
+  AMR-R.
+- Reused from: E-JOINT-010 (round 5, VERIFIED upstream as stated); not independently re-derived by R-CHEM
+- Supports: EXP-2 §0, §2, §4
+- Confidence: high (floor); medium (inference)
+
 ## D. Prior art: matching-free / distribution / energy objectives (Exp 2)
+
+### E-CHEM-014
+- Claim: TD's torsional Boltzmann generators took 250 epochs and 6–9 days on one GPU for 10,000 DRUGS molecules, with
+  5-step resampling of 32 samples every max(5, ESS) epochs and temperature annealing from 3000 K.
+- Source type: paper
+- Locator: paper: papers/core/2022_jing_torsional_diffusion.pdf, PDF p. 24, Appendix G.2; training set size PDF p. 23
+- Exact quote:
+  > We start from a torsional diffusion model pretrained on GEOM- DRUGS, and train for 250 epochs (6-9 days on a single GPU).
+  > The resampling procedure with 5 steps is run for every molecule every max(5, ESS) epochs, where ESS is computed for the current set of 32 samples.
+  ("GEOM- DRUGS" is a line-break hyphen)
+- Shows vs infers: SHOWS
+- Supports: EXP-2 §7 (variant D2 cost)
+- Confidence: high
 
 ### E-CHEM-030
 - Claim: GeoMol (2021) already trains a torsional conformer-ensemble model without any per-conformer pairing: an
@@ -625,6 +728,30 @@ TD's `data/DRUGS/test_smiles.csv` not byte-checked: the 25 GB archive was not do
   UNVERIFIED (PDF blocked).
 - Supports: EXP-3 §0 novelty verdict
 - Confidence: low–medium
+
+### E-CHEM-048
+- Claim: Reflected Diffusion Models (ICML 2023) diffuse on a bounded domain with a reflected SDE (trajectories hitting
+  the boundary are reflected back), trained by constrained denoising score matching; thresholding in standard samplers
+  is shown to be an (inconsistent) instance of it.
+- Source type: paper
+- Locator: paper: papers/related/2023_lou_reflected_diffusion.pdf, PDF p. 1, §1
+- Exact quote:
+  > In this work, we present Reflected Diffusion Models, a class of diffusion models that, by design, respects the known support of the data distribution.
+- Shows vs infers: SHOWS (images, hypercube). Using a reflected kernel on a half-circle for E/Z bonds is INFERENCE
+  (EXP-3 K2) and makes K2 an application of known constrained-domain diffusion, not a new mechanism.
+- Supports: EXP-3 §1, §3
+- Confidence: high
+
+### E-CHEM-049
+- Claim: Fishman et al. (TMLR 2023) give diffusion models for constrained domains (log-barrier and reflected Brownian
+  motion), the other standard reference for constrained kernels.
+- Source type: paper
+- Locator: paper: papers/related/2023_fishman_constrained_domains.pdf, PDF p. 1, title block
+- Exact quote:
+  > Diffusion Models for Constrained Domains
+- Shows vs infers: SHOWS (title only; mechanism details not re-read this round — UNVERIFIED beyond the title)
+- Supports: EXP-3 §1
+- Confidence: medium
 
 ## F. RDKit stereo perception
 
