@@ -1,6 +1,13 @@
 # EXP-4: Full-molecule Boltzmann generator p(L, τ) = p_φ(L) p_θ(τ | L)
 
 Author: R-JOINT (round 5), 2026-10-15. Evidence IDs [E-JOINT-NNN] refer to `round5/ledger/evidence_JOINT.md`.
+
+**Revision 1 (2026-10-15), after verifier V5 (ruling: SUPPORTED with corrections; `round5/ledger/disputes.md`):**
+- D-007: the variant-D cost was understated by up to about 2×, and §5 is corrected.
+- D-004: τ in this chart is a *chart coordinate* (torsions are applied by `modify` after the displacement), not a
+  measured dihedral, so the dihedral-drift issue of EXP-1's V2 projector does not affect the density. Any
+  complement subspace of the anchor works as E_L; ½ log det g is computed for whichever basis is used.
+- D-005: H1 vs H2 now matches the torsion models' training L, and is framed as a test of a hypothesis.
 INFERENCE = my derivation or design, not something a source shows.
 
 ## 0. Honest scope
@@ -111,7 +118,11 @@ Two orderings are pre-declared:
     head's endpoint is a function of τ and the anchor alone. A τ-dependent covariance contributes its log-determinant,
     which is computed exactly.
 - Pre-declared hypothesis: **ESS(H2) > ESS(H1)**. This is the Boltzmann-side counterpart of Exp-1's coupled-vs-
-  decoupled control A5 vs A6.
+  decoupled control. *Revised after D-005 (superseded: "A5 vs A6"):* it pairs with **A5 vs A6b**. For the
+  comparison to test coupling and not L mismatch, H1's torsion model p_θ(τ | L) must be trained (or BG-fine-tuned)
+  on L drawn from H1's own decoupled L distribution, just as H2's is trained on its geometry head's L. A TD model
+  trained on RDKit or GT L would fail H1 for the mismatch reason (EXP-1 E-JOINT-010 rev.). It is a hypothesis; the
+  current evidence does not predict its sign.
 
 ### 2.4 Variant D, a diffusion L factor (evaluation-only feasibility)
 
@@ -173,14 +184,19 @@ QM9 has n ≤ 29 atoms, so k = 3n − 6 − m ≈ 40–80.
 |---|---|---|---|---|
 | TD BG (L₀-conditional) | 20 × (m + 1) ≈ 60–80 | < 0.5 GPU-h | ≈ 3 GPU-h | yes |
 | **H1 / H2** | as TD + the Exp-1 geometry pass (≈ 20) + an MMFF Hessian on CPU (≈ 2·3n gradient calls, ms) | **≈ 0.5–1 GPU-h + < 1 CPU-h** | ≈ 5–10 GPU-h | **yes** |
-| D (exact divergence) | 20 × (m + k + 1) ≈ 900–1700 | ≈ 3–6 GPU-h | ≈ 30–60 GPU-h | eval on ≤ 100 molecules only |
+| D (exact divergence), separate sampling per temperature | 20 × (m + k + 1) ≈ 900–1700 | **≈ 4.8–13.6 GPU-h** (8.6 × 10⁶ – 1.6 × 10⁷ NFE) | **≈ 48–136 GPU-h** | eval on ≤ 100 molecules only (revised after D-007; superseded "3–6 / 30–60") |
+| D, one sample set reweighted at all 3 temperatures (q(x) is not temperature-conditioned, so only E/kT changes) | same | ≈ 1.6–4.5 GPU-h (2.9–5.4 × 10⁶ NFE) | ≈ 16–45 GPU-h | **planned setting**; per-temperature sampling only for temperature-trained models (TD BG) |
 | Energy-based training, TD Alg. 1 [E-JOINT-045], full train set, H | ≈ 10⁸ NFE per epoch (≈ 35–45 GPU-h per epoch) | — | — | **no** |
 | Energy-based training, D | ≈ 10⁹ NFE per epoch | — | — | **no** |
 | Energy-based training, H, on a 1000-molecule subset, 5-step resampler | ≈ 6 × 10⁵ NFE per epoch (≈ 0.4 GPU-h) | 50 epochs ≈ 20 GPU-h | — | optional, last |
 
-**Total ask:** ≈ 10–15 GPU-h for H1, H2, the TD BG reference and the baselines on 100–1000 molecules, plus ≈ 5 GPU-h
-for a D feasibility point on 100 molecules. Everything depends on an Exp-1 checkpoint (A5 or A8), so **no new
-training** is needed except the optional energy-trained H.
+**Total ask (revised after D-007):** ≈ 10–15 GPU-h for H1, H2, the TD BG reference and the baselines on 100–1000
+molecules, plus ≈ 1.6–4.5 GPU-h for a D feasibility point on 100 molecules with shared samples (ceiling 13.6 GPU-h if
+per-temperature sampling is needed). Superseded: "≈ 5 GPU-h for a D point". H1 now needs a torsion model trained on
+H1's own L (D-005), which is one extra 100-epoch run (≈ 12–18 GPU-h) unless an Exp-1 A6b checkpoint is reused. The
+throughput basis (2–3 × 10⁴ NFE/min) is inferred from TD test-run wall-clock, not measured for exact-divergence
+batches; a 10-molecule timing run precedes E4-M3. Everything depends on Exp-1 checkpoints (A5 or A8 for H2; A6b for H1), so no new training is needed beyond them
+except the optional energy-trained H.
 
 **Milestones.**
 - **E4-M0 (CPU).** Implement the §2.2 Jacobian and the golden test against TD's `log_det_jac` at k = 0. Then a

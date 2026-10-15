@@ -43,6 +43,16 @@ Sections:
 - Supports card(s): EXP-1 (all variants), EXP-4
 - Confidence: high (numbers); high (the "coupled" conclusion, because the split view is a paired within-molecule
   measurement over the same targets with only the seed half changed, `round4/leakfree.md` §2)
+- **Revised after D-001 and D-003 (V5).** The numbers stand. Two parts of the inference above are withdrawn.
+  - (a) "Worse than RDKit L" is **not budget-matched**. The split view generates 2·|half| conformers per molecule
+    (`tools/make_split_half.py:19-22`), while `ref_rdkitL` generates 2·n (`tools/analyze_leakfree.py:318-347`).
+    AMR-R is a minimum over samples, so halving K raises it by itself. The split − ref_rdkitL gaps (CR +0.032,
+    B1 +0.048, S3 +0.088, S4 +0.064 Å) are therefore UNVERIFIED until the budget-matched CPU re-score requested in
+    D-001 is run. Only the paired own-vs-split leak contrast is budget-matched, and it stands.
+  - (b) "Geometry only helps when coupled" is **withdrawn as an inference from this test**. With E-JOINT-010
+    corrected, the failure is fully explained by a train/test L-distribution mismatch in the torsion models. The test
+    gives no evidence that coupling is *necessary*. Coupling is now a **hypothesis**, tested by arm A6b (EXP-1 §4).
+  - Confidence of the coupling conclusion: high → **none (hypothesis)**.
 
 ### E-JOINT-002
 - Claim: The split-half test's population: 744 of 1000 QM9 test molecules have ≥ 2 clean GT conformers, 743 are in the
@@ -92,6 +102,19 @@ Sections:
   parameterisation and a diffusion/flow head is the right one.
 - Supports card(s): EXP-1
 - Confidence: high
+- **Revised after D-002 (V5).** The pooled mean of 10.65° and median of 0.44° include 3,078 seeds whose largest ring
+  is 3-membered; those always score 0.0°. I recomputed on the stored file (`l_error.csv`, cond `L_etkdg2L`,
+  largest ring from RDKit ring perception of the SMILES):
+
+  | Population | Seeds | Mean | Median | > 10° |
+  |---|---|---|---|---|
+  | Largest ring ≥ 4 | 4,181 | 18.50° | 9.79° | 49.6 % |
+  | Largest ring = 3 | 3,078 | 0.00° | — | 0 % |
+
+  For rings of four or more atoms the error is therefore **the bulk, not a minority tail**: half the seeds exceed
+  10°. The inference is restated: the geometry factor must make large pucker moves on about half of all ≥ 4-ring
+  seeds. That still needs a multimodal (diffusion/flow) head, now for the bulk of those seeds. Every ring-tail
+  threshold in EXP-1 is defined on the ≥ 4-ring population, which is the population of the 49.6 % baseline.
 
 ### E-JOINT-005
 - Claim: Models trained on true or mixed local structure are *brittle to better geometry*: against CTRL_rematch on
@@ -154,7 +177,8 @@ Sections:
   MCF-B 0.103).
 - Source type: our-data + paper
 - Locator: our-data: `RESULTS_QM9.md`; paper: `papers/related/2025_frank_ditmc.pdf`, PDF p. 6, Table 1.
-- Exact quote (DiTMC Table 1, raw extraction):
+- Exact quote (DiTMC Table 1, **row reassembled from the column-shifted extraction**; in the raw text these numbers
+  sit next to the "DMT-B (55M)" label. Revised after D-008):
   > Tors. Diff. (1.6M) 92.8 100.0 0.178 0.147 92.7 100.0 0.221 0.195
 - Shows vs infers: SHOWS. Reused from E-ARCH-052 / E-PRIOR-034 / -039. INFERENCE: Exp 1 cannot be framed as "beats
   SOTA on QM9"; its claim must be a *mechanism* claim (joint L–τ) with an internal-geometry and energy evaluation,
@@ -181,6 +205,32 @@ Sections:
   the other, and the decoupled-ablation control (EXP-1 §4, arm A6) is what separates them.
 - Supports card(s): EXP-1 §0, §2, §4
 - Confidence: high (floor values); the inference is the spec's central caveat
+- **Revised after D-003 (V5); the history above is kept.**
+  - **The 0.0323 / 0.0137 / 0.0269 Å values are wrong, biased low by a code bug** (E-JOINT-031). At
+    `tools/local_structure_analysis.py:302`, `np.argsort(cost_gg[i])[:args.floor_topm]` with `floor_topm = 3` (:74)
+    includes the target itself whenever n_GT ≤ 3. I checked this independently in round 5 on
+    `cluster_sync/results/analysis/local_structure_test.csv`: all 769 rows with `n_gt ≤ 3` have
+    floor_gtother ≤ 2.0e-5 Å (mean 8.4e-8).
+  - **Corrected values**, on the rows the bug does not touch (`n_gt > 3`; my recomputation agrees with V5):
+
+    | Stratum | Conformers (molecules) | floor_gtother mean | floor_gtother median | floor_best_sym (RDKit L), same rows |
+    |---|---|---|---|---|
+    | Ring | 4,696 (391) | **0.0359 Å** | 0.0165 Å | **0.1143 Å** |
+    | Acyclic | 2,089 (97) | 0.0138 Å | — | 0.0507 Å |
+    | All | 6,785 (488) | 0.0291 Å | — | 0.0947 Å |
+
+    These rows are molecules with ≥ 4 conformers, a different population from the full set.
+  - **Corrected definition.** floor_gtother is an **oracle best-of-3**: differential evolution over the 3 GT
+    conformers *closest to the target by transplant cost*, chosen from all of its other GT conformers. It is not
+    "another conformer's L" and not an analogue of the split-half test (other half only, and ≈ 40 % of targets have a
+    near-duplicate, E-JOINT-002).
+  - **Corrected inference.** The direction survives: L taken from the target's closest other GT conformers is
+    geometrically much better than RDKit L (0.036 vs 0.114 Å on the same rows). It follows that the leak-free failure
+    is a **train/test L-distribution mismatch in the torsion models**. That is the S3/B1 brittleness of E-JOINT-005,
+    and it is *not* evidence that L must be coupled to τ. This supersedes the coupling inference in E-JOINT-001; see
+    its revision note.
+  - Requested by V5 and not yet run: a fixed-code re-run for n_GT ≤ 3, and an other-half-only variant matching the
+    split-half design. These are listed in EXP-1 §9 "Known issues".
 
 ---
 
@@ -355,6 +405,44 @@ Sections:
   > updates), so the angle MAE here is the local-structure error that a FlexiTors angle factor must reduce.
 - Shows vs infers: SHOWS. NEW in round 5.
 - Supports card(s): EXP-1 §3
+- Confidence: high
+
+### E-JOINT-031
+- Claim: **Known bug.** In `tools/local_structure_analysis.py`, the other-GT-conformer floor takes the 3 smallest
+  transplant costs from `cost_gg[i]`, a row that contains the target i itself. The self cost is `np.inf`, which only
+  sorts it last, so whenever n_GT ≤ 3 the target conformer is one of the "others" and the floor is ≈ 0.
+- Source type: code (+ our-data effect)
+- Locator: code: `tools/local_structure_analysis.py:302` (loop) and `:74` (`--floor_topm` default 3); effect in
+  `cluster_sync/results/analysis/local_structure_test.csv` (769 rows with `n_gt ≤ 3`: max floor_gtother 1.97e-5 Å).
+- Exact quote:
+  > for jj in np.argsort(cost_gg[i])[:args.floor_topm]:
+- Shows vs infers: SHOWS (code read and effect recomputed in round 5). Found by V5 (D-003). It affects
+  `round2/research_A.md:24-34` and every entry that reused its `floor_gtother` column (E-ARCH-010, E-JOINT-010,
+  E-CHEM-065). Fix: exclude i before slicing. **Not edited by R-JOINT** (research agents do not change code); it is
+  listed in EXP-1 §9.
+- Supports card(s): EXP-1 §9
+- Confidence: high
+
+### E-JOINT-032
+- Claim: The L-subspace projector P_L = I − Bᵀ(BBᵀ)⁺B with B = [J_τ; J_rig] (EXP-1 §2.2, first version) removes the
+  torsion **tangent** directions ∂x/∂τ_i. It does **not** annihilate the dihedral **gradients** ∇_x τ_i, which are the
+  dual (Wilson-B) rows, so a projected step still changes the rotatable dihedrals at first order. V5 measured
+  0.245 rad/Å (`CCC1CCCC1CO`) and 0.185 rad/Å (`CC(C)C1=CC=CC=C1CCO`), the same as an unprojected step, and 0.000 rad/Å
+  for the orthogonal projector onto ker W, where W stacks one dihedral gradient per rotatable bond. V5 also found
+  chirality flips in 1 of 20 random 0.3 Å-RMS projected steps.
+- Source type: our-data (verifier recomputation; V5 scratch `projector_test.py`, quoted in `round5/ledger/disputes.md`
+  D-004)
+- Locator: our-data: `round5/ledger/disputes.md` D-004; `round5/ledger/verify_V5.md` Summary row "EXP-1 projector
+  math".
+- Exact quote (disputes.md D-004):
+  > first-order drift is 0.245 rad/Å (`CCC1CCCC1CO`) and 0.185 rad/Å (`CC(C)C1=CC=CC=C1CCO`);
+- Shows vs infers: SHOWS (4 molecules). It is also correct analytically: the change in τ_i is ∇τ_i·δx, and
+  span{∂x/∂τ_j} ≠ span{∇τ_j} in general. **EXP-1 claim (1) "changes no torsion to first order" is withdrawn.** It is
+  replaced by the ker-W projector P_W = I − Cᵀ(CCᵀ)⁺C with C = [W; J_rig] (EXP-1 §2.2, revised). One dihedral is
+  fixed per rotatable bond: TD's own quadruple rule (n0[0], b, c, n1[0]) from
+  `torsional-diffusion/utils/standardization.py:69-90` (`get_torsion_angles`). Other quadruples around the same bond
+  differ from the fixed one by bond-angle or improper terms, which belong to L, so they may change.
+- Supports card(s): EXP-1 §2.2, §2.7, §2.8, §5.3
 - Confidence: high
 
 ---
@@ -655,6 +743,8 @@ Sections:
 - Exact quote:
   > making an extension feasible that performs joint flow matching over the different degrees of freedom to simultaneously sample the cyclic and torsional degrees of freedom.
 - Shows vs infers: SHOWS. Reused from E-ARCH-042 (VERIFIED); **re-checked on PDF p. 10 in round 5.**
+  **Revised after D-008: the source calls the joint flow a *feasible extension*. The word "announced" below is
+  withdrawn; read "proposed as feasible".**
   INFERENCE (novelty risk, high): the *exact* V3b construction is announced future work of an active group that
   already has a working CP flow on the TD codebase. A FlexiTors paper competes with them on time, so the claim must
   rest on what they do not have: the coupling evidence (E-JOINT-001), polycyclic systems (E-JOINT-071) and the
@@ -1224,7 +1314,8 @@ Sections:
 | "Joint bond-angle + torsion diffusion" | **PRIOR ART** | RINGER 2023, for macrocycles [E-JOINT-060]; FoldingDiff, for protein backbones [E-JOINT-062] |
 | "Joint ring-pucker + torsion generation for drug-like small molecules, benchmarked on GEOM/TD protocol, including polycyclic systems" | **NOVEL but contested** | none found [E-JOINT-079]; announced as future work by PuckerFlow's group [E-JOINT-069]; INCREMENTAL over PuckerFlow + GO-Flow without a real-use win |
 | The L-subspace projection construction (a Cartesian geometry factor made orthogonal to the torsion and rigid directions using TD's own likelihood Jacobian) | **NOVEL (method detail)** | GO-Flow projects the other way, internal → Cartesian [E-JOINT-063]; DiffDock's factors are disjoint by construction, not projected [E-JOINT-072]; no precedent found [E-JOINT-079] |
-| Evidence that coupling L to τ is *necessary* (leak-free split-half test + the decoupled-ablation control) | **NOVEL** | TD App. F.1 uses other-conformer L only as a matching floor, never as a model test [E-JOINT-049] |
+| Evidence that coupling L to τ is *necessary* (leak-free split-half test + the decoupled-ablation control) | ~~NOVEL~~ → **HYPOTHESIS, not a finding (revised after D-001/D-003/D-005)**: the leak-free result is explained by L-distribution mismatch [E-JOINT-010 rev.]; only arm A6b can test coupling | TD App. F.1 uses other-conformer L only as a matching floor, never as a model test [E-JOINT-049] |
+| (revised after D-004) The L-subspace projector gives exact separation from torsions | **WITHDRAWN as stated**: P_L projects out the torsion tangents, not the dihedral gradients [E-JOINT-032]. Replaced by the ker-W projector; a "first-order dihedral-preserving geometry step" is a minor method detail | — |
 | "First multi-scale / hierarchical conformer generator" | **PRIOR ART — do not claim** | EBD [E-JOINT-090]; HierDiff [E-JOINT-093]; MSGEN [E-JOINT-095]; OctMole [E-JOINT-094] |
 | "A learned local-structure correction to RDKit conformers" | **PRIOR ART** | CoarsenConf [E-JOINT-075]; EBD (fragment centroids only) [E-JOINT-091]; FM-refiner [E-JOINT-077] |
 | "A Boltzmann generator that models bond lengths and angles" | **PRIOR ART** | Noé et al. 2019 [E-JOINT-110]; Kim et al. ICLR 2024 (`papers/INDEX.md` has no PDF for this one — abstract only) |

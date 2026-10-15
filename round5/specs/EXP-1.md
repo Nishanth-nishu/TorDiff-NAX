@@ -5,34 +5,60 @@ Round-4 IDs (E-ARCH, E-PRIOR) are quoted only where they were copied into the JO
 ORACLE = uses test-set true geometry; analysis only, never model selection (`orchestration/README.md` rule 5).
 INFERENCE = my design reasoning, not something a source shows.
 
+**Revision 1 (2026-10-15), after verifier V5's disputes D-001 … D-008 (`round5/ledger/disputes.md`).** The
+corrections below are applied in place, and superseded text is kept struck through or quoted so the history stays
+readable:
+- D-001: the leak-free "worse than RDKit L" comparison is not budget-matched, and a re-score is now pre-declared.
+- D-002: the ring error is a bulk error on rings of four or more atoms, not a tail.
+- D-003: the 0.032 Å floor was wrong (code bug; corrected value 0.036 Å).
+- D-004: P_L does not preserve dihedrals; it is replaced by the ker-W projector, and a chirality guard is
+  pre-declared.
+- D-005: coupling is now a hypothesis, tested by the new arm A6b.
+- D-006: there is one M1 cost.
+- D-008: PuckerFlow "proposed", not "announced".
+
 ## 0. Summary
 
 TD generates only torsions τ on T^m. It takes the local structure L (bond lengths, bond angles, ring puckers) from an
 RDKit seed and never changes it [E-JOINT-024, E-JOINT-026, E-JOINT-040]. Our data put most of the remaining error in
-ring geometry [E-JOINT-003, E-JOINT-004]. The leak-free split-half test [E-JOINT-001] showed that **another
-conformer's true L makes every trained model worse than RDKit L** (CR 0.2195 vs 0.1873 Å).
+ring geometry [E-JOINT-003, E-JOINT-004]. In the leak-free split-half test [E-JOINT-001], trained models given
+another conformer's true L scored worse (CR 0.2195 Å) than the descriptive full-set RDKit-L reference (0.1873 Å).
+*(Revised after D-001: that comparison is not budget-matched — the split view has half the samples — so the size and
+even the sign of the gap are pending the re-score in §3.6. Only the own-vs-split leak contrast is budget-matched.)*
 
-That result needs one qualification before it can drive the design. With torsions optimised directly against the
-target, another conformer's L leaves only a 0.032 Å floor for ring molecules [E-JOINT-010]. So the geometry is good
-enough. What fails is a torsion model being handed L from a distribution it was not trained on. This is the same
-brittleness that shows up on MMFF L [E-JOINT-005], and the only learned fix that has worked is training on the
-deployed L source [E-JOINT-006].
+*(Revised after D-003; superseded text: "another conformer's L leaves only a 0.032 Å floor".)* With torsions
+optimised directly against the target, L from the target's closest other GT conformers (an oracle best-of-3) leaves a
+0.036 Å floor for ring molecules, against 0.114 Å for RDKit L on the same rows [E-JOINT-010, revised]. The 0.032 Å
+figure was biased low by a code bug [E-JOINT-031]. So the geometry is good enough. What fails is a torsion model
+being handed L from a distribution it was not trained on. This is the same brittleness that shows up on MMFF L
+[E-JOINT-005], and the only learned fix that has worked is training on the deployed L source [E-JOINT-006].
+**This explains the leak-free result without any appeal to coupling. The leak-free test therefore does not show that
+coupling is necessary, and coupling is treated as a hypothesis (§4, arm A6b).**
 
 **The design rule is therefore: the torsion factor must always see L drawn from the same process that produces L at
-test time, and that process should be able to depend on τ.** Exp 1 builds this in three steps:
+test time (established). Whether that process should also depend on τ is the hypothesis Exp 1 tests (not
+established).** Exp 1 builds this in three steps:
 
 - **V1** is TD with fixed RDKit L. This is the baseline, and it is already run.
 - **V2** adds a learned correction to L that is conditioned on the current τ and generated in the same network,
   followed by DAgger fine-tuning of the torsion head.
 - **V3** is a joint L + τ diffusion with independent clocks on a product space.
 
-The primary geometry representation is a **Cartesian velocity projected onto the local-structure subspace**, the
-orthogonal complement of the m torsion directions and the 6 rigid-body directions. TD's own likelihood code already
-builds that Jacobian [E-JOINT-028]. With this representation, ring closure needs no special handling and the geometry
-factor cannot move torsions. A Cremer–Pople variant is a secondary ablation.
+The primary geometry representation is a **Cartesian velocity projected onto ker W ∩ (rigid motions)^⊥**. W stacks
+one dihedral gradient per rotatable bond; rigid motions are the 6 translations and rotations. *(Revised after D-004:
+the first version projected out the torsion tangents ∂x/∂τ, and that does not preserve dihedrals; see E-JOINT-032.)*
+With this representation:
+- ring closure needs no special handling;
+- a geometry step leaves the rotatable dihedrals unchanged **to first order only**;
+- chirality **can** flip and is guarded (§2.8).
 
-The decisive control is arm A6. It takes the same trained geometry factor and uses it as an independent L sampler
-feeding the frozen V1 torsion model. If V2/V3 do not beat A6, the contribution is "learned L", not "joint L–τ".
+A Cremer–Pople variant is a secondary ablation.
+
+**The decisive control is arm A6b (added after D-005).** It uses the same trained geometry factor as an *independent*
+L sampler, with τ frozen at the seed. A torsion head is then **re-trained on that sampler's own L** with the S5 /
+DAgger recipe, so the train/test L mismatch is removed from the decoupled arm as well. If V2/V3 do not beat A6b, the
+contribution is "learned L with sampler-matched training", not "joint L–τ". The original A6 (frozen RDKit-trained
+torsion model) stays as a secondary arm, because it confounds coupling with L mismatch.
 
 ## 1. Prior-art check (adversarial)
 
@@ -44,24 +70,27 @@ with every relevant paper already in `papers/`. Each claim below is paired with 
 | "Relax TD's rigid L / diffuse over full intrinsic coordinates" | TD's own conclusion proposes exactly this [E-JOINT-047]; Corso's thesis proposes pucker hyperspheres and a soft-constraint full-dimensional diffusion [E-JOINT-078] | **PRIOR ART (idea)** |
 | "Joint bond-angle + torsion diffusion" | RINGER: wrapped-normal joint diffusion of bond angles and torsions in redundant internal coordinates, SLSQP reconstruction, macrocycles only [E-JOINT-060]. FoldingDiff: 3 bond angles + 3 dihedrals per residue, NeRF, proteins [E-JOINT-062] | **PRIOR ART** |
 | "Full internal coordinates (bonds × angles × torsions) for small-molecule conformers" | GO-Flow: one flow per manifold, internal → Cartesian Jacobian, GD-P protocol only, no ring-closure treatment [E-JOINT-063, -064, -065] | **PRIOR ART**, but with a hole (rings) |
-| "Ring-pucker factor next to torsions" | PuckerFlow: CP flow, monocyclic, unsubstituted, a two-stage demo with TD, and joint CP × torsion flow announced as future work on the TD codebase [E-JOINT-066..069]. TMCgen: S² angle factor + torsions, metal complexes [E-JOINT-070] | **CONTESTED**: no paper yet for drug-like polycyclic molecules on GEOM [E-JOINT-079]; an active group has announced it |
+| "Ring-pucker factor next to torsions" | PuckerFlow: CP flow, monocyclic, unsubstituted, a two-stage demo with TD; a joint CP × torsion flow is **proposed as a feasible extension** (revised after D-008; was "announced"), and their code builds on the TD codebase [E-JOINT-066..069]. TMCgen: S² angle factor + torsions, metal complexes [E-JOINT-070] | **CONTESTED**: no paper yet for drug-like polycyclic molecules on GEOM [E-JOINT-079]; an active group has proposed it |
 | "Learned correction of the RDKit conformer" | CoarsenConf: learns the RDKit → GT Cartesian difference [E-JOINT-075]. FM-refiner: refines any upstream sample, but has no TD + refiner row [E-JOINT-077]. EBD: corrects RDKit fragment centroids [E-JOINT-091] | **PRIOR ART**; none restricts the correction to the L-subspace or keeps a torsion factor |
 | "Multi-scale / hierarchical conformer generation" | EBD (fragment → atom, NeurIPS 2024) [E-JOINT-090]; MSGEN (scaffold-first, abstract) [E-JOINT-095]; HierDiff and OctMole (de novo, coarse-to-fine) [E-JOINT-093, -094] | **PRIOR ART: do not use this framing** |
 | "Torsion model conditioned on / robust to L" | Torsional-GFN follows mode shifts for unseen L (small MD set) [E-JOINT-074] | **PRIOR ART** for conditioning. Our *brittleness* finding is the counter-evidence |
-| L-subspace projection: Cartesian geometry velocity projected orthogonal to torsion + rigid directions using TD's Jacobian | GO-Flow goes the other way [E-JOINT-063]; DiffDock's factors are disjoint by construction [E-JOINT-072]; nothing found [E-JOINT-079] | **NOVEL (method detail)** |
-| Coupling is *necessary*: leak-free split-half test + decoupled control | TD F.1 uses other-conformer L as a matching floor only [E-JOINT-049] | **NOVEL** |
+| Dihedral-preserving Cartesian geometry step: velocity projected onto ker W ∩ rigid^⊥ (revised after D-004; the tangent-space version was wrong [E-JOINT-032]) | GO-Flow goes the other way [E-JOINT-063]; DiffDock's factors are disjoint by construction [E-JOINT-072]; nothing found [E-JOINT-079] | **NOVEL but minor (method detail)**; preserves dihedrals to first order only |
+| Coupling is *necessary* | TD F.1 uses other-conformer L as a matching floor only [E-JOINT-049]. Our leak-free result is explained by L mismatch [E-JOINT-010 rev.] | ~~NOVEL~~ → **HYPOTHESIS** (revised after D-001/D-003/D-005); it becomes a finding only if A5/A8 beat A6b |
 | Ring geometry dominates TD's QM9 error with the model in the loop | Corso: "works fine for small rings" [E-JOINT-078]; HierDiff: rings are what atom models get wrong (de novo) [E-JOINT-093] | **NOVEL as a measurement**, but leak-corrected numbers are needed first (§3.6) |
 
 **What is and is not new, stated exactly.**
 - Not new: the idea of learning L, joint angle + torsion diffusion, internal-coordinate flows for small molecules,
   ring-pucker flows, learned RDKit corrections, and the "multi-scale" framing.
-- New, if it works:
-  1. A torsion-diffusion model whose geometry factor lives in the L-subspace. This construction gives exact separation
-     from torsions and closed rings of any topology (fused, bridged, spiro) without a closure solver.
-  2. Evidence that coupling is necessary, from the leak-free test plus the decoupled control A6.
+- New, if it works (revised after D-004/D-005):
+  1. A torsion-diffusion model whose geometry step is projected onto ker W ∩ rigid^⊥. This preserves the rotatable
+     dihedrals **to first order** and keeps rings of any topology (fused, bridged, spiro) closed without a closure
+     solver. Superseded wording: "exact separation from torsions" — withdrawn [E-JOINT-032].
+  2. *Conditional on A5/A8 beating A6b:* evidence that coupling helps beyond sampler-matched training. The leak-free
+     test alone does **not** provide this [E-JOINT-001 rev., E-JOINT-010 rev.].
   3. The first TD-protocol GEOM benchmark of a learned-L torsion model, with ring-pucker, stereo and xTB-energy
      metrics.
-- Point 1 is a modest method contribution. Points 2 and 3 carry the paper. Our absolute numbers (best real use
+- Point 1 is a minor method contribution. Point 3 is unconditional. Point 2 is a hypothesis with a pre-declared
+  test. Our absolute numbers (best real use
   0.150 Å vs the Cartesian frontier 0.068–0.073 Å [E-JOINT-009]) rule out a "beats SOTA" framing. QM9 at δ 0.5 Å is
   arguably saturated [E-JOINT-155], so GEOM-DRUGS is needed for a main venue.
 
@@ -85,28 +114,42 @@ Existing runs:
 
 ### 2.2 V2: TD + τ-conditioned local-geometry correction (coupled)
 
-**Why coupled rather than independent.** An independent L generator feeding a frozen torsion model reproduces the
-leak-free failure: the torsion model sees L from a distribution it was not trained on [E-JOINT-001, -005, -010]. V2
-puts both factors in one network so that:
-- (a) the geometry head sees the current torsions when it moves L;
+**Why coupled rather than independent (revised after D-005).** An independent L generator feeding a *frozen,
+RDKit-trained* torsion model reproduces the leak-free failure, because the torsion model sees L from a distribution
+it was not trained on [E-JOINT-005, -010 rev.]. That failure is fixed by sampler-matched training, which does not
+require coupling. V2 puts both factors in one network so that:
+- (a) the geometry head sees the current torsions when it moves L. **This is the coupling hypothesis, and A6b tests
+  it**;
 - (b) the torsion head is trained, and in stage 2 fine-tuned, on L produced by that geometry head
-  [E-JOINT-006, -137].
+  [E-JOINT-006, -137]. A6b gets (b) as well, so A5 − A6b isolates (a).
 
-**L-subspace projector.** At a conformer x, define:
-- J_τ(x) ∈ R^{m×3n}: rows are TD's torsion displacement fields ∂x/∂τ_i (TD Eq. 9, PDF p. 7, [E-JOINT-044]), already
-  computed in `likelihood.py:68-93` [E-JOINT-028];
-- J_rig(x) ∈ R^{6×3n}: three translations plus three rotations x_k × ê (TD Eq. 10).
+**Dihedral-preserving projector (revised after D-004).** *Superseded version:* P_L = I − Bᵀ(BBᵀ)⁺B with
+B = [J_τ; J_rig] (torsion tangents ∂x/∂τ_i from TD Eq. 9 plus rigid motions), with the claim that it "changes no
+rotatable torsion to first order". **That claim is false.** P_L removes the tangents ∂x/∂τ_i, but the first-order
+change of dihedral i is ∇_x τ_i · δx, and the gradient rows ∇τ_i (Wilson-B rows) are dual to the tangents, not
+parallel to them. V5 measured a drift of 0.19–0.25 rad/Å with P_L, the same as with no projection [E-JOINT-032].
 
-Let B = [J_τ; J_rig] and P_L(x) = I − Bᵀ(BBᵀ)⁺B. P_L is the orthogonal projector onto the local-structure subspace,
-of dimension 3n − 6 − m. (INFERENCE: a direct construction from TD's Prop. 3 machinery; no source does this.)
+*Revised version.* At a conformer x, define:
+- W(x) ∈ R^{m×3n}: the gradient of **one** dihedral per rotatable bond, using TD's quadruple rule
+  (n0[0], b, c, n1[0]) from `torsional-diffusion/utils/standardization.py:69-90`, by analytic dihedral gradients
+  (Wilson B-matrix rows);
+- J_rig(x) ∈ R^{6×3n}: three translations plus three rotations x_k × ê (TD Eq. 10, PDF p. 7 [E-JOINT-044]);
+- C = [W; J_rig] and P_W(x) = I − Cᵀ(CCᵀ)⁺C.
 
-A step δx = P_L v therefore:
-1. changes no rotatable torsion to first order;
+P_W is the orthogonal projector onto ker W ∩ rigid^⊥, of dimension 3n − 6 − m when C has full rank. V5 checked that
+this dimension equals that of P_L, with drift 0.000 rad/Å [E-JOINT-032]. INFERENCE: a direct construction; no source
+does this.
+
+A step δx = P_W v therefore:
+1. changes the m chosen rotatable dihedrals by zero **to first order**; the second-order drift is O(‖δx‖²) and is
+   measured (§5.3);
 2. adds no rigid motion;
 3. keeps every ring closed, because Cartesian coordinates carry no closure constraint.
 
-Ring closure is a problem only in internal-coordinate parameterisations: RINGER needs SLSQP [E-JOINT-060] and GO-Flow
-leaves it open [E-JOINT-064].
+Other dihedrals about the same bond (other H or heavy substituent quadruples) differ from the fixed one by angle or
+improper terms that belong to L, so they may change; this is intended. Ring closure is a problem only in
+internal-coordinate parameterisations: RINGER needs SLSQP [E-JOINT-060] and GO-Flow leaves it open [E-JOINT-064].
+Below, read "P_L" as P_W everywhere. The symbol is kept so the earlier text stays readable.
 
 **Training (one sample).**
 1. Pick conformer k. Set x_R = `data.pos[k]` and x_G = `data.gt_pos[k]` (`dataset.py:79-99` [E-JOINT-023]).
@@ -127,10 +170,16 @@ leaves it open [E-JOINT-064].
 Why anchor at RDKit: EBD's own ablation found the RDKit-atom prior beats the coarse prior [E-JOINT-092], and ET-Flow
 shows the prior shifts DRUGS AMR-R by 0.083 Å [E-JOINT-076].
 
-**Choice of σ_b.** The ring error is a heavy tail: ETKDG ring-dihedral mean is 10.65° but the median is 0.44°, and
-49.6 % of seeds exceed 10° [E-JOINT-004]. The RDKit → GT velocity is therefore multimodal for a minority of seeds,
-and an interpolant with too little noise averages them into distorted rings. σ_b ∈ {0.05, 0.15, 0.3} Å is swept on
-the rigid stratum only, at about 1 GPU-h each (arm A11). INFERENCE: 0.3 Å is the order of a ring-flip displacement.
+**Choice of σ_b (revised after D-002).** *Superseded:* "a heavy tail … multimodal for a minority of seeds". That
+statement pooled 3,078 three-membered-ring seeds, which always sit at 0°. On seeds with a ring of ≥ 4 atoms
+(4,181 seeds), the ETKDG ring-dihedral error has mean 18.5°, median 9.79°, and 49.6 % exceed 10° [E-JOINT-004 rev.,
+recomputed]. The error is the **bulk** of those seeds. The RDKit → GT velocity is therefore large and potentially
+multimodal (pucker choice) for about half of all ≥ 4-ring seeds, and an interpolant with too little noise averages
+puckers into distorted rings.
+
+σ_b ∈ {0.05, 0.15, 0.3} Å is swept in arm A11. Training is on the full QM9 training set; **evaluation only** is on
+the rigid stratum (289 test molecules) and the ≥ 4-ring population. Cost is in §6. INFERENCE: 0.3 Å is the order of a
+ring-flip displacement.
 
 **Sampling.**
 1. ETKDG seed at t = 0; τ ~ U[0, 2π)^m (TD).
@@ -165,6 +214,9 @@ products is simulation-free [E-JOINT-073].
   anchored at the matched seed. Write x = x_R + d with d ∈ E_L(x_R).
 - The L forward process is a variance-exploding Gaussian on d with closed form:
   d_s = d_0 + σ_L(s)·P_L(x_R) ζ, with d_0 = P_L(x_R)(x_G − x_R).
+  (Note after D-004: in V3a τ is a **chart coordinate** — torsions are applied by `modify` after the displacement —
+  so the factorisation is consistent whichever complement (P_L or P_W) spans E_L. The dihedral drift of D-004 only
+  matters for V2's in-place geometry steps, which therefore use P_W.)
   The perturbation kernel is exactly Gaussian on the subspace. Fixing the anchor keeps it closed-form; projecting at
   the moving x would not.
 - Torsions are applied after the displacement: x(s) = modify(x_R + d_s, τ_s). Because modify acts by rigid side
@@ -196,7 +248,7 @@ products is simulation-free [E-JOINT-073].
   - 465 of 885 QM9 test ring molecules are fused, bridged or spiro [E-JOINT-071], and their CP coordinates are not
     independent;
   - NeRF has FoldingDiff's lever-arm effect [E-JOINT-062];
-  - it is the variant most exposed to PuckerFlow's announced work [E-JOINT-069].
+  - it is the variant most exposed to PuckerFlow's proposed extension [E-JOINT-069] (wording revised after D-008).
 - What it buys: an exact likelihood for the L factor with a closed-form Jacobian (relevant to EXP-4) and
   interpretable puckers.
 - Run only if V3a passes Gate 1.
@@ -257,6 +309,11 @@ The layer is applied after every geometry step in V2/V3. It is pure geometry (no
   - For each RDKit-perceived stereocentre c with neighbours a<b<d in canonical rank order, the signed volume is
     χ_c = (x_a − x_c)·[(x_b − x_c) × (x_d − x_c)].
   - If a geometry step flips sign(χ_c) relative to the seed, the step is backtracked (§2.6).
+  - **Guard is mandatory (revised after D-004).** V5 observed chirality flips in 1 of 20 random 0.3 Å-RMS projected
+    steps [E-JOINT-032]: projection does not protect stereo. The guard runs after **every** geometry step in
+    training roll-outs (DAgger) and at sampling. The V3a forward kernel can also cross χ_c = 0, so any noised
+    d_s that flips a centre is rejected and resampled during training, and rejections are counted. Flip counts (before guard) and guard backtracks are reported per arm (§3 row 9).
+  - Same guard for ring-fusion stereo (cis/trans ring junctions), via the signed volume at each bridgehead.
   - The ET-Flow post hoc flip [E-JOINT-132] is used only as a final reported repair, and only in a separate arm.
 - **E/Z.** V1 already can flip E/Z, because non-ring double bonds are treated as rotatable [E-JOINT-025, -131]. This
   belongs to **Exp 3 (R-CHEM)**. Exp 1 measures it with `tools/stereo_check.py` and adopts whatever Exp 3 decides,
@@ -279,7 +336,7 @@ All on the TD/GeoMol QM9 split (1000 test molecules, 2K samples, δ 0.5 Å), wit
 | 6 | Stereo preservation: % with input chirality and E/Z | `tools/stereo_check.py` [E-JOINT-131] | screen + reported |
 | 7 | Energy: GFN2-xTB single point; xTB-relaxed E_relax; RMSD moved by relaxation; post-relaxation connectivity change; Boltzmann-weighted E, μ, Δε, E_min vs reference on a 100-molecule subset | xtb 6.7.1 on gnode118 (≈ 0.14 s per QM9 opt [E-JOINT-008]); TD §4.4 protocol [E-JOINT-153]; screens [E-JOINT-133] | physical endpoint |
 | 8 | Inference time | core-seconds per conformer on CPU (TD Table 2 units [E-JOINT-153]) and packed GPU wall-clock; NFE | cost |
-| 9 | Constraint cost | share of per-step time spent in P_L and §2.6; backtracks and skips per conformer; induced torsion drift per step | cost / diagnostic |
+| 9 | Constraint cost | share of per-step time spent in P_W and §2.6; backtracks and skips per conformer; induced dihedral drift per step, measured on TD's quadruple per rotatable bond (`standardization.py:69-90`) (revised after D-004) | cost / diagnostic |
 | 10 | Rigid stratum AMR-R (n_rot = 0, 289 molecules) | `breakdown.log` "by n_rot_heavy" bin 0 [E-JOINT-007] | model-free L read-out (Gate 0) |
 | 11 | **Leak-free oracle as an analysis tool** | §3.6 | mechanism test (ORACLE) |
 
@@ -300,12 +357,21 @@ Re-run `round4/leakfree.md` §2 unchanged on the V2/V3 checkpoints: `tools/make_
   conformation consistent with the τ it generates?
 - **seeds = other half's GT L**, with the geometry factor off: torsion head only.
 
-Pre-declared predictions:
-- (i) a coupled model's split-half AMR-R is **no worse than its RDKit-L AMR-R**, unlike CR (+0.032), B1 (+0.048) and
-  S3 (+0.088) [E-JOINT-001];
+**Budget-matched reference first (added after D-001; CPU only, existing files, to be run before any Exp-1 GPU
+time).** For CR, B1, S3 and S4 (`steps20_seed0` `eval.pkl`/`confs.pkl` on gnode118): re-score `ref_rdkitL` with,
+per molecule, a random subset of 2·|B| of its generated conformers against the B targets (and 2·|A| against A),
+averaged over 10 draws. This gives `ref_half`. Report split − ref_half with a paired molecule bootstrap. Until this
+is run, the published gaps (CR +0.032, B1 +0.048, S3 +0.088, S4 +0.064 Å vs full-budget `ref_rdkitL`) are
+descriptive only and are not cited as evidence. Owner: the orchestrator's analysis driver;
+`tools/analyze_leakfree.py` gains a `--ref_subsample` option (code change, not made by R-JOINT).
+
+Pre-declared predictions (revised after D-001/D-005; superseded: "no worse than its RDKit-L AMR-R, unlike CR
+(+0.032) …"):
+- (i) a coupled model's split − ref_half gap is no larger than A6b's split − ref_half gap, i.e. no larger than
+  that of a decoupled model with sampler-matched training;
 - (ii) its own − split leak gap is smaller than S4's (0.17 Å).
 
-If (i) fails, the coupling claim fails, whatever the primary metrics show. Report the `split_d` distinct-target view
+If (i) fails, the coupling hypothesis is not supported by the oracle analysis, whatever the primary metrics show. Report the `split_d` distinct-target view
 alongside, since ≈ 40 % of targets have a near-duplicate in the other half [E-JOINT-002].
 
 ## 4. Ablation table and the controls against "winning by more optimisation"
@@ -321,7 +387,8 @@ evaluator, and 100 epochs unless noted.
 | A3 | V1 parameter-matched: FlexiTors network with the geometry head present but w = 0 and no geometry steps | new | 3 | controls for capacity and code changes; must equal A0 within noise (golden test) |
 | A4 | V2, no DAgger | new | 3 | coupled correction |
 | A5 | V2 + DAgger | new | 3 | **main V2 arm** |
-| A6 | **Decoupled**: A5's geometry head run alone (τ frozen at seed) to produce L, then the frozen A0 torsion model on that L | new (no training) | 3 | **mechanism control: coupling vs "learned L"** |
+| A6 | Decoupled, unmatched: A5's geometry head run alone (τ frozen at seed) to produce L, then the frozen A0 torsion model (trained on RDKit L) on that L | new (no training) | 3 | **secondary** (revised after D-005): confounds coupling with train/test L mismatch, so it reproduces the S3/B1 regime by construction |
+| **A6b** | **Decoupled, sampler-matched** (added after D-005): A5's geometry head run alone (τ frozen at seed) as an independent L sampler on the **training** set; GT torsions re-matched to that L (`standardize_confs.py`); a torsion head re-trained (S5 recipe) or DAgger-fine-tuned from A0 on it; at test the same sampler gives L, then this torsion head | new | 3 | **primary coupling control**: A5 − A6b isolates "geometry head sees τ" from "torsion head trained on its own L" |
 | A7 | V3a, shared clock | new | 3 | joint diffusion |
 | A8 | V3a + DAgger | new | 3 | **main V3 arm** |
 | A9 | V3b (CP), only if A8 passes Gate 1 | new | 1→3 | coordinate ablation |
@@ -332,7 +399,9 @@ evaluator, and 100 epochs unless noted.
 | A13 | A0 output + post hoc learned refiner (FM-refiner style, trained on A0 samples) | new | 1 | "why not just refine TD's output?" [E-JOINT-077] |
 | A14 | A0 + MMFF after sampling; A0 + xTB after sampling | partly have (A3 round 1) | 3 | relaxation trades recall for precision [E-JOINT-135]; reported separately, never folded in |
 
-**Pre-declared primary contrasts (Holm family):** A5 − A1, A8 − A1, A5 − A6, A8 − A6, each on AMR-R and COV-R@0.5.
+**Pre-declared primary contrasts (Holm family; revised after D-005):** A5 − A1, A8 − A1, **A5 − A6b, A8 − A6b**,
+each on AMR-R and COV-R@0.5. A5 − A6 and A8 − A6 move to the secondary family. Superseded: "A5 − A6, A8 − A6" as
+primary.
 **Secondary:** A5/A8 − A2, A4 − A5 (DAgger effect), A7 − A8, A9 − A8, A12 − A0, A13 − A5.
 
 **Controls that stop the model from winning by more optimisation:**
@@ -347,7 +416,8 @@ evaluator, and 100 epochs unless noted.
 5. **Equal samples, equal seeds.** K is fixed, and the ETKDG seed list is fixed across arms. RDKit + cluster at an
    equal sample budget is reported because recall is gameable by budget [E-JOINT-154].
 6. **Refinement contrast A13.** It isolates the "joint" claim from "post hoc refinement".
-7. **Decoupled contrast A6.** It isolates "coupling" from "learned L".
+7. **Decoupled contrast A6b** (revised after D-005; was A6). It isolates "coupling" from "learned L with
+   sampler-matched training". A6 alone could not, because its torsion head is mismatched to its L.
 8. **No selection on the test set.** Checkpoints are picked by validation loss; σ_b and w are picked on the validation
    rigid stratum; the leak-free oracle is analysis only.
 
@@ -360,8 +430,8 @@ Every mechanism carries a comment `# <paper>, PDF p. N, eq. M` or `# [E-JOINT-NN
 
 | Module | Contents | Reuses (path:line) |
 |---|---|---|
-| `flexitors/geometry/jacobian.py` | `torsion_jacobian(pos, edge_index, edge_mask, mask_rotate)` returning J_τ ∈ R^{m×3n}; `rigid_jacobian(pos)` returning 6×3n; batched torch versions | `torsional-diffusion/diffusion/likelihood.py:68-74` (`dx_dtau`), `:59-65` (`inertia_tensor`), `:84-93` (rows and rigid removal) |
-| `flexitors/geometry/projector.py` | `l_subspace_projector(pos, ...)` returning P_L (dense for n ≤ 64, otherwise implicit via `torch.linalg.lstsq`); `project(v, ...)`; rank check | `jacobian.py` |
+| `flexitors/geometry/jacobian.py` | `dihedral_gradients(pos, quads)` returning W ∈ R^{m×3n}, analytic Wilson-B rows for TD's quadruple per rotatable bond (`standardization.py:69-90`), **used by the V2 projector** (revised after D-004); `torsion_jacobian(...)` returning J_τ (tangents; used only by the EXP-4 chart Jacobian); `rigid_jacobian(pos)` returning 6×3n; batched torch versions | `torsional-diffusion/diffusion/likelihood.py:68-74` (`dx_dtau`), `:59-65` (`inertia_tensor`), `:84-93` (rows and rigid removal) |
+| `flexitors/geometry/projector.py` | `dihedral_preserving_projector(pos, ...)` returning P_W = I − Cᵀ(CCᵀ)⁺C, C = [W; J_rig] (dense for n ≤ 64, otherwise implicit via `torch.linalg.lstsq`), batched over molecules (no per-molecule Python loop, D-006); `project(v, ...)`; rank check | `jacobian.py` |
 | `flexitors/geometry/internal.py` | bonds, angles, torsions, impropers from (pos, edge_index); stereocentre neighbour ordering; signed volumes | `torsional-diffusion/utils/torsion.py:110-124` (`get_torsion_angles`) |
 | `flexitors/geometry/rings.py` | ring perception, ring-system classes (isolated / fused / bridged / spiro); CP forward/inverse (V3b) | RDKit `RingInfo`; method of [E-JOINT-066] |
 | `flexitors/geometry/constraints.py` | §2.6: bond window, clash test, chirality sign check, backtracking step; counters | `internal.py` |
@@ -385,31 +455,47 @@ Every mechanism carries a comment `# <paper>, PDF p. N, eq. M` or `# [E-JOINT-NN
 
 - **M0 (CPU only, ≈ 1–2 days of coding).** `geometry/jacobian.py`, `projector.py`, `constraints.py` and their tests.
   Then one offline experiment with **no learning**: take the round-2 paired cache and, for each QM9 test-set rigid
-  molecule's matched RDKit seed, apply the *oracle* step x_R + P_L(x_R)(x_G − x_R), as ORACLE analysis only.
+  molecule's matched RDKit seed, apply the *oracle* step x_R + P_W(x_R)(x_G − x_R), as ORACLE analysis only.
   Measure:
-  - (a) the torsion drift caused (should be about 0);
+  - (a) the dihedral drift caused (revised after D-004: measured as the change of TD's quadruple dihedral per
+    rotatable bond, `standardization.py:69-90`; expected O(step²), reported in rad, with P_L (old projector) shown
+    beside it as the negative control that V5 measured at 0.19–0.25 rad/Å);
   - (b) how much of the RDKit → GT RMSD the L-subspace captures (fraction of ‖x_G − x_R‖² inside range P_L);
   - (c) the chirality flips.
 
   This shows whether the subspace carries the error before any GPU is spent. **Kill criterion:** if the projected
   oracle step recovers < 50 % of the rigid-stratum RMSD gap (ETKDG 0.152 → own-GT), the representation is wrong.
-- **M1 = Gate 0 (≈ 4–6 GPU-h).** Train only the V2 geometry head (torsion loss weight 0, τ noise still applied),
-  30 epochs, 1 seed, σ_b sweep (A11). Evaluate on the rigid stratum and the ring tail.
-  **GO** if rigid AMR-R ≤ 0.10 Å (ETKDG 0.152, MMFF 0.128) **and** the > 10° ring tail ≤ 20 % (ETKDG 49.6 %, MMFF
-  35.1 %) [E-JOINT-004, -007].
-- **M2 = Gate 1 (≈ 15 GPU-h).** Full V2 (A4), 100 epochs, 1 seed, plus A6 (no training). **GO** to the 3-seed table if
-  A4 < A1 on AMR-R by ≥ 0.005 Å and A4 < A6.
+- **M1 = Gate 0: ≈ 10.5 GPU-h at TD speed, budget ceiling 16 GPU-h (revised after D-006; superseded figures "1 GPU-h
+  each" and "4–6 GPU-h").** Train only the V2 geometry head (torsion loss weight 0, τ noise still applied) on the
+  **full** QM9 training set: 30 epochs × 3 σ_b values × 1 seed (A11) = 0.3 × 11.7 × 3 = 10.5 GPU-h. The ceiling
+  allows ≤ +50 % for the extra head and per-sample projector, which is **unmeasured**. The numpy path in
+  `likelihood.py` loops per molecule in Python, so the projector must be a batched torch implementation.
+  **Before the Gate-0 ask, a 1-epoch smoke run (≈ 0.12–0.18 GPU-h) measures the real overhead,** and the ask is
+  restated from it. Evaluation only is restricted: the rigid stratum (n_rot = 0, 289 test molecules [E-JOINT-007])
+  and the ≥ 4-ring seed population.
+  **GO** if rigid AMR-R ≤ 0.10 Å (ETKDG 0.152, MMFF 0.128) **and** the share of ≥ 4-ring seeds with ring-dihedral
+  RMSD > 10° is ≤ 20 % (ETKDG 49.6 %, MMFF 35.1 %, both on the ≥ 4-ring population [E-JOINT-004 rev.], as confirmed
+  after D-002).
+- **M2 = Gate 1 (≈ 15 GPU-h + A6b ≈ 15 GPU-h; revised after D-005).** Full V2 (A4), 100 epochs, 1 seed, plus A6
+  (no training) and A6b, 1 seed. **GO** to the 3-seed table if A4 < A1 on AMR-R by ≥ 0.005 Å. The coupling claim
+  additionally needs A4 < A6b; if A4 ≈ A6b, continue as a "learned L + sampler-matched training" paper and drop the
+  joint framing.
 
 ### 5.3 Test plan (`flexitors/tests/`)
 
-- `test_projector.py`:
-  - P_L is idempotent and symmetric;
-  - P_L·J_τᵀ ≈ 0 and P_L·J_rigᵀ ≈ 0, both to 1e-6;
+- `test_projector.py` (revised after D-004):
+  - P_W is idempotent and symmetric;
+  - W·P_W ≈ 0 and J_rig·P_W ≈ 0, both to 1e-6. The old test "P_L·J_τᵀ ≈ 0" passes for the wrong projector, so it
+    is kept only as a documented negative example;
+  - analytic dihedral gradients W match central finite differences;
   - rank = 3n − 6 − m;
   - m = 0 molecules work;
   - finite-difference check of `torsion_jacobian` against `modify_conformer` (step 1e-4 rad).
 - `test_invariance.py`:
-  - a projected L-step of 0.05 Å RMS changes every rotatable torsion by < 1e-3 rad (via `get_torsion_angles`);
+  - a P_W-projected L-step of 0.05 Å RMS changes each TD-quadruple rotatable dihedral by < 1e-3 rad, and the drift
+    scales as step² (checked at 0.01 / 0.02 / 0.05 Å);
+  - the chirality guard catches a deliberate 0.3 Å step that flips χ_c, which happens in ≈ 1/20 random steps
+    [E-JOINT-032];
   - a TD torsion step changes no bond length or angle (> 1e-5 fails), as a regression of [E-JOINT-026].
 - `test_parity.py`: on x and −x, the torsion and CP heads negate, the `0e` head is unchanged, and the `1o` head
   negates.
@@ -436,31 +522,35 @@ Every mechanism carries a comment `# <paper>, PDF p. N, eq. M` or `# [E-JOINT-NN
 | Item | Estimate | Basis |
 |---|---|---|
 | M0 | 0 GPU-h, ≈ 1 CPU-h | linear algebra on ≈ 300 molecules |
-| M1 (A11, 3 × 30 epochs) | ≈ 12 GPU-h | 0.3 × 11.7 × 1.15 (≈ 15 % head + projector overhead, INFERENCE) × 3 |
-| M2 (A4 1 seed + A6) | ≈ 14 + 0.5 GPU-h | 11.7 × 1.15–1.25 |
+| Smoke run (1 epoch, geometry head + projector) | ≈ 0.12–0.18 GPU-h | measures the real overhead before the Gate-0 ask (added after D-006) |
+| M1 (A11, 3 σ_b × 30 epochs, full QM9 train set) | **≈ 10.5 GPU-h at TD speed; ceiling 16 GPU-h** | 0.3 × 11.7 × 3; ceiling = +50 % unmeasured overhead (revised after D-006; superseded "≈ 12 GPU-h" with an assumed +15 %) |
+| M2 (A4 1 seed + A6 + A6b 1 seed) | ≈ 12–18 + 0.5 + 12–18 GPU-h, plus A6b re-matching CPU (UNVERIFIED) | 11.7 × 1.0–1.5 per 100-epoch run |
 | A2 seeds (xTB) | ≈ 0.5–3 CPU-h test; train-set matched seeds ≈ 1.5 M confs × 0.14 s ≈ 60 CPU-h (parallel) + one 11.7 GPU-h retrain × 3 | [E-JOINT-008] |
-| Main table, new trained arms (A2, A3, A4, A5, A7, A8) × 3 seeds | ≈ 18 runs × 13–15 GPU-h ≈ 240–270 GPU-h | |
-| DAgger rollouts (A5, A8) | ≈ 25–40 GPU-h + matching CPU (UNVERIFIED) | training set ≈ 100× test-set inference |
+| Main table, new trained arms (A2, A3, A4, A5, **A6b**, A7, A8) × 3 seeds | ≈ 21 runs × 12–18 GPU-h ≈ 250–380 GPU-h | A6b added after D-005 |
+| DAgger / re-matching rollouts (A5, A6b, A8) | ≈ 35–60 GPU-h + matching CPU (UNVERIFIED) | training set ≈ 100× test-set inference |
 | Inference + xTB eval, all arms | ≈ 15 GPU-h + ≈ 30 CPU-h | 15–25 min per run |
-| **Decision-gate ask (M0–M2)** | **≈ 30 GPU-h** | |
-| **Full QM9 table** | **≈ 300–350 GPU-h ≈ 4 days on 4 × 3090** | |
+| D-001 budget-matched leak-free re-score | 0 GPU-h, a few CPU-h | existing `eval.pkl`/`confs.pkl` |
+| **Decision-gate ask (smoke + M1 + M2)** | **≈ 35–53 GPU-h** (revised; superseded "≈ 30") | |
+| **Full QM9 table** | **≈ 300–450 GPU-h ≈ 3–5 days on 4 × 3090** | |
 | GEOM-DRUGS | ≈ 10× training (estimate, unmeasured) | `round4/BRIEF.md` |
 
 ## 7. Risks
 
-1. **The leak-free premise is narrower than "geometry needs coupling".** The geometric floor with other-conformer L
-   is 0.032 Å [E-JOINT-010], so A6 (decoupled, learned L) may do as well as A5. That would be a legitimate negative
-   result for "joint", and the paper would become "learned L + sampler-matched training". The arm is pre-declared so
-   this cannot be hidden.
+1. **Coupling may not matter (revised after D-003/D-005).** The best-of-3 other-conformer floor is 0.036 Å vs
+   0.114 Å for RDKit L on the same rows [E-JOINT-010 rev.], and the leak-free failure is explained by L mismatch. So
+   **A6b (decoupled, sampler-matched) may do as well as A5**. That is the *a priori* most likely outcome given current
+   evidence, and it would be a legitimate negative result for "joint": the paper would become "learned L +
+   sampler-matched training". A6b is a pre-declared primary contrast, so this cannot be hidden.
 2. **Multimodal L velocity.** Ring flips mean that too small a σ_b averages puckers into distorted rings. Mitigated by
-   A11 on the cheap rigid stratum. The round-2 λ-blend defect (≈ 10 % of slots reused another conformer's blend)
+   A11, which is read out cheaply on the rigid stratum. The round-2 λ-blend defect (≈ 10 % of slots reused another conformer's blend)
    means the paired cache must be rebuilt, not reused.
 3. **Exposure bias.** Without DAgger, A4 behaves like S3/B1 on MMFF L [E-JOINT-005]. DAgger is mandatory, and its
    matching cost is unmeasured.
 4. **RMSD may not move even if geometry improves** [E-JOINT-152]. Both endpoints are pre-declared.
 5. **Constraint layer as hidden optimisation.** It is pure geometry with counters reported. A9b measures planarity
    separately.
-6. **Competition.** PuckerFlow's group has announced joint CP × torsion [E-JOINT-069], and GO-Flow is the GD-P
+6. **Competition.** PuckerFlow's group has proposed joint CP × torsion as a feasible extension [E-JOINT-069] (revised
+   after D-008), and GO-Flow is the GD-P
    precedent. The claim stays scoped to §1's "new" list.
 7. **Absolute level.** Best case (CTRL-type model on λ ≈ 0.5–0.75-quality L, round-4 C-ARCH-01 §3, INFERENCE) is
    AMR-R ≈ 0.11–0.14 Å. That is still above the Cartesian frontier of 0.068–0.073 [E-JOINT-009]. The paper cannot be
@@ -468,18 +558,49 @@ Every mechanism carries a comment `# <paper>, PDF p. N, eq. M` or `# [E-JOINT-NN
 8. **QM9 saturation** [E-JOINT-155]. COV-R@0.1, internal-geometry and energy metrics carry the QM9 result, and
    GEOM-DRUGS is needed.
 
-## 8. Novelty verdict
+## 8. Novelty verdict (revised after D-001/D-003/D-004/D-005/D-008; original kept below)
 
-- **"Joint geometry–torsion modelling" as such is NOT unexplored.** RINGER (2023) diffuses bond angles and torsions
-  jointly for macrocycles [E-JOINT-060]. FoldingDiff does angles + dihedrals for proteins [E-JOINT-062]. GO-Flow flows
-  bonds × angles × torsions for small molecules [E-JOINT-063]. TD and Corso proposed it [E-JOINT-047, -078]. PuckerFlow
-  announced joint CP × torsion [E-JOINT-069]. "Multi-scale conformer generation" is taken by EBD [E-JOINT-090].
+- **"Joint geometry–torsion modelling" as such is NOT unexplored.**
+  - RINGER (2023) diffuses bond angles and torsions jointly for macrocycles [E-JOINT-060].
+  - FoldingDiff does angles + dihedrals for proteins [E-JOINT-062].
+  - GO-Flow flows bonds × angles × torsions for small molecules [E-JOINT-063].
+  - TD and Corso proposed it [E-JOINT-047, -078].
+  - PuckerFlow proposes joint CP × torsion as a feasible extension [E-JOINT-069].
+  - "Multi-scale conformer generation" is taken by EBD [E-JOINT-090].
 - **What remains NOVEL (scoped):**
-  1. the evidence that L must be coupled to τ, from the leak-free split-half test with the decoupled control
-     [E-JOINT-001, -049];
-  2. the L-subspace projection construction, which gives exact torsion/L separation and closure-free rings of any
-     topology [E-JOINT-063, -072, -079];
-  3. the first TD-protocol GEOM benchmark of a learned-L torsion model on drug-like **polycyclic** rings, with pucker,
-     stereo and xTB metrics [E-JOINT-071, -079].
-- **Overall: INCREMENTAL-to-NOVEL, contingent on A5/A8 beating both A1/A2 (real use) and A6 (coupling).** Without
-  that win it is a workshop analysis paper (leak-free + ring decomposition), not a method paper.
+  1. **(unconditional)** the first TD-protocol GEOM benchmark of a learned-L torsion model on drug-like
+     **polycyclic** rings, with pucker, stereo and xTB metrics, plus the leak-free *methodology* (own vs split,
+     budget-matched) [E-JOINT-071, -079, -049];
+  2. **(minor method detail)** the ker-W ∩ rigid^⊥ Cartesian geometry step: dihedral-preserving to first order,
+     closure-free for any ring topology, chirality-guarded [E-JOINT-032, -063, -072, -079]. It is **not** an "exact
+     separation";
+  3. **(hypothesis, not a finding)** that coupling L to τ helps beyond sampler-matched training. It counts only if
+     A5/A8 beat A6b. The leak-free test does not support it [E-JOINT-001 rev., -010 rev.].
+- **Overall: INCREMENTAL.** It becomes NOVEL-as-method only if A5/A8 beat A1/A2 (real use) **and** A6b (coupling).
+  Without the first win it is a workshop analysis paper. Without the second it is a "learned L + sampler-matched
+  training" paper, with the joint framing dropped.
+
+<details><summary>Original §8 (before revision 1), kept for the record</summary>
+
+- What remains NOVEL (scoped): 1. the evidence that L must be coupled to τ, from the leak-free split-half test with
+  the decoupled control; 2. the L-subspace projection construction, which gives exact torsion/L separation and
+  closure-free rings of any topology; 3. the first TD-protocol GEOM benchmark … Overall: INCREMENTAL-to-NOVEL,
+  contingent on A5/A8 beating both A1/A2 and A6. — Items 1 and 2 were withdrawn after D-003/D-005 and D-004.
+</details>
+
+## 9. Known issues (added in revision 1)
+
+1. **Code bug, `tools/local_structure_analysis.py:302`** [E-JOINT-031]. `np.argsort(cost_gg[i])[:args.floor_topm]`
+   (with `--floor_topm` default 3, `:74`) includes the target conformer i whenever n_GT ≤ 3. The self cost is
+   `np.inf`, which only sorts it last. All 769 rows with `n_gt ≤ 3` in
+   `cluster_sync/results/analysis/local_structure_test.csv` have floor_gtother ≤ 2e-5 Å.
+   - Affected: `round2/research_A.md:24-34` (0.0323 / 0.0137 / 0.0269), E-ARCH-010, E-JOINT-010, E-CHEM-065.
+   - Fix (for a coding agent; research agents do not edit code): drop i from the candidate list before slicing.
+   - Re-run the n_GT ≤ 3 molecules on gnode118 and add an other-half-only variant matching the split-half design.
+     Until then, cite only the n_GT > 3 values (ring 0.0359 Å, RDKit 0.1143 Å on the same rows).
+2. **Leak-free reference not budget-matched** (D-001). The CPU re-score of §3.6 must run before any leak-free gap
+   versus RDKit L is cited (EXP-1, EXP-2, `round5/PLAN.md` phase 2).
+3. **Projector overhead unmeasured** (D-006). The smoke run must happen before the Gate-0 ask.
+4. **DAgger / re-matching CPU cost unmeasured** (§5.4 Q-*-003). It now applies to A5, A6b and A8.
+5. **Verification debt.** Ledger entries E-JOINT-130, -132, -136, -151 and -154 are UNVERIFIED-IN-R5 (quotes not
+   re-extracted) and must not support any claim in a paper draft until re-checked.

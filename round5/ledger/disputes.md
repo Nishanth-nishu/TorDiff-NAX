@@ -1,0 +1,243 @@
+# Round 5 disputes
+
+Format: `## D-NNN on <entry/spec>` / Raised by / problem / requested action / Status. The orchestrator routes each
+thread to its author (R-JOINT or R-CHEM), and the author appends `### Answer (<AGENT>)`.
+
+## D-001 on E-JOINT-001, E-CHEM-054 (and EXP-1 §0 / §3.6 prediction (i), EXP-2 framing, round5/PLAN.md phase 2)
+Raised by: V5
+- The numbers are VERIFIED. The INFERENCE "another conformer's true L makes every model worse than RDKit L" compares
+  two views that do not have the same sample budget:
+  - the split view generates 2·|half| conformers per molecule and scores recall against half the targets
+    (`tools/make_split_half.py:19-22`);
+  - `ref_rdkitL` generates 2·n conformers and scores against all n targets (`tools/analyze_leakfree.py:318-347`;
+    `round4/leakfree.md` itself labels the reference "descriptive").
+- AMR-R is a min over generated samples. The model samples the whole conformer distribution, not only half B, so
+  halving K raises AMR-R by itself. Part or all of CR's +0.032 Å gap may therefore be budget.
+- The own-vs-split leak contrast is budget-matched and stands.
+- Requested (CPU only, existing cluster `eval.pkl`/`confs.pkl` of `steps20_seed0`): re-score `ref_rdkitL` with, per
+  molecule, a random 2·|B| subset of its generated conformers against the B targets (and the same for A). Average over
+  ~10 draws. Report split − ref_half for CR, B1, S3 and S4. Prediction (i) of EXP-1 §3.6 must use this budget-matched
+  reference.
+Status: OPEN
+
+### Response (JOINT)
+Accepted. No counter-evidence: AMR-R is a minimum over samples, and the split view has 2·|half| samples versus 2·n.
+- E-JOINT-001 is revised ("Revised after D-001 and D-003", history kept). The split − ref_rdkitL gaps (CR +0.032,
+  B1 +0.048, S3 +0.088, S4 +0.064 Å) are now marked descriptive/UNVERIFIED, and the coupling inference is withdrawn.
+- EXP-1 §3.6 adopts the requested CPU re-score verbatim: a random 2·|B| (and 2·|A|) subset per molecule, 10 draws,
+  giving split − ref_half for CR, B1, S3 and S4 with a paired bootstrap. It must run before any Exp-1 GPU time.
+- Prediction (i) is restated against ref_half and against A6b. The own-vs-split leak contrast is kept as the only
+  budget-matched quantity.
+- I could not run the re-score myself: the per-molecule `eval.pkl`/`confs.pkl` are on gnode118, and only summaries
+  are in `cluster_sync/`. It is assigned to the analysis driver (EXP-1 §9 item 2).
+
+## D-002 on E-JOINT-004 (EXP-1 §2.2 "Choice of σ_b", §5.2 Gate 0 / Gate 1 ring-tail thresholds)
+Raised by: V5
+- Numbers VERIFIED by recompute.
+- The claim that ring error is "a heavy tail … multimodal for a minority of seeds" rests on mean 10.65° and median
+  0.44°, but that population includes 3,078 seeds whose largest ring is 3-membered, and those are always 0.0°.
+- For seeds with a ring of 4+ atoms (n = 4,181, `cluster_sync/round2/data/QM9/round2_seeds/l_error.csv`,
+  cond = L_etkdg2L) the mean is 18.5°, the median 9.79° and 49.6 % exceed 10°. The error is the bulk of these seeds.
+- Requested: restate the σ_b rationale on the ≥ 4-ring population. Confirm that the Gate-1 "> 10° ring tail ≤ 20 %"
+  threshold is computed on that population; the 49.6 % baseline is.
+Status: OPEN
+
+### Response (JOINT)
+Accepted, and recomputed independently on `cluster_sync/round2/data/QM9/round2_seeds/l_error.csv` (cond `L_etkdg2L`;
+largest ring from RDKit `AtomRings` of the SMILES):
+
+| Population | Seeds | Mean | Median | > 10° |
+|---|---|---|---|---|
+| Largest ring ≥ 4 | 4,181 | 18.50° | 9.79° | 49.6 % |
+| Largest ring = 3 | 3,078 | 0.00° | — | 0 % |
+
+These are identical to V5's numbers.
+- E-JOINT-004 has a revision note: this is a bulk error on ≥ 4-ring seeds, not a minority tail.
+- EXP-1 §2.2 restates the σ_b rationale on that population.
+- EXP-1 §5.2 confirms the Gate-0 "> 10° ≤ 20 %" threshold is computed on the ≥ 4-ring population, the same
+  population as the 49.6 % baseline.
+
+## D-003 on E-JOINT-010, E-CHEM-065 (EXP-1 §0, EXP-2 framing; also affects round2/research_A.md:24-34)
+Raised by: V5
+- **Code bug.** At `tools/local_structure_analysis.py:302`, `for jj in np.argsort(cost_gg[i])[:args.floor_topm]` with
+  `floor_topm = 3` (:74) includes the target itself whenever n_GT ≤ 3. The self cost is `np.inf`, which only sorts it
+  last. Result: all 544 rows with n_GT ∈ {2, 3} have floor_gtother ≈ 1e-7 (max 2e-5).
+- **Corrected values** on rows with n_GT > 3 (unaffected by the bug), from `local_structure_test.csv`:
+
+  | Stratum | Conformers (molecules) | floor_gtother mean | floor_gtother median | floor_best_sym, same rows |
+  |---|---|---|---|---|
+  | Ring | 4,696 (391) | 0.0359 Å | 0.0165 | 0.1143 |
+  | Acyclic | 2,089 | 0.0138 | — | — |
+  | All | 6,785 | 0.0291 | — | — |
+
+  The published 0.0323 / 0.0137 / 0.0269 are biased low.
+- **Definition.** floor_gtother is the minimum over the 3 other GT conformers *closest to the target* (by transplant
+  cost) among *all* other GT conformers, followed by DE. It is an oracle best-of selection over the full set, not
+  "another conformer's L" and not the split-half (other-half) analogue. QM9 has near-duplicates for about 40 % of
+  targets (E-JOINT-002).
+- Consequence:
+  - The direction survives: GT L from other conformers is geometrically far better than RDKit L.
+  - The sentence "the geometry is good enough; what fails is the torsion model" still follows.
+  - But this inference contradicts E-JOINT-001's inference ("geometry only helps when coupled"). Once this one is
+    accepted, the leak-free result is fully explained by train/test L-distribution shift, and it provides **no
+    evidence that coupling is necessary**. See D-005.
+- Requested:
+  - fix the self-inclusion (exclude i before slicing);
+  - re-run the n_GT ≤ 3 molecules on the cluster, or report the n_GT > 3 numbers;
+  - add an other-half-only variant matching the split-half design;
+  - correct the 0.032 Å figure in EXP-1 §0, EXP-2 §0/§2 and E-CHEM-065.
+Status: OPEN
+
+### Response (JOINT)
+Accepted. I verified both the bug and the corrected values myself.
+- **Bug.** Code read at `tools/local_structure_analysis.py:302` with `--floor_topm` default 3 at `:74`. In
+  `local_structure_test.csv`, all 769 rows with `n_gt ≤ 3` have floor_gtother ≤ 1.97e-5 Å (mean 8.4e-8).
+- **Corrected values on `n_gt > 3`.**
+
+  | Stratum | Conformers (molecules) | floor_gtother mean | median | floor_best_sym, same rows |
+  |---|---|---|---|---|
+  | Ring | 4,696 (391) | 0.0359 Å | 0.0165 Å | 0.1143 Å |
+  | Acyclic | 2,089 (97) | 0.0138 Å | — | — |
+  | All | 6,785 (488) | 0.0291 Å | — | — |
+
+  These match V5.
+- **Ledger.** E-JOINT-010 is revised: corrected values, the definition corrected to "oracle best-of-3 closest other
+  GT conformers, not split-half", and the inference corrected to "L-distribution mismatch, not evidence for
+  coupling". The bug is recorded as E-JOINT-031.
+- **Spec.** It is listed in EXP-1 §9 "Known issues" item 1 (I did not edit code), with the requested fix, the n_GT ≤ 3
+  re-run and the other-half-only variant. EXP-1 §0 now cites 0.036 vs 0.114 Å and keeps the superseded 0.032 text.
+- **Cross-agent.** E-CHEM-065 and EXP-2 belong to R-CHEM.
+
+## D-004 on EXP-1 §2.2 claim (1), §0 ("the geometry factor cannot move torsions"), §1 / §8 novelty point 1 ("exact separation from torsions")
+Raised by: V5
+- P_L = I − Bᵀ(BBᵀ)⁺B with B = [J_τ; J_rig] projects out the torsion *tangents* ∂x/∂τ_i.
+- A dihedral changes at first order by ∇_x τ_i · δx, and ∇τ_i (the Wilson-B row) is not in span{∂x/∂τ_j}. The two
+  are dual, not parallel.
+- Numerical check on 4 molecules (RDKit ETKDG + H, TD's rotatable rule, TD's `dx_dtau` with rigid motion removed):
+  - mean |Δdihedral| over all neighbour quadruples of the rotatable bonds is the same for P_L steps and for unprojected
+    steps (ratio 1.00–1.08 at 1e-4, 0.05 and 0.3 Å RMS step);
+  - first-order drift is 0.245 rad/Å (`CCC1CCCC1CO`) and 0.185 rad/Å (`CC(C)C1=CC=CC=C1CCO`);
+  - the orthogonal projector onto ker W (W = gradients of one dihedral per rotatable bond) gives 0.000 rad/Å with the
+    same dimension 3n−6−m.
+- What still holds:
+  - In V3a / EXP-4's chart x = modify(x_R + d, τ), τ is a chart coordinate, so the construction is consistent.
+  - The rank and dimension claims hold.
+  - Ring "closure" holds trivially.
+- What does not hold: in V2, the geometry step moves the dihedrals that the torsion head reads, and the M0 check (a)
+  "torsion drift ≈ 0" will fail if it is measured as dihedral change.
+- Requested: either switch to the ker-W projector or restate the claim as "orthogonal to the torsion tangent space"
+  (not "changes no torsion"), and pre-declare how M0 (a) measures drift.
+- Note on ker W: with explicit H there are several quadruples per bond, so pick one rule, e.g. TD's own heavy-atom
+  quadruple from `standardization.py`, and document it.
+- In either case, "exact separation from torsions" must not appear as a contribution without this qualification.
+Status: OPEN
+
+### Response (JOINT)
+Accepted. The analytic argument (tangents ∂x/∂τ vs gradients ∇τ are dual) and V5's measurement (0.19–0.25 rad/Å vs
+0.000 for ker W) agree, and I have no counter-evidence.
+- **New ledger entry** E-JOINT-032 records the result. Claim (1) "changes no torsion to first order" is withdrawn.
+- **EXP-1 §2.2** now uses P_W = I − Cᵀ(CCᵀ)⁺C with C = [W; J_rig]:
+  - W is one dihedral gradient per rotatable bond, on TD's quadruple rule (n0[0], b, c, n1[0]) from
+    `torsional-diffusion/utils/standardization.py:69-90`, documented as requested;
+  - it preserves those dihedrals to **first order only**;
+  - other quadruples about the same bond may change, and those are L by definition.
+- **"Exact separation"** is struck from §0, §1 and §8. The point is now a minor method detail.
+- **M0 (a)** is pre-declared to measure drift as the change of that quadruple's dihedral, with the old P_L shown as
+  the negative control.
+- **Tests (§5.3)** check W·P_W ≈ 0, a finite-difference check on W, and step² scaling.
+- **Chirality guard.** §2.8 makes the signed-volume guard mandatory after every geometry step, including DAgger
+  roll-outs, and adds reject-and-resample for V3a forward-kernel samples that flip a centre. It cites V5's 1/20 flip
+  rate.
+- **V3a and EXP-4.** These use τ as a chart coordinate, as V5 notes, and are unaffected; the notes are added.
+
+## D-005 on EXP-1 §4 arm A6, §1 "Coupling is necessary: NOVEL", §8 point 2 (and EXP-4 H1-vs-H2 framing)
+Raised by: V5
+- A6 = A5's geometry head producing L, then the **frozen A0** torsion model, which was trained on RDKit L.
+- The spec's own E-JOINT-010 reasoning says a torsion model fed L from a distribution it was not trained on fails;
+  this is the S3/B1 regime. A6 will therefore lose to A5 (which is DAgger-trained) whether or not coupling matters.
+- A5 − A6 confounds "coupled" with "torsion head trained on its deployed L". The leak-free data (D-001, D-003) do not
+  show coupling is necessary either.
+- Requested: add a decoupled arm A6b. An independent L sampler (A5's geometry head run alone, τ frozen at the seed)
+  produces L for the *training* set; the torsion head is then retrained or fine-tuned (DAgger / S5 recipe) on that L.
+  Make A5 − A6b (and A8 − A6b) the primary coupling contrast, with A6 kept as secondary.
+- Until A6b exists, rule "coupling is necessary" as a hypothesis, not a NOVEL finding.
+Status: OPEN
+
+### Response (JOINT)
+Accepted. With E-JOINT-010 corrected, A5 − A6 confounds coupling with train/test L mismatch.
+- **New arm A6b** is added to EXP-1 §4, exactly as requested: A5's geometry head with τ frozen at the seed as an
+  independent sampler on the training set, GT torsions re-matched, and the torsion head retrained or DAgger-fine-tuned
+  on that L.
+- **Primary Holm family** is now A5 − A1, A8 − A1, A5 − A6b and A8 − A6b. A6 moves to secondary.
+- **Coupling** is ruled a HYPOTHESIS in §0, §1, §8 and ledger §I.
+- **Gate 1 (M2)** includes A6b. If A4 ≈ A6b, the joint framing is dropped. Risk 1 now says A6b ≈ A5 is the a priori
+  likely outcome.
+- **Compute (§6)** includes A6b: Gate ask ≈ 35–53 GPU-h; full table ≈ 300–450 GPU-h.
+- **EXP-4.** H1 vs H2 is reframed against A6b, and H1's torsion model must be trained on H1's own L.
+
+## D-006 on EXP-1 §2.2 / §5.2 / §6 compute for M1 (A11)
+Raised by: V5
+- M1 is costed three ways:
+  - "about 1 GPU-h each" (§2.2), i.e. 3 GPU-h for 3 σ_b values;
+  - "≈ 4–6 GPU-h" (§5.2);
+  - "≈ 12 GPU-h = 0.3 × 11.7 × 1.15 × 3" (§6).
+- With the measured 11.7 GPU-h per 100 epochs, the §6 figure is right for full-QM9 training. The lower figures need
+  training restricted to the rigid stratum, and the spec gives neither the size of that stratum nor whether training
+  (not only evaluation) is restricted.
+- The "+15 % head + projector overhead" is unmeasured. The per-sample P_L(x_t) and P_L(x_R') require per-bond masks;
+  the numpy path in `likelihood.py` is a per-molecule Python loop.
+- Requested: one consistent M1 figure with the stratum size, and a measured 1-epoch smoke run before the Gate-0 ask.
+Status: OPEN
+
+### Response (JOINT)
+Accepted. There is now one M1 figure everywhere (§2.2, §5.2, §6).
+- **Cost.** 30 epochs × 3 σ_b on the **full** QM9 training set = 0.3 × 11.7 × 3 = **10.5 GPU-h at TD speed**, with a
+  **budget ceiling of 16 GPU-h** (≤ +50 % unmeasured overhead). The superseded figures (1 GPU-h each, 4–6, ≈ 12 with
+  an assumed +15 %) are kept, struck.
+- **Scope.** Only *evaluation* is restricted: the rigid stratum (n_rot = 0, 289 test molecules) and the ≥ 4-ring
+  seeds.
+- **Smoke run.** A measured 1-epoch smoke run (≈ 0.12–0.18 GPU-h) precedes the Gate-0 ask, and the ask is restated
+  from it.
+- **Projector.** It must be a batched torch implementation, not `likelihood.py`'s per-molecule numpy loop (§5.1).
+
+## D-007 on EXP-4 §5 variant-D cost
+Raised by: V5
+- 100 molecules × 32 samples × 3 temperatures × 20 steps × (m + k + 1) with m + k + 1 ≈ 45–85 gives
+  ≈ 0.86–1.6 × 10⁷ NFE.
+- At the spec's own 2–3 × 10⁴ NFE/min this is ≈ 4.8–13.6 GPU-h, not 3–6. The 1000-molecule figure scales to
+  ≈ 48–136, not 30–60.
+- Requested: correct the table, or justify a higher throughput for exact-divergence batches.
+Status: OPEN
+
+### Response (JOINT)
+Accepted. V5's arithmetic is right for the table as written: 100 × 32 × 3 T × 20 × (45–85) = 0.86–1.6 × 10⁷ NFE,
+which at 2–3 × 10⁴ NFE/min is 4.8–13.6 GPU-h for 100 molecules and 48–136 GPU-h for 1000. EXP-4 §5 is corrected.
+
+One recomputation added (not an argument against the correction): variant D's q(x) is not temperature-conditioned,
+so one sample set can be reweighted at all three temperatures, because only E/kT changes. That gives
+2.9–5.4 × 10⁶ NFE ≈ 1.6–4.5 GPU-h (100 molecules) and 16–45 GPU-h (1000 molecules). This is the planned setting; the
+per-temperature figure is the ceiling. Variant H's covariance kT·H⁻¹ *is* temperature-dependent, so H keeps
+per-temperature sampling.
+
+The throughput basis is flagged as inferred, not measured for exact-divergence batches, and a 10-molecule timing run
+precedes E4-M3.
+
+## D-008 on cosmetic / wording items (E-JOINT-009, E-JOINT-069 in EXP-1 §1, EXP-3 §0 and §2 table)
+Raised by: V5
+1. **E-JOINT-009.** The "raw extraction" quote of the DiTMC Table 1 TD row is a reassembly: in the raw text the
+   numbers 92.8 … 0.195 sit next to the "DMT-B (55M)" label. The values are right. Label the quote "row reassembled
+   from the column-shifted extraction".
+2. **EXP-1 §1 PuckerFlow row.** "joint CP × torsion flow announced as future work". The source (PDF p. 10) says such
+   an extension is *feasible*. Write "proposed".
+3. **EXP-3 §0.** "12.4 %" is R0 only; R0–R2 give 12.4 / 10.3 / 10.5 % (mean 11.1 %). Use the range, as the §2 table
+   does. Also state that the E/Z analysis covers the 38 molecules perceived by RDKit 2022.09.5, out of 102 with a
+   TD-rotatable double bond.
+4. **EXP-3 §2 table.** 108/2,880 = 3.75 %; "3.7 %" is the 106-bond figure from the census line.
+Status: OPEN
+
+### Response (JOINT) — items 1 and 2 only (items 3 and 4 are R-CHEM's)
+1. **E-JOINT-009.** Accepted. The quote is now labelled "row reassembled from the column-shifted extraction; in the
+   raw text these numbers sit next to the DMT-B (55M) label".
+2. **PuckerFlow wording.** Accepted. "announced" is replaced by "proposed as a feasible extension" in EXP-1 §1
+   (table), §2.3, §7 risk 6 and §8. E-JOINT-069 has a revision note withdrawing "announced"; its original text is
+   kept.

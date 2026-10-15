@@ -45,7 +45,7 @@ def pad(f, L):  # absolute-n curve padded flat beyond the pool
     return np.concatenate([f, np.full(L - len(f), f[-1])]) if len(f) < L else f[:L]
 
 rows = []
-for Bmul in [0.5, 1.0]:
+for Bmul in [float(x) for x in (sys.argv[6].split(",") if len(sys.argv) > 6 else ["0.5", "1.0"])]:
     B = int(round(Bmul * nm.sum()))
     res = {k: [] for k in ['TD 2K rule (uses K)', 'uniform', 'static n_rot strata (cross-fit)', 'Good-Turing sequential (GT-free)',
                            'two-stage signal (cross-fit)', 'ORACLE greedy (AMR obj)', 'ORACLE greedy (COV0.1 obj)']}
@@ -90,11 +90,11 @@ for Bmul in [0.5, 1.0]:
         cov1 = [pad(cur[k]['cov'][0.1], L) for k in keys]
         allocs['ORACLE greedy (COV0.1 obj)'] = greedy(cov1, B, 1, Nn)
         for name, al in allocs.items():
-            assert al.sum() <= B + 1, (name, al.sum(), B)
-            res[name].append(realised(PP, al) + (float(np.mean(al == Nn)),))
+            assert al.sum() <= 1.03 * B + 1, (name, al.sum(), B)
+            res[name].append(realised(PP, al) + (float(np.mean(al == Nn)), al.sum() / B))
     for name, v in res.items():
         v = np.array(v); rows.append(dict(budget=f'{Bmul}x sum(2K)', allocator=name, **{'AMR-R': v[:, 0].mean(), 'COV-R@0.5': v[:, 1].mean(),
-                    'COV-R@0.1': v[:, 2].mean(), 'AMR sd(5 perms)': v[:, 0].std(), 'share at pool cap': v[:, 3].mean()}))
+                    'COV-R@0.1': v[:, 2].mean(), 'AMR sd(5 perms)': v[:, 0].std(), 'share at pool cap': v[:, 3].mean(), 'budget used/B': v[:, 4].mean()}))
 df = pd.DataFrame(rows); pd.set_option('display.width', 250)
 print(f'M={M}; pool cap N_i = 3 x 2K_i (3 sampling seeds of the released QM9 model); stage-1 n1={N1}')
 print(df.to_string(index=False, float_format=lambda v: f'{v:.4f}'))

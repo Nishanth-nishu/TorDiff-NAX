@@ -1,0 +1,10 @@
+train molecules 106586 distinct train scaffolds 13583
+stratum
+scaffold-seen     802
+acyclic           111
+scaffold-novel     87
+                  n  failures  AMR_R  COV_R_success  n_rot       K  COV_R_TDconv
+stratum                                                                         
+acyclic         111         2 0.2275         0.8763 3.7523 49.6422        0.8605
+scaffold-novel   87        15 0.1690         0.9637 0.2639  2.8611        0.7976
+scaffold-seen   802        49 0.1682         0.9633 1.1673  9.3572        0.9045

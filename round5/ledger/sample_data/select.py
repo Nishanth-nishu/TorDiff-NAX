@@ -35,6 +35,10 @@ for rep in range(3):
                 choices['torsion FPS'] = pool[fps(X[pool], n, rng)]
                 choices['lowest MMFF E'] = pool[np.argsort(np.nan_to_num(E[pool], nan=np.inf))[:n]]
                 choices['ORACLE greedy'] = pool[oracle(Pm[:, pool], n)]
+                keep = pool[np.argsort(np.nan_to_num(E[pool], nan=np.inf))[:max(n, int(np.ceil(0.75 * len(pool))))]]
+                choices['MMFF-filter 25% + torsion FPS'] = keep[fps(X[keep], n, rng)]
+                keep2 = pool[np.argsort(np.nan_to_num(E[pool], nan=np.inf))[:max(n, int(np.ceil(0.5 * len(pool))))]]
+                choices['MMFF-filter 50% + torsion FPS'] = keep2[fps(X[keep2], n, rng)]
             for nmn, s in choices.items():
                 S = Pm[:, s]
                 acc.setdefault((c, nmn), []).append((S.min(1).mean(), (S.min(1) < 0.5).mean(), (S.min(1) < 0.1).mean(), S.min(0).mean(), (S.min(0) < 0.5).mean()))
