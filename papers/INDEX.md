@@ -80,3 +80,39 @@ Blog/technical snapshots added by SCOUT EVAL (in `blogs/`): `rowan_openconf_2026
 is a `pdftotext -layout` extraction.
 
 **Counts:** 1 core paper + 39 related entries (38 PDFs stored; LoQI note only).
+
+| 2026_schaufelberger_tmcgen (PDF + fulltext only; added round 4 by SCOUT ARCH) | 2026 | arXiv 2606.00666 | technique (G1 angles, product manifold) | own TMC set | TMCgen (PuckerFlow group): simulation-free diffusion on S^2 coordination angles combined with per-ligand rotation and torsion diffusion; states the n-sphere generalisation could serve ring-system conformer ensembles (p. 6). Closest product-manifold precedent for an angle/pucker factor next to torsions; novelty risk for FlexiTors-ring. |
+| 2025_frank_ditmc (PDF + fulltext only; added round 4 by SCOUT ARCH) | 2025 | NeurIPS 2025, arXiv 2506.15378 | G1 G2 (Cartesian) | TD-P | DiTMC: diffusion-transformer flow matching with harmonic prior and graph conditioning; QM9 AMR-R 0.068–0.073 (TD row 0.178), DRUGS AMR-R 0.415–0.444 (p. 6, 8); QM9 250 epochs ≈ 2 H100-days. Current QM9 frontier together with ET-Flow. |
+| 2024_wang_td_input_perturbation (PDF + fulltext only; added round 4 by SCOUT ARCH) | 2024 | SMC 2024, arXiv 2409.14014 | G2 (technique, TD follow-up) | GD-P | Input perturbation (DDPM-IP) applied to a TD retrained on the ConfGF split: QM9 MAT 0.2379 → 0.1924 (GD-P, 200 molecules). Prior art for exposure-bias fixes on TD. |
+| 2026_darouich_curvfm (PDF + fulltext only; added round 4 by SCOUT ARCH) | 2026 | arXiv 2609.34592 | G1 (physical fidelity of L) | own split | CurvFM: flow matching with a frozen ML-Hessian residual loss at the generated endpoint; −63 % median max-force deviation on GEOM-QM9 at unchanged structural accuracy (p. 1). An auxiliary loss option for a learned L generator. |
+
+Blog/code snapshot added by SCOUT ARCH (in `blogs/`): `puckerflow_repo_readme.txt` (PuckerFlow README: torch 2.1.0+cu118,
+MIT licence, built on the TD codebase). SCOUT ARCH fulltexts are `pdftotext -layout` extractions with form feeds.
+
+Repository / data snapshots added by SCOUT BENCH (round 4, in `blogs/`; no new PDFs): `td_gdrive_listing.txt` (TD shared
+Drive listing, archive sizes, released `drugs_default` config), `td_github_issues.txt` (TD issues #4, #15),
+`etflow_github_issues.txt` (ET-Flow issues #31 QM9 non-reproduction, #26, #24 chirality, #11 Kabsch, #13),
+`etflow_eval_code.txt` (ET-Flow `covmat.py`, `eval.py`, `eval_cov_mat.py`, `prepare_data.py`, line-numbered),
+`zenodo_etflow_14226681.txt` (ET-Flow checkpoint sizes), `geom_dataverse_files.txt` (GEOM Dataverse file sizes),
+`geom_revisited_repo.txt` (GEOM-Drugs Revisited README + xTB energy-benchmark scripts), `mcf_repo_readme.txt`,
+`nextmol_repo_readme.txt`. OpenReview review threads could not be fetched (browser-verification wall); forum IDs are in
+`round4/ledger/evidence_BENCH.md` section Z.
+
+**Round 4, added by SCOUT TRAIN (2026-10-12; PDF + reading-order fulltext only, `pdftotext` without `-layout`):**
+
+| File (related/) | Year | Venue | Gaps | Protocol | One-line takeaway |
+|---|---|---|---|---|---|
+| 2022_hsu_esm_if1 | 2022 | ICML 2022 (bioRxiv 2022.04.10.487779 v2) | G2 (analogy, proteins) | — | ESM-IF1: inverse folding trained on 12M AlphaFold2-predicted structures; predicted backbones carry sub-Å artefacts that "may give away" the target, so 0.1 Å noise is added (p. 15); more predicted data helps (p. 6). Template for training on upstream-model outputs and for identity leaks. |
+| 2024_lu_dynamicbind | 2024 | Nat. Commun. 15:1071 | G2 (analogy, docking) | — | DynamicBind: training decoys morph native → AlphaFold-predicted structure instead of Gaussian noise, which "only" teaches reverting to the pre-noise state (p. 2). |
+| 2024_wang_exposure_bias_conformers | 2024 | arXiv 2409.14014 | technique (TD exposure bias) | GD-P | Measures exposure bias in TD/ConfGF and adds input perturbation (TD-IP); QM9 MAT 0.2379 → 0.1924 vs a weak retrained TD baseline (p. 4). |
+| 2024_bridging_gap_molecule_diffusion | 2024/25 | ACML 2025, arXiv 2411.05472 | technique (exposure bias) | CrossDocked | DiffGap: aligns training with inference trajectories in 3D SBDD diffusion (p. 1). |
+| 2022_chen_analog_bits_selfcond | 2022 | ICLR 2023, arXiv 2208.04202 | technique | — | Self-conditioning: condition on the model's own previous x0 estimate; trained with 50 % zeroed input (p. 3). |
+| 2024_chen_diffusion_forcing | 2024 | NeurIPS 2024, arXiv 2407.01392 | technique (joint L+τ) | — | Independent per-token noise levels in one denoiser (p. 1); template for independent L / torsion noise levels. |
+| 2023_bao_unidiffuser | 2023 | ICML 2023, arXiv 2303.06555 | technique (joint L+τ) | — | Independent timesteps per modality let one network fit marginal, conditional and joint distributions (p. 4). |
+| 2024_campbell_multiflow | 2024 | ICML 2024, arXiv 2402.04997 | technique (joint L+τ) | — | Multiflow: independent structure/sequence times; conditional inpainting by fixing one modality (p. 6). |
+| 2023_klein_equivariant_flow_matching | 2023 | NeurIPS 2023, arXiv 2306.15030 | technique (OT coupling) | — | Equivariant OT flow matching: shorter paths, better sampling efficiency (p. 1). |
+| 2021_meng_sdedit | 2021 | ICLR 2022, arXiv 2108.01073 | technique | — | SDEdit: noise an imperfect input then denoise; more noise = more realism, less faithfulness (p. 2). |
+| 2024_ning_exposure_bias_epsilon_scaling | 2023/24 | ICLR 2024, arXiv 2308.15321 | technique (exposure bias) | — | Epsilon Scaling: training-free exposure-bias fix by scaling down the network output (p. 1). |
+
+Blog snapshot added by SCOUT TRAIN (in `blogs/`): `chen_2024_diffusion_forcing_page.txt` (Diffusion Forcing project
+page, accessed 2026-10-12).

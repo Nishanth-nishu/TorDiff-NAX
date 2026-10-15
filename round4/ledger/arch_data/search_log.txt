@@ -1,0 +1,92 @@
+# SCOUT ARCH arXiv search log, run 2026-10-12 via export.arxiv.org API (arxq.py, newest first; rows >= 2024-01-01)
+=== QUERY: abs:conformer AND abs:torsion AND (abs:ring OR abs:"bond angle")
+# retry 0 HTTP Error 429: Unknown Error
+# retry 1 HTTP Error 429: Unknown Error
+# retry 2 HTTP Error 429: Unknown Error
+# retry 3 HTTP Error 429: Unknown Error
+Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\tor_diff\round4\ledger\arch_data\arxq.py", line 10, in <module>
+    for e in x.split('<entry>')[1:]:
+             ^
+NameError: name 'x' is not defined
+=== QUERY: abs:"conformer generation" AND abs:"flow matching"
+# retry 0 HTTP Error 429: Unknown Error
+# retry 1 HTTP Error 429: Unknown Error
+# retry 2 HTTP Error 429: Unknown Error
+# retry 3 HTTP Error 429: Unknown Error
+Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\tor_diff\round4\ledger\arch_data\arxq.py", line 10, in <module>
+    for e in x.split('<entry>')[1:]:
+             ^
+NameError: name 'x' is not defined
+=== QUERY: abs:"conformer generation" AND abs:diffusion AND abs:GEOM
+# retry 0 HTTP Error 429: Too Many Requests
+# retry 1 HTTP Error 429: Too Many Requests
+# retry 2 HTTP Error 429: Too Many Requests
+# retry 3 HTTP Error 429: Unknown Error
+Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\tor_diff\round4\ledger\arch_data\arxq.py", line 10, in <module>
+    for e in x.split('<entry>')[1:]:
+             ^
+NameError: name 'x' is not defined
+=== QUERY: abs:"torsional diffusion"
+# retry 0 HTTP Error 429: Too Many Requests
+# retry 1 HTTP Error 429: Unknown Error
+# retry 2 HTTP Error 429: Unknown Error
+# retry 3 The read operation timed out
+Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\tor_diff\round4\ledger\arch_data\arxq.py", line 10, in <module>
+    for e in x.split('<entry>')[1:]:
+             ^
+NameError: name 'x' is not defined
+=== QUERY: abs:"internal coordinates" AND abs:conformer AND (abs:diffusion OR abs:flow)
+# retry 0 The read operation timed out
+# retry 1 HTTP Error 429: Too Many Requests
+# retry 2 HTTP Error 429: Unknown Error
+# retry 3 HTTP Error 429: Unknown Error
+Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\tor_diff\round4\ledger\arch_data\arxq.py", line 10, in <module>
+    for e in x.split('<entry>')[1:]:
+             ^
+NameError: name 'x' is not defined
+=== QUERY: abs:conformer AND abs:"GEOM-QM9"
+# retry 0 HTTP Error 429: Too Many Requests
+# retry 1 HTTP Error 429: Too Many Requests
+# retry 2 HTTP Error 429: Unknown Error
+# retry 3 HTTP Error 429: Unknown Error
+Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\tor_diff\round4\ledger\arch_data\arxq.py", line 10, in <module>
+    for e in x.split('<entry>')[1:]:
+             ^
+NameError: name 'x' is not defined
+=== QUERY: abs:conformer AND abs:"GEOM-DRUGS"
+# retry 0 HTTP Error 429: Unknown Error
+# retry 1 HTTP Error 429: Too Many Requests
+# retry 2 HTTP Error 429: Unknown Error
+# retry 3 HTTP Error 429: Unknown Error
+Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\tor_diff\round4\ledger\arch_data\arxq.py", line 10, in <module>
+    for e in x.split('<entry>')[1:]:
+             ^
+NameError: name 'x' is not defined
+=== QUERY: abs:"Cremer-Pople"
+# retry 0 <urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>
+# retry 1 <urlopen error [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond>
+# retry 2 HTTP Error 429: Unknown Error
+# retry 3 HTTP Error 429: Unknown Error
+Traceback (most recent call last):
+  File "C:\Users\HP\Desktop\tor_diff\round4\ledger\arch_data\arxq.py", line 10, in <module>
+    for e in x.split('<entry>')[1:]:
+             ^
+NameError: name 'x' is not defined
+=== QUERY: abs:"bond angles" AND abs:diffusion AND abs:conform
+# retry 0 The read operation timed out
+2026-05-25 2605.25577v1 | Geometric Flow Matching for Molecular Conformation Generation via Manifold Decomposition
+2024-07-06 2407.05066v1 | Activity-Induced Stiffness, Entanglement Network and Dynamic Slowdown in Unentangled Semidilute Polymer Solutions
+2024-04-02 2404.02003v2 | AUTODIFF: Autoregressive Diffusion Modeling for Structure-based Drug Design
+=== QUERY: abs:macrocycle AND abs:conformer AND (abs:diffusion OR abs:flow)
+2026-07-28 2607.25156v1 | Accurate structural modeling of chemically diverse molecular interfaces with Vilya-2
+=== QUERY: abs:"local structure" AND abs:conformer AND abs:torsion
+2025-07-15 2507.11759v1 | Torsional-GFN: a conditional conformation generator for small molecules
+2024-04-02 2404.02003v2 | AUTODIFF: Autoregressive Diffusion Modeling for Structure-based Drug Design
+# done

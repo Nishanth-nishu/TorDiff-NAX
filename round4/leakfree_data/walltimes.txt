@@ -1,0 +1,11 @@
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_0.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 09:46:32 AM IST 2026  wall 1367 s
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_10.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 01:35:51 PM IST 2026  wall 1370 s
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_1.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 10:09:31 AM IST 2026  wall 1373 s
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_2.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 10:32:21 AM IST 2026  wall 1365 s
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_3.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 10:55:15 AM IST 2026  wall 1369 s
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_4.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 11:18:10 AM IST 2026  wall 1370 s
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_5.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 11:41:08 AM IST 2026  wall 1373 s
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_6.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 12:04:08 PM IST 2026  wall 1375 s
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_7.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 12:27:05 PM IST 2026  wall 1372 s
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_8.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 12:50:01 PM IST 2026  wall 1371 s
+/scratch/nishanth.r/tordiff/logs/tordiff_r4_leakfree_17518_9.log:all 4 tags have eval.pkl + SUMMARY; done: Mon Oct 12 01:12:56 PM IST 2026  wall 1370 s

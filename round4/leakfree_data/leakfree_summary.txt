@@ -1,0 +1,363 @@
+# Leak-free (split-half) true-geometry oracle test: analysis (ORACLE; tools/analyze_leakfree.py)
+
+eligible molecules (split.tsv, n_clean >= 2): 744
+success intersection over 11 runs x 4 conditions: 743
+distinct-target universe (>= 1 target with other-half nn_rmsd >= 0.1 A): 626
+models complete: ['CR', 'B1', 'S3', 'S4']
+
+targets in universe: 12628; with nn_rmsd >= 0.1 A: 7516
+
+S4 pair_ok test subset (round 2): 707 of 743 universe molecules
+## Per model (seed-averaged; AMR-R in A, COV-R as fraction)
+view     split                         own                        leak                     split_d                       own_d                      leak_d                     ref_rdkitL                     ref_gtLcycle_full                    
+metric   AMR-R COV-R@0.5 COV-R@0.1   AMR-R COV-R@0.5 COV-R@0.1   AMR-R COV-R@0.5 COV-R@0.1   AMR-R COV-R@0.5 COV-R@0.1   AMR-R COV-R@0.5 COV-R@0.1   AMR-R COV-R@0.5 COV-R@0.1      AMR-R COV-R@0.5 COV-R@0.1             AMR-R COV-R@0.5 COV-R@0.1
+model                                                                                                                                                                                                                                              
+CR      0.2195    0.8564    0.5019  0.1603    0.8891    0.6304 -0.0593    0.0327    0.1284  0.2670    0.8246    0.3416  0.1928    0.8697    0.5376 -0.0742    0.0451    0.1961     0.1873    0.9447    0.3438            0.1026    0.9543    0.7338
+B1      0.3046    0.7373    0.4002  0.0303    0.9911    0.9512 -0.2743    0.2538    0.5510  0.4166    0.6425    0.1004  0.0366    0.9894    0.9376 -0.3800    0.3469    0.8372     0.2565    0.8670    0.2297            0.0269    0.9926    0.9587
+S3      0.2797    0.7673    0.4325  0.0525    0.9785    0.8880 -0.2272    0.2112    0.4555  0.3733    0.6905    0.1724  0.0641    0.9738    0.8569 -0.3093    0.2833    0.6845     0.1913    0.9431    0.3271            0.0436    0.9874    0.9077
+S4      0.2528    0.8004    0.4782  0.0780    0.9606    0.8237 -0.1748    0.1602    0.3455  0.3321    0.7369    0.2573  0.0966    0.9511    0.7758 -0.2355    0.2142    0.5185     0.1890    0.9431    0.3356            0.0556    0.9823    0.8683
+COPY    0.3336    0.6976    0.3650     NaN       NaN       NaN     NaN       NaN       NaN  0.4656    0.5807    0.0000     NaN       NaN       NaN     NaN       NaN       NaN        NaN       NaN       NaN               NaN       NaN       NaN
+
+## Per model and direction
+view   split_AtoB                     split_BtoA                     own_BtoB                     own_AtoA                    
+metric      AMR-R COV-R@0.5 COV-R@0.1      AMR-R COV-R@0.5 COV-R@0.1    AMR-R COV-R@0.5 COV-R@0.1    AMR-R COV-R@0.5 COV-R@0.1
+model                                                                                                                         
+CR         0.2333    0.8433    0.4749     0.2057    0.8694    0.5290   0.1704    0.8744    0.6109   0.1501    0.9037    0.6499
+B1         0.2968    0.7486    0.4066     0.3124    0.7260    0.3937   0.0290    0.9915    0.9537   0.0316    0.9906    0.9487
+S3         0.2816    0.7706    0.4282     0.2777    0.7640    0.4368   0.0530    0.9779    0.8840   0.0520    0.9792    0.8920
+S4         0.2587    0.7933    0.4685     0.2469    0.8074    0.4879   0.0815    0.9579    0.8185   0.0746    0.9632    0.8289
+
+## Per-seed values
+model    view    metric   value  seed_sd                    per_seed
+   CR   split     AMR-R  0.2195   0.0011    0.2198 / 0.2184 / 0.2205
+   CR   split COV-R@0.5  0.8564   0.0004    0.8564 / 0.8567 / 0.8560
+   CR   split COV-R@0.1  0.5019   0.0049    0.5040 / 0.5055 / 0.4964
+   CR     own     AMR-R  0.1603   0.0004    0.1601 / 0.1607 / 0.1600
+   CR     own COV-R@0.5  0.8891   0.0010    0.8879 / 0.8899 / 0.8894
+   CR     own COV-R@0.1  0.6304   0.0054    0.6323 / 0.6243 / 0.6346
+   CR    leak     AMR-R -0.0593   0.0015 -0.0596 / -0.0576 / -0.0605
+   CR    leak COV-R@0.5  0.0327   0.0010    0.0315 / 0.0332 / 0.0334
+   CR    leak COV-R@0.1  0.1284   0.0097    0.1284 / 0.1188 / 0.1382
+   CR split_d     AMR-R  0.2670   0.0016    0.2674 / 0.2653 / 0.2684
+   CR split_d COV-R@0.5  0.8246   0.0024    0.8244 / 0.8270 / 0.8222
+   CR split_d COV-R@0.1  0.3416   0.0082    0.3441 / 0.3482 / 0.3324
+   CR   own_d     AMR-R  0.1928   0.0017    0.1912 / 0.1946 / 0.1926
+   CR   own_d COV-R@0.5  0.8697   0.0011    0.8684 / 0.8705 / 0.8701
+   CR   own_d COV-R@0.1  0.5376   0.0090    0.5439 / 0.5274 / 0.5417
+   CR  leak_d     AMR-R -0.0742   0.0031 -0.0762 / -0.0707 / -0.0758
+   CR  leak_d COV-R@0.5  0.0451   0.0024    0.0440 / 0.0435 / 0.0479
+   CR  leak_d COV-R@0.1  0.1961   0.0154    0.1998 / 0.1791 / 0.2093
+   B1   split     AMR-R  0.3046   0.0012    0.3038 / 0.3040 / 0.3059
+   B1   split COV-R@0.5  0.7373   0.0005    0.7370 / 0.7379 / 0.7369
+   B1   split COV-R@0.1  0.4002   0.0018    0.4022 / 0.3993 / 0.3990
+   B1     own     AMR-R  0.0303   0.0017    0.0315 / 0.0310 / 0.0284
+   B1     own COV-R@0.5  0.9911   0.0019    0.9891 / 0.9910 / 0.9930
+   B1     own COV-R@0.1  0.9512   0.0025    0.9485 / 0.9516 / 0.9534
+   B1    leak     AMR-R -0.2743   0.0029 -0.2723 / -0.2730 / -0.2776
+   B1    leak COV-R@0.5  0.2538   0.0020    0.2521 / 0.2531 / 0.2561
+   B1    leak COV-R@0.1  0.5510   0.0042    0.5463 / 0.5523 / 0.5544
+   B1 split_d     AMR-R  0.4166   0.0020    0.4146 / 0.4166 / 0.4185
+   B1 split_d COV-R@0.5  0.6425   0.0007    0.6428 / 0.6430 / 0.6417
+   B1 split_d COV-R@0.1  0.1004   0.0084    0.1096 / 0.0986 / 0.0932
+   B1   own_d     AMR-R  0.0366   0.0020    0.0380 / 0.0375 / 0.0342
+   B1   own_d COV-R@0.5  0.9894   0.0021    0.9873 / 0.9895 / 0.9915
+   B1   own_d COV-R@0.1  0.9376   0.0029    0.9343 / 0.9386 / 0.9400
+   B1  leak_d     AMR-R -0.3800   0.0039 -0.3766 / -0.3791 / -0.3843
+   B1  leak_d COV-R@0.5  0.3469   0.0027    0.3445 / 0.3465 / 0.3498
+   B1  leak_d COV-R@0.1  0.8372   0.0113    0.8248 / 0.8400 / 0.8468
+   S3   split     AMR-R  0.2797   0.0017             0.2809 / 0.2785
+   S3   split COV-R@0.5  0.7673   0.0036             0.7647 / 0.7699
+   S3   split COV-R@0.1  0.4325   0.0028             0.4306 / 0.4345
+   S3     own     AMR-R  0.0525   0.0008             0.0520 / 0.0531
+   S3     own COV-R@0.5  0.9785   0.0000             0.9786 / 0.9785
+   S3     own COV-R@0.1  0.8880   0.0019             0.8866 / 0.8893
+   S3    leak     AMR-R -0.2272   0.0025           -0.2290 / -0.2254
+   S3    leak COV-R@0.5  0.2112   0.0037             0.2139 / 0.2086
+   S3    leak COV-R@0.1  0.4555   0.0008             0.4561 / 0.4549
+   S3 split_d     AMR-R  0.3733   0.0001             0.3733 / 0.3734
+   S3 split_d COV-R@0.5  0.6905   0.0028             0.6885 / 0.6925
+   S3 split_d COV-R@0.1  0.1724   0.0040             0.1753 / 0.1696
+   S3   own_d     AMR-R  0.0641   0.0013             0.0631 / 0.0650
+   S3   own_d COV-R@0.5  0.9738   0.0002             0.9739 / 0.9737
+   S3   own_d COV-R@0.1  0.8569   0.0017             0.8557 / 0.8581
+   S3  leak_d     AMR-R -0.3093   0.0012           -0.3101 / -0.3084
+   S3  leak_d COV-R@0.5  0.2833   0.0030             0.2854 / 0.2812
+   S3  leak_d COV-R@0.1  0.6845   0.0057             0.6804 / 0.6885
+   S4   split     AMR-R  0.2528   0.0050    0.2585 / 0.2496 / 0.2503
+   S4   split COV-R@0.5  0.8004   0.0052    0.7945 / 0.8045 / 0.8021
+   S4   split COV-R@0.1  0.4782   0.0112    0.4654 / 0.4857 / 0.4836
+   S4     own     AMR-R  0.0780   0.0019    0.0793 / 0.0790 / 0.0758
+   S4     own COV-R@0.5  0.9606   0.0019    0.9609 / 0.9585 / 0.9623
+   S4     own COV-R@0.1  0.8237   0.0058    0.8172 / 0.8257 / 0.8283
+   S4    leak     AMR-R -0.1748   0.0044 -0.1793 / -0.1706 / -0.1745
+   S4    leak COV-R@0.5  0.1602   0.0062    0.1664 / 0.1540 / 0.1602
+   S4    leak COV-R@0.1  0.3455   0.0059    0.3517 / 0.3400 / 0.3446
+   S4 split_d     AMR-R  0.3321   0.0070    0.3399 / 0.3264 / 0.3301
+   S4 split_d COV-R@0.5  0.7369   0.0072    0.7289 / 0.7428 / 0.7390
+   S4 split_d COV-R@0.1  0.2573   0.0144    0.2412 / 0.2689 / 0.2617
+   S4   own_d     AMR-R  0.0966   0.0016    0.0975 / 0.0976 / 0.0947
+   S4   own_d COV-R@0.5  0.9511   0.0017    0.9519 / 0.9491 / 0.9523
+   S4   own_d COV-R@0.1  0.7758   0.0058    0.7696 / 0.7767 / 0.7810
+   S4  leak_d     AMR-R -0.2355   0.0068 -0.2425 / -0.2288 / -0.2353
+   S4  leak_d COV-R@0.5  0.2142   0.0084    0.2230 / 0.2063 / 0.2133
+   S4  leak_d COV-R@0.1  0.5185   0.0103    0.5284 / 0.5078 / 0.5193
+ COPY   split     AMR-R  0.3336      NaN                  model-free
+ COPY   split COV-R@0.5  0.6976      NaN                  model-free
+ COPY   split COV-R@0.1  0.3650      NaN                  model-free
+ COPY split_d     AMR-R  0.4656      NaN                  model-free
+ COPY split_d COV-R@0.5  0.5807      NaN                  model-free
+ COPY split_d COV-R@0.1  0.0000      NaN                  model-free
+
+## Contrasts (AMR-R in A, COV in %; diff = arm - ref; p_holm over the PRIMARY family only)
+                       id      family    metric   n arm  ref              view  arm_value  ref_value     diff    ci_lo    ci_hi  p_boot  hier_lo  hier_hi                                                      note  p_holm
+           P1.S3-CR.split     primary     AMR-R 743  S3   CR             split     0.2797     0.2195   0.0602   0.0499   0.0708  0.0000   0.0492   0.0712                                                               0.0
+           P1.S3-CR.split     primary COV-R@0.5 743  S3   CR             split    76.7305    85.6375  -8.9070 -10.5722  -7.3173  0.0000 -10.6824  -7.2202                                                               0.0
+           P1.S3-CR.split     primary COV-R@0.1 743  S3   CR             split    43.2511    50.1934  -6.9423  -8.7105  -5.1477  0.0000  -8.8623  -5.1082                                                               NaN
+           P2.B1-CR.split     primary     AMR-R 743  B1   CR             split     0.3046     0.2195   0.0850   0.0726   0.0980  0.0000   0.0722   0.0982                                                               0.0
+           P2.B1-CR.split     primary COV-R@0.5 743  B1   CR             split    73.7282    85.6375 -11.9093 -13.7618 -10.1166  0.0000 -13.8034 -10.0164                                                               0.0
+           P2.B1-CR.split     primary COV-R@0.1 743  B1   CR             split    40.0160    50.1934 -10.1774 -12.2062  -8.1502  0.0000 -12.2522  -8.1067                                                               NaN
+            S.S4-CR.split   secondary     AMR-R 743  S4   CR             split     0.2528     0.2195   0.0333   0.0235   0.0431  0.0000   0.0223   0.0446         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+            S.S4-CR.split   secondary COV-R@0.5 743  S4   CR             split    80.0363    85.6375  -5.6012  -7.0693  -4.1633  0.0000  -7.1934  -4.0709         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+            S.S4-CR.split   secondary COV-R@0.1 743  S4   CR             split    47.8233    50.1934  -2.3701  -3.9027  -0.8961  0.0016  -4.3495  -0.4781         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+   S.S4-CR.split@S4subset   secondary     AMR-R 707  S4   CR             split     0.2527     0.2181   0.0346   0.0245   0.0450  0.0000   0.0235   0.0463         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+   S.S4-CR.split@S4subset   secondary COV-R@0.5 707  S4   CR             split    79.9580    85.8098  -5.8518  -7.3916  -4.2990  0.0000  -7.5312  -4.2454         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+   S.S4-CR.split@S4subset   secondary COV-R@0.1 707  S4   CR             split    47.6610    50.0772  -2.4162  -4.0373  -0.8740  0.0032  -4.4298  -0.4830         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+              S.S3-CR.own   secondary     AMR-R 743  S3   CR               own     0.0525     0.1603  -0.1078  -0.1173  -0.0985  0.0000  -0.1176  -0.0983                                                               NaN
+              S.S3-CR.own   secondary COV-R@0.5 743  S3   CR               own    97.8549    88.9066   8.9482   7.6956  10.2638  0.0000   7.6954  10.2743                                                               NaN
+              S.S3-CR.own   secondary COV-R@0.1 743  S3   CR               own    88.7995    63.0383  25.7612  24.0109  27.6449  0.0000  23.8220  27.7313                                                               NaN
+              S.B1-CR.own   secondary     AMR-R 743  B1   CR               own     0.0303     0.1603  -0.1300  -0.1406  -0.1199  0.0000  -0.1410  -0.1192                                                               NaN
+              S.B1-CR.own   secondary COV-R@0.5 743  B1   CR               own    99.1051    88.9066  10.1985   8.9144  11.5616  0.0000   8.8731  11.5914                                                               NaN
+              S.B1-CR.own   secondary COV-R@0.1 743  B1   CR               own    95.1176    63.0383  32.0793  29.9705  34.2829  0.0000  29.9532  34.3044                                                               NaN
+              S.S4-CR.own   secondary     AMR-R 743  S4   CR               own     0.0780     0.1603  -0.0822  -0.0917  -0.0732  0.0000  -0.0920  -0.0726         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+              S.S4-CR.own   secondary COV-R@0.5 743  S4   CR               own    96.0550    88.9066   7.1484   6.0105   8.3447  0.0000   5.9948   8.3977         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+              S.S4-CR.own   secondary COV-R@0.1 743  S4   CR               own    82.3712    63.0383  19.3329  17.6814  21.0616  0.0000  17.4480  21.2953         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+     S.S4-CR.own@S4subset   secondary     AMR-R 707  S4   CR               own     0.0801     0.1643  -0.0842  -0.0937  -0.0746  0.0000  -0.0943  -0.0742         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+     S.S4-CR.own@S4subset   secondary COV-R@0.5 707  S4   CR               own    95.9846    88.6545   7.3301   6.1186   8.5518  0.0000   6.0524   8.6166         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+     S.S4-CR.own@S4subset   secondary COV-R@0.1 707  S4   CR               own    81.8838    62.1758  19.7080  17.9266  21.5021  0.0000  17.7624  21.6332         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+          S.leakS3-leakCR   secondary     AMR-R 743  S3   CR              leak    -0.2272    -0.0593  -0.1679  -0.1847  -0.1526  0.0000  -0.1846  -0.1522                                                               NaN
+          S.leakS3-leakCR   secondary COV-R@0.5 743  S3   CR              leak    21.1243     3.2691  17.8552  15.4977  20.2762  0.0000  15.4730  20.2432                                                               NaN
+          S.leakS3-leakCR   secondary COV-R@0.1 743  S3   CR              leak    45.5484    12.8449  32.7035  30.1132  35.2892  0.0000  29.9355  35.5369                                                               NaN
+          S.leakB1-leakCR   secondary     AMR-R 743  B1   CR              leak    -0.2743    -0.0593  -0.2150  -0.2349  -0.1958  0.0000  -0.2351  -0.1961                                                               NaN
+          S.leakB1-leakCR   secondary COV-R@0.5 743  B1   CR              leak    25.3770     3.2691  22.1078  19.5993  24.8022  0.0000  19.4637  24.8298                                                               NaN
+          S.leakB1-leakCR   secondary COV-R@0.1 743  B1   CR              leak    55.1016    12.8449  42.2567  39.3619  45.2495  0.0000  39.1625  45.5252                                                               NaN
+            E.S3-B1.split exploratory     AMR-R 743  S3   B1             split     0.2797     0.3046  -0.0249  -0.0301  -0.0197  0.0000  -0.0315  -0.0190                                                               NaN
+            E.S3-B1.split exploratory COV-R@0.5 743  S3   B1             split    76.7305    73.7282   3.0024   2.2528   3.7749  0.0000   2.1210   3.9770                                                               NaN
+            E.S3-B1.split exploratory COV-R@0.1 743  S3   B1             split    43.2511    40.0160   3.2351   2.4337   4.0368  0.0000   2.3265   4.2351                                                               NaN
+          S.S3-CR.split_d   secondary     AMR-R 626  S3   CR           split_d     0.3733     0.2670   0.1063   0.0933   0.1188  0.0000   0.0924   0.1207                                                               NaN
+          S.S3-CR.split_d   secondary COV-R@0.5 626  S3   CR           split_d    69.0493    82.4561 -13.4068 -15.4775 -11.3136  0.0000 -15.5896 -11.3475                                                               NaN
+          S.S3-CR.split_d   secondary COV-R@0.1 626  S3   CR           split_d    17.2436    34.1573 -16.9137 -19.0681 -14.7832  0.0000 -19.3029 -14.6194                                                               NaN
+          S.B1-CR.split_d   secondary     AMR-R 626  B1   CR           split_d     0.4166     0.2670   0.1495   0.1344   0.1645  0.0000   0.1346   0.1653                                                               NaN
+          S.B1-CR.split_d   secondary COV-R@0.5 626  B1   CR           split_d    64.2505    82.4561 -18.2055 -20.5379 -15.9336  0.0000 -20.6203 -15.8919                                                               NaN
+          S.B1-CR.split_d   secondary COV-R@0.1 626  B1   CR           split_d    10.0445    34.1573 -24.1128 -26.3496 -21.7955  0.0000 -26.7238 -21.4985                                                               NaN
+          S.S4-CR.split_d   secondary     AMR-R 626  S4   CR           split_d     0.3321     0.2670   0.0651   0.0527   0.0781  0.0000   0.0502   0.0798         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+          S.S4-CR.split_d   secondary COV-R@0.5 626  S4   CR           split_d    73.6897    82.4561  -8.7664 -10.6322  -6.9531  0.0000 -10.9348  -6.8252         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+          S.S4-CR.split_d   secondary COV-R@0.1 626  S4   CR           split_d    25.7260    34.1573  -8.4313 -10.5267  -6.4104  0.0000 -11.0107  -5.8622         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+ S.S4-CR.split_d@S4subset   secondary     AMR-R 603  S4   CR           split_d     0.3299     0.2630   0.0670   0.0540   0.0805  0.0000   0.0518   0.0824         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+ S.S4-CR.split_d@S4subset   secondary COV-R@0.5 603  S4   CR           split_d    73.7770    82.8464  -9.0694 -11.0507  -7.1509  0.0000 -11.2776  -7.0111         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+ S.S4-CR.split_d@S4subset   secondary COV-R@0.1 603  S4   CR           split_d    26.1057    34.6586  -8.5530 -10.6489  -6.4389  0.0000 -11.2977  -5.8273         S4 LIMITATION (trains on pair_ok-safe pairs only)     NaN
+                S.leak.CR   secondary     AMR-R 743  CR    -         own-split     0.1603     0.2195  -0.0593  -0.0731  -0.0455  0.0000  -0.0732  -0.0456                                                               NaN
+                S.leak.CR   secondary COV-R@0.5 743  CR    -         own-split    88.9066    85.6375   3.2691   1.5278   5.0236  0.0000   1.5082   5.0532                                                               NaN
+                S.leak.CR   secondary COV-R@0.1 743  CR    -         own-split    63.0383    50.1934  12.8449  10.5250  15.2454  0.0000  10.2191  15.6344                                                               NaN
+              S.leak_d.CR   secondary     AMR-R 626  CR    -     own_d-split_d     0.1928     0.2670  -0.0742  -0.0913  -0.0575  0.0000  -0.0919  -0.0570                                                               NaN
+              S.leak_d.CR   secondary COV-R@0.5 626  CR    -     own_d-split_d    86.9668    82.4561   4.5107   2.3080   6.7149  0.0000   2.3054   6.7926                                                               NaN
+              S.leak_d.CR   secondary COV-R@0.1 626  CR    -     own_d-split_d    53.7649    34.1573  19.6075  16.3491  22.9286  0.0000  16.0222  23.3103                                                               NaN
+                S.leak.B1   secondary     AMR-R 743  B1    -         own-split     0.0303     0.3046  -0.2743  -0.2917  -0.2577  0.0000  -0.2913  -0.2573                                                               NaN
+                S.leak.B1   secondary COV-R@0.5 743  B1    -         own-split    99.1051    73.7282  25.3770  22.9647  27.9782  0.0000  22.9411  27.8769                                                               NaN
+                S.leak.B1   secondary COV-R@0.1 743  B1    -         own-split    95.1176    40.0160  55.1016  52.4185  57.7774  0.0000  52.4483  57.8218                                                               NaN
+              S.leak_d.B1   secondary     AMR-R 626  B1    -     own_d-split_d     0.0366     0.4166  -0.3800  -0.3979  -0.3626  0.0000  -0.3999  -0.3619                                                               NaN
+              S.leak_d.B1   secondary COV-R@0.5 626  B1    -     own_d-split_d    98.9426    64.2505  34.6921  31.6882  37.7086  0.0000  31.6298  37.7331                                                               NaN
+              S.leak_d.B1   secondary COV-R@0.1 626  B1    -     own_d-split_d    93.7648    10.0445  83.7202  81.8300  85.4932  0.0000  81.4798  85.7964                                                               NaN
+                S.leak.S3   secondary     AMR-R 743  S3    -         own-split     0.0525     0.2797  -0.2272  -0.2434  -0.2117  0.0000  -0.2438  -0.2112                                                               NaN
+                S.leak.S3   secondary COV-R@0.5 743  S3    -         own-split    97.8549    76.7305  21.1243  18.8419  23.4812  0.0000  18.8533  23.5003                                                               NaN
+                S.leak.S3   secondary COV-R@0.1 743  S3    -         own-split    88.7995    43.2511  45.5484  42.8547  48.1087  0.0000  42.8847  48.1773                                                               NaN
+              S.leak_d.S3   secondary     AMR-R 626  S3    -     own_d-split_d     0.0641     0.3733  -0.3093  -0.3276  -0.2922  0.0000  -0.3275  -0.2918                                                               NaN
+              S.leak_d.S3   secondary COV-R@0.5 626  S3    -     own_d-split_d    97.3803    69.0493  28.3310  25.4914  31.3002  0.0000  25.4533  31.2090                                                               NaN
+              S.leak_d.S3   secondary COV-R@0.1 626  S3    -     own_d-split_d    85.6887    17.2436  68.4451  65.9971  70.8613  0.0000  65.8526  71.0011                                                               NaN
+                S.leak.S4   secondary     AMR-R 743  S4    -         own-split     0.0780     0.2528  -0.1748  -0.1904  -0.1599  0.0000  -0.1911  -0.1589                                                               NaN
+                S.leak.S4   secondary COV-R@0.5 743  S4    -         own-split    96.0550    80.0363  16.0187  13.9696  18.1465  0.0000  13.8737  18.2805                                                               NaN
+                S.leak.S4   secondary COV-R@0.1 743  S4    -         own-split    82.3712    47.8233  34.5479  32.0150  37.0847  0.0000  32.0033  37.2189                                                               NaN
+              S.leak_d.S4   secondary     AMR-R 626  S4    -     own_d-split_d     0.0966     0.3321  -0.2355  -0.2546  -0.2165  0.0000  -0.2557  -0.2154                                                               NaN
+              S.leak_d.S4   secondary COV-R@0.5 626  S4    -     own_d-split_d    95.1097    73.6897  21.4200  18.9512  24.0538  0.0000  18.7093  24.0915                                                               NaN
+              S.leak_d.S4   secondary COV-R@0.1 626  S4    -     own_d-split_d    77.5780    25.7260  51.8520  48.9466  54.8493  0.0000  48.6579  55.0015                                                               NaN
+          E.CR-COPY.split exploratory     AMR-R 743  CR COPY             split     0.2195     0.3336  -0.1140  -0.1277  -0.1008  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.B1-COPY.split exploratory     AMR-R 743  B1 COPY             split     0.3046     0.3336  -0.0290  -0.0342  -0.0244  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.S3-COPY.split exploratory     AMR-R 743  S3 COPY             split     0.2797     0.3336  -0.0539  -0.0618  -0.0465  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.S4-COPY.split exploratory     AMR-R 743  S4 COPY             split     0.2528     0.3336  -0.0808  -0.0919  -0.0703  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.CR-COPY.split exploratory COV-R@0.5 743  CR COPY             split    85.6375    69.7588  15.8787  13.8889  17.8861  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.B1-COPY.split exploratory COV-R@0.5 743  B1 COPY             split    73.7282    69.7588   3.9694   3.2926   4.6791  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.S3-COPY.split exploratory COV-R@0.5 743  S3 COPY             split    76.7305    69.7588   6.9717   5.9261   8.0620  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.S4-COPY.split exploratory COV-R@0.5 743  S4 COPY             split    80.0363    69.7588  10.2775   8.9056  11.7129  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.CR-COPY.split exploratory COV-R@0.1 743  CR COPY             split    50.1934    36.4987  13.6947  11.6178  15.7759  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.B1-COPY.split exploratory COV-R@0.1 743  B1 COPY             split    40.0160    36.4987   3.5173   2.8867   4.1712  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.S3-COPY.split exploratory COV-R@0.1 743  S3 COPY             split    43.2511    36.4987   6.7524   5.6779   7.8435  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+          E.S4-COPY.split exploratory COV-R@0.1 743  S4 COPY             split    47.8233    36.4987  11.3246   9.8603  12.8887  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.CR-COPY.split_d exploratory     AMR-R 626  CR COPY           split_d     0.2670     0.4656  -0.1986  -0.2148  -0.1828  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.B1-COPY.split_d exploratory     AMR-R 626  B1 COPY           split_d     0.4166     0.4656  -0.0491  -0.0560  -0.0426  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.S3-COPY.split_d exploratory     AMR-R 626  S3 COPY           split_d     0.3733     0.4656  -0.0923  -0.1025  -0.0825  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.S4-COPY.split_d exploratory     AMR-R 626  S4 COPY           split_d     0.3321     0.4656  -0.1335  -0.1470  -0.1212  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.CR-COPY.split_d exploratory COV-R@0.5 626  CR COPY           split_d    82.4561    58.0715  24.3846  21.8956  26.8769  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.B1-COPY.split_d exploratory COV-R@0.5 626  B1 COPY           split_d    64.2505    58.0715   6.1791   5.1595   7.2719  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.S3-COPY.split_d exploratory COV-R@0.5 626  S3 COPY           split_d    69.0493    58.0715  10.9778   9.4805  12.5061  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.S4-COPY.split_d exploratory COV-R@0.5 626  S4 COPY           split_d    73.6897    58.0715  15.6182  13.8971  17.4202  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.CR-COPY.split_d exploratory COV-R@0.1 626  CR COPY           split_d    34.1573     0.0000  34.1573  31.7431  36.4525  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.B1-COPY.split_d exploratory COV-R@0.1 626  B1 COPY           split_d    10.0445     0.0000  10.0445   8.7813  11.3680  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.S3-COPY.split_d exploratory COV-R@0.1 626  S3 COPY           split_d    17.2436     0.0000  17.2436  15.5225  18.9868  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+        E.S4-COPY.split_d exploratory COV-R@0.1 626  S4 COPY           split_d    25.7260     0.0000  25.7260  23.6549  27.8032  0.0000      NaN      NaN COPY = other-half GT conformers as predictions (no model)     NaN
+       R.S3-CR.ref_rdkitL   reference     AMR-R 711  S3   CR        ref_rdkitL     0.1913     0.1873   0.0040   0.0018   0.0062  0.0012      NaN      NaN          round-2 steps20_seed0 re-scored on this universe     NaN
+       R.S3-CR.ref_rdkitL   reference COV-R@0.5 711  S3   CR        ref_rdkitL    94.3122    94.4720  -0.1599  -0.6752   0.3087  0.5240      NaN      NaN          round-2 steps20_seed0 re-scored on this universe     NaN
+       R.S3-CR.ref_rdkitL   reference COV-R@0.1 711  S3   CR        ref_rdkitL    32.7051    34.3845  -1.6794  -2.2532  -1.1172  0.0000      NaN      NaN          round-2 steps20_seed0 re-scored on this universe     NaN
+       R.B1-CR.ref_rdkitL   reference     AMR-R 711  B1   CR        ref_rdkitL     0.2565     0.1873   0.0693   0.0616   0.0771  0.0000      NaN      NaN          round-2 steps20_seed0 re-scored on this universe     NaN
+       R.B1-CR.ref_rdkitL   reference COV-R@0.5 711  B1   CR        ref_rdkitL    86.6950    94.4720  -7.7770  -9.1318  -6.4020  0.0000      NaN      NaN          round-2 steps20_seed0 re-scored on this universe     NaN
+       R.B1-CR.ref_rdkitL   reference COV-R@0.1 711  B1   CR        ref_rdkitL    22.9672    34.3845 -11.4172 -12.6931 -10.1705  0.0000      NaN      NaN          round-2 steps20_seed0 re-scored on this universe     NaN
+R.S3-CR.ref_gtLcycle_full   reference     AMR-R 743  S3   CR ref_gtLcycle_full     0.0436     0.1026  -0.0591  -0.0649  -0.0533  0.0000      NaN      NaN round-2 steps20_seed0_gtLcycle re-scored on this universe     NaN
+R.S3-CR.ref_gtLcycle_full   reference COV-R@0.5 743  S3   CR ref_gtLcycle_full    98.7407    95.4332   3.3075   2.5912   4.0328  0.0000      NaN      NaN round-2 steps20_seed0_gtLcycle re-scored on this universe     NaN
+R.S3-CR.ref_gtLcycle_full   reference COV-R@0.1 743  S3   CR ref_gtLcycle_full    90.7707    73.3793  17.3914  15.9000  18.9464  0.0000      NaN      NaN round-2 steps20_seed0_gtLcycle re-scored on this universe     NaN
+R.B1-CR.ref_gtLcycle_full   reference     AMR-R 743  B1   CR ref_gtLcycle_full     0.0269     0.1026  -0.0758  -0.0824  -0.0694  0.0000      NaN      NaN round-2 steps20_seed0_gtLcycle re-scored on this universe     NaN
+R.B1-CR.ref_gtLcycle_full   reference COV-R@0.5 743  B1   CR ref_gtLcycle_full    99.2592    95.4332   3.8259   3.0572   4.6150  0.0000      NaN      NaN round-2 steps20_seed0_gtLcycle re-scored on this universe     NaN
+R.B1-CR.ref_gtLcycle_full   reference COV-R@0.1 743  B1   CR ref_gtLcycle_full    95.8658    73.3793  22.4865  20.7166  24.2779  0.0000      NaN      NaN round-2 steps20_seed0_gtLcycle re-scored on this universe     NaN
+
+## n_clean strata (exploratory)
+model n_bin   n    view   AMR-R  COV-R@0.5  COV-R@0.1
+   CR   2-3 243   split  0.2298     0.8141     0.5840
+   CR   2-3 243     own  0.1244     0.8844     0.7750
+   CR   2-3 243    leak -0.1055     0.0703     0.1910
+   CR   2-3 162 split_d  0.3375     0.7037     0.3483
+   CR   2-3 162   own_d  0.1849     0.8256     0.6626
+   CR   2-3 162  leak_d -0.1526     0.1219     0.3143
+   CR  4-10 281   split  0.2193     0.8600     0.4971
+   CR  4-10 281     own  0.1666     0.8816     0.6300
+   CR  4-10 281    leak -0.0527     0.0216     0.1328
+   CR  4-10 246 split_d  0.2584     0.8405     0.3399
+   CR  4-10 246   own_d  0.1898     0.8685     0.5615
+   CR  4-10 246  leak_d -0.0686     0.0279     0.2216
+   CR 11-30 135   split  0.2103     0.8867     0.4368
+   CR 11-30 135     own  0.1917     0.8882     0.5040
+   CR 11-30 135    leak -0.0186     0.0015     0.0672
+   CR 11-30 134 split_d  0.2270     0.8862     0.3489
+   CR 11-30 134   own_d  0.2015     0.8910     0.4435
+   CR 11-30 134  leak_d -0.0255     0.0048     0.0946
+   CR   >30  84   split  0.2054     0.9177     0.3853
+   CR   >30  84     own  0.1926     0.9288     0.4165
+   CR   >30  84    leak -0.0128     0.0112     0.0312
+   CR   >30  84 split_d  0.2204     0.9125     0.3219
+   CR   >30  84   own_d  0.2031     0.9242     0.3771
+   CR   >30  84  leak_d -0.0173     0.0116     0.0552
+   B1   2-3 243   split  0.3579     0.6512     0.4029
+   B1   2-3 243     own  0.0172     0.9928     0.9777
+   B1   2-3 243    leak -0.3407     0.3416     0.5748
+   B1   2-3 162 split_d  0.5551     0.4306     0.0489
+   B1   2-3 162   own_d  0.0247     0.9897     0.9671
+   B1   2-3 162  leak_d -0.5303     0.5592     0.9182
+   B1  4-10 281   split  0.3119     0.7294     0.3758
+   B1  4-10 281     own  0.0260     0.9942     0.9578
+   B1  4-10 281    leak -0.2859     0.2647     0.5820
+   B1  4-10 246 split_d  0.4189     0.6445     0.0860
+   B1  4-10 246   own_d  0.0295     0.9936     0.9513
+   B1  4-10 246  leak_d -0.3894     0.3491     0.8652
+   B1 11-30 135   split  0.2496     0.8237     0.4064
+   B1 11-30 135     own  0.0455     0.9841     0.9233
+   B1 11-30 135    leak -0.2041     0.1604     0.5169
+   B1 11-30 134 split_d  0.3199     0.7818     0.1424
+   B1 11-30 134   own_d  0.0476     0.9834     0.9132
+   B1 11-30 134  leak_d -0.2724     0.2016     0.7707
+   B1   >30  84   split  0.2141     0.8735     0.4637
+   B1   >30  84     own  0.0579     0.9868     0.8971
+   B1   >30  84    leak -0.1562     0.1132     0.4334
+   B1   >30  84 split_d  0.2967     0.8232     0.1753
+   B1   >30  84   own_d  0.0624     0.9861     0.8801
+   B1   >30  84  leak_d -0.2343     0.1630     0.7049
+   S3   2-3 243   split  0.3223     0.6914     0.4506
+   S3   2-3 243     own  0.0330     0.9815     0.9434
+   S3   2-3 243    leak -0.2893     0.2901     0.4928
+   S3   2-3 162 split_d  0.4906     0.5039     0.1312
+   S3   2-3 162   own_d  0.0480     0.9730     0.9159
+   S3   2-3 162  leak_d -0.4426     0.4691     0.7847
+   S3  4-10 281   split  0.2909     0.7500     0.4074
+   S3  4-10 281     own  0.0486     0.9801     0.8984
+   S3  4-10 281    leak -0.2423     0.2301     0.4909
+   S3  4-10 246 split_d  0.3831     0.6774     0.1506
+   S3  4-10 246   own_d  0.0570     0.9746     0.8803
+   S3  4-10 246  leak_d -0.3261     0.2972     0.7297
+   S3 11-30 135   split  0.2292     0.8586     0.4304
+   S3 11-30 135     own  0.0718     0.9738     0.8377
+   S3 11-30 135    leak -0.1574     0.1152     0.4073
+   S3 11-30 134 split_d  0.2858     0.8304     0.2098
+   S3 11-30 134   own_d  0.0759     0.9740     0.8139
+   S3 11-30 134  leak_d -0.2099     0.1436     0.6041
+   S3   >30  84   split  0.2000     0.8982     0.4675
+   S3   >30  84     own  0.0909     0.9724     0.7739
+   S3   >30  84    leak -0.1091     0.0743     0.3064
+   S3   >30  84 split_d  0.2581     0.8654     0.2565
+   S3   >30  84   own_d  0.0967     0.9726     0.7432
+   S3   >30  84  leak_d -0.1614     0.1072     0.4866
+   S4   2-3 243   split  0.2862     0.7301     0.5130
+   S4   2-3 243     own  0.0521     0.9602     0.9126
+   S4   2-3 243    leak -0.2341     0.2301     0.3995
+   S4   2-3 162 split_d  0.4358     0.5581     0.2217
+   S4   2-3 162   own_d  0.0814     0.9372     0.8657
+   S4   2-3 162  leak_d -0.3544     0.3791     0.6440
+   S4  4-10 281   split  0.2604     0.7947     0.4500
+   S4  4-10 281     own  0.0749     0.9656     0.8288
+   S4  4-10 281    leak -0.1856     0.1710     0.3788
+   S4  4-10 246 split_d  0.3405     0.7379     0.2259
+   S4  4-10 246   own_d  0.0869     0.9578     0.7988
+   S4  4-10 246  leak_d -0.2537     0.2199     0.5729
+   S4 11-30 135   split  0.2161     0.8706     0.4679
+   S4 11-30 135     own  0.1033     0.9536     0.7496
+   S4 11-30 135    leak -0.1128     0.0830     0.2817
+   S4 11-30 134 split_d  0.2569     0.8558     0.3038
+   S4 11-30 134   own_d  0.1112     0.9555     0.7111
+   S4 11-30 134  leak_d -0.1456     0.0997     0.4073
+   S4   >30  84   split  0.1895     0.9098     0.4886
+   S4   >30  84     own  0.1230     0.9557     0.6687
+   S4   >30  84    leak -0.0665     0.0459     0.1802
+   S4   >30  84 split_d  0.2277     0.8891     0.3435
+   S4   >30  84   own_d  0.1312     0.9511     0.6380
+   S4   >30  84  leak_d -0.0966     0.0620     0.2945
+
+## Files
+model  seed       cond  num_failures  n_results  n_nan
+   CR     0 split_AtoB             1        743      0
+   CR     0 split_BtoA             1        743      0
+   CR     0   own_BtoB             1        743      0
+   CR     0   own_AtoA             1        743      0
+   CR     1 split_AtoB             1        743      0
+   CR     1 split_BtoA             1        743      0
+   CR     1   own_BtoB             1        743      0
+   CR     1   own_AtoA             1        743      0
+   CR     2 split_AtoB             1        743      0
+   CR     2 split_BtoA             1        743      0
+   CR     2   own_BtoB             1        743      0
+   CR     2   own_AtoA             1        743      0
+   B1     0 split_AtoB             1        743      0
+   B1     0 split_BtoA             1        743      0
+   B1     0   own_BtoB             1        743      0
+   B1     0   own_AtoA             1        743      0
+   B1     1 split_AtoB             1        743      0
+   B1     1 split_BtoA             1        743      0
+   B1     1   own_BtoB             1        743      0
+   B1     1   own_AtoA             1        743      0
+   B1     2 split_AtoB             1        743      0
+   B1     2 split_BtoA             1        743      0
+   B1     2   own_BtoB             1        743      0
+   B1     2   own_AtoA             1        743      0
+   S3     0 split_AtoB             1        743      0
+   S3     0 split_BtoA             1        743      0
+   S3     0   own_BtoB             1        743      0
+   S3     0   own_AtoA             1        743      0
+   S3     1 split_AtoB             1        743      0
+   S3     1 split_BtoA             1        743      0
+   S3     1   own_BtoB             1        743      0
+   S3     1   own_AtoA             1        743      0
+   S4     0 split_AtoB             1        743      0
+   S4     0 split_BtoA             1        743      0
+   S4     0   own_BtoB             1        743      0
+   S4     0   own_AtoA             1        743      0
+   S4     1 split_AtoB             1        743      0
+   S4     1 split_BtoA             1        743      0
+   S4     1   own_BtoB             1        743      0
+   S4     1   own_AtoA             1        743      0
+   S4     2 split_AtoB             1        743      0
+   S4     2 split_BtoA             1        743      0
+   S4     2   own_BtoB             1        743      0
+   S4     2   own_AtoA             1        743      0
