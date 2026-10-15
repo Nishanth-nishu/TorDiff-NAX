@@ -494,6 +494,37 @@ split-half test (round 4) is running to settle what remains of S3's oracle gain.
 
 ---
 
+# Part 2b. Round 4: the leak-free oracle test (done 15 Oct)
+
+- **Why:** the round-3 impact analyst suspected that giving a sample its *own* target conformer's true geometry tells
+  the model which conformer to become ("conformer-identity leakage"), so the oracle gains of B1 (0.037), S3 (0.033) and
+  even A1 (−54 %) might not mean that better geometry helps.
+- **Where from:** suggested by the round-3 validity judge (split-half design); no published paper defines a leak-free
+  oracle (round-4 BENCH scout); the closest precedent is TorDiff App. F.1, PDF p. 21 (another conformer's local
+  structure leaves 0.284 Å on GEOM-DRUGS).
+- **What we built:** `tools/make_split_half.py`, `tools/check_split_seeds.py`, `tools/analyze_leakfree.py` (pre-declared
+  before any result), tests in `tools/tests/test_leakfree*.py`; evaluator unchanged. For each molecule with ≥ 2 true
+  conformers (744 molecules), true conformers are split into alternating halves; one half supplies the geometry, the
+  other half is scored, both directions averaged.
+- **Outcome (AMR-R, Å, 743 molecules, ORACLE; `cluster_sync/round4/analysis_r4_leakfree/leakfree_summary.txt`):**
+
+| Model | Own-conformer true geometry (leaky) | Other-half true geometry (leak-free) | RDKit geometry |
+|---|---|---|---|
+| Standard TorDiff (CTRL_rematch) | 0.160 | **0.220** | 0.187 |
+| B1 (trained on true geometry) | 0.030 | 0.305 | 0.257 |
+| S3 (50/50 mix) | 0.053 | 0.280 | 0.191 |
+| S4 (λ-conditioned) | 0.078 | 0.253 | 0.189 |
+| Copy the other half's geometry (no model) | — | 0.334 | — |
+
+- **What it says:** with another conformer's true geometry, every model is *worse* than with RDKit geometry. The large
+  oracle gains of B1, S3 and S4 were almost entirely conformer-identity leakage. Correct geometry in general does not
+  help; geometry helps only when it matches the specific conformer being generated. **Local structure and torsions are
+  strongly coupled.** This re-reads A1 (−54 %) and the ring-only result (0.119) as upper bounds that include leakage.
+- **What we did next:** the round-5 programme is built around a *coupled* geometry–torsion model (Experiment 1) instead
+  of an independent geometry predictor, and the split-half test becomes a standard analysis tool.
+- **Worth it?** Yes, decisively: ~4 GPU-h, and it prevented a paper built on a leaked oracle. The test itself is a
+  candidate methodological contribution.
+
 # Part 3. Round 3: designing the next experiments (in progress, nothing run yet)
 
 **Why a new process.** Rounds 1–2 showed what goes wrong without it: quotes cited for claims they did not support,
