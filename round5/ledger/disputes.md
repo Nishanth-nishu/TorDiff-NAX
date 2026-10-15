@@ -31,6 +31,17 @@ Accepted. No counter-evidence: AMR-R is a minimum over samples, and the split vi
 - I could not run the re-score myself: the per-molecule `eval.pkl`/`confs.pkl` are on gnode118, and only summaries
   are in `cluster_sync/`. It is assigned to the analysis driver (EXP-1 §9 item 2).
 
+### Response (CHEM)
+Accepted for E-CHEM-054 and the EXP-2 framing, with no counter-evidence: AMR-R is a minimum over samples, so the split
+view (2·|half| samples) and `ref_rdkitL` (2·n samples) are not budget-matched.
+- **E-CHEM-054** keeps its values, gets a "Revised after D-001" note, and its "worse than RDKit L" reading is now
+  descriptive/UNVERIFIED. Only the own − split leak contrast is used as budget-matched.
+- **EXP-2 §0 / §2** state the comparison as descriptive.
+- **EXP-2 §4** (L-robustness panel) now defines the robustness gap as split − ref_half, using the same CPU re-score as
+  EXP-1 §3.6: a random 2·|B| subset per molecule against the B targets, 10 draws. The unmatched gap is reported only as
+  descriptive.
+- No EXP-2 design decision depended on the unmatched gap, so the arms and controls are unchanged.
+
 ## D-002 on E-JOINT-004 (EXP-1 §2.2 "Choice of σ_b", §5.2 Gate 0 / Gate 1 ring-tail thresholds)
 Raised by: V5
 - Numbers VERIFIED by recompute.
@@ -107,6 +118,21 @@ Accepted. I verified both the bug and the corrected values myself.
 - **Spec.** It is listed in EXP-1 §9 "Known issues" item 1 (I did not edit code), with the requested fix, the n_GT ≤ 3
   re-run and the other-half-only variant. EXP-1 §0 now cites 0.036 vs 0.114 Å and keeps the superseded 0.032 text.
 - **Cross-agent.** E-CHEM-065 and EXP-2 belong to R-CHEM.
+
+### Response (CHEM)
+Accepted for E-CHEM-065 and EXP-2 §0 / §2.
+- **E-CHEM-065** has a "Revised after D-003" block, with the original text kept below it. It records:
+  - the self-inclusion bug at `tools/local_structure_analysis.py:302`;
+  - the corrected n_GT > 3 values: ring 0.0359 Å (median 0.0165) vs floor_best_sym 0.1143 Å on the same rows;
+    acyclic 0.0138 Å; all 0.0291 Å;
+  - the corrected definition: oracle best of the 3 closest other GT conformers, not split-half;
+  - the corrected inference: L-distribution mismatch of the torsion model, not evidence for coupling.
+- **EXP-2 §0** strikes the 0.032 Å sentence and states 0.036 vs 0.114 Å with the definition.
+- **EXP-2 §2** corrects the table row the same way.
+- **Floor dependence.** EXP-2's design never used a floor_gtother number. B-T, D1 and the diagnostics compute their
+  own target-to-GT RMSD. EXP-3 uses no floor number at all.
+- **The direction EXP-2 relies on survives:** what the torsion model was trained to pair with τ decides which L it can
+  use.
 
 ## D-004 on EXP-1 §2.2 claim (1), §0 ("the geometry factor cannot move torsions"), §1 / §8 novelty point 1 ("exact separation from torsions")
 Raised by: V5
@@ -241,3 +267,19 @@ Status: OPEN
 2. **PuckerFlow wording.** Accepted. "announced" is replaced by "proposed as a feasible extension" in EXP-1 §1
    (table), §2.3, §7 risk 6 and §8. E-JOINT-069 has a revision note withdrawing "announced"; its original text is
    kept.
+
+### Response (CHEM) — items 3 and 4
+3. **Accepted.**
+   - EXP-3 §0 now reports 12.4 / 10.3 / 10.5 % (R0 / R1 / R2; 65, 54, 55 of 526), mean 11.1 %.
+   - It states the coverage: 38 molecules perceived by RDKit 2022.09.5, out of 102 QM9 test molecules with a
+     TD-rotatable double bond.
+   - The "96–100 molecules" phrase is corrected to 102. The 96 in E-CHEM-063 is now explained: those are the
+     molecules with generated conformers in the evaluated set.
+   - E-CHEM-061 has a "Revised after D-008" note with the three-seed mean; the original text is kept.
+   - My handback summary also quoted 12.4 %; the corrected figure is the mean 11.1 % (range 10.3–12.4 %).
+4. **Accepted.** The EXP-3 §2 table now reads 108 / 2,880 = 3.75 %. E-CHEM-050 adds the 108-bond (3.75 %, 102
+   molecules) figure next to the 106-bond stereo figure (3.7 %).
+- **Other items.**
+  - My specs do not cite PuckerFlow, so the "announced → proposed" wording (item 2) needs no change on my side.
+  - V5 found EXP-2 / EXP-3 GPU-h consistent with the 11.7 GPU-h basis, and I re-checked it: 3 × 11.7 = 35 per
+    3-seed arm, and 20 epochs ≈ 2.3 GPU-h per run. No change.
