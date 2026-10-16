@@ -1,6 +1,7 @@
 #!/bin/bash
 # Round 5: copy the committed flexitors/, tools/ and experiments/ (if present) of HEAD to gnode118
-# ($PROJECT/{flexitors,tools,experiments}, plus the round5/ledger/chem_data test fixtures and round5/data) and record the commit in $PROJECT/FLEXITORS_COMMIT. The frozen baseline
+# ($PROJECT/{flexitors,tools,experiments}, plus the round5/ledger/chem_data test fixtures and round5/data) and
+# record the commit in $PROJECT/FLEXITORS_COMMIT. The frozen baseline
 # torsional-diffusion/ is never touched here (round2/sync_cluster.sh pattern; flexitors/tests/test_baseline_frozen.py
 # checks the cluster copy against the pins). Usage: bash round5/sync_cluster.sh
 set -euo pipefail
@@ -11,7 +12,7 @@ fi
 COMMIT=$(git rev-parse HEAD)
 T=$(mktemp -d)
 DIRS="flexitors tools round5/ledger/chem_data"; [ -d experiments ] && DIRS="$DIRS experiments"
-[ -d round5/data ] && DIRS="$DIRS round5/data"   # test fixtures and the committed E/Z target table
+git cat-file -e HEAD:round5/data 2>/dev/null && DIRS="$DIRS round5/data"   # test fixtures and the committed E/Z target table
 git archive --format=tar.gz -o "$T/r5sync.tgz" HEAD $DIRS
 cat > "$T/r5apply.sh" <<EOS
 set -eu
