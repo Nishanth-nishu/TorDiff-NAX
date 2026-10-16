@@ -84,6 +84,11 @@ parser.add_argument('--de_seed', type=int, default=None)
 parser.add_argument('--seed_confs', default=None, help='--mode leak: the seed pickle the cycle run used')
 parser.add_argument('--raw_dir', default='data/QM9/qm9/', help='--mode leak: raw pickles for Boltzmann weights')
 parser.add_argument('--n_perm', type=int, default=200)
+# [round5 EXP-1 §10.5 / Q-P1-011] other-half floor: candidates restricted to the other half of tools/make_split_half.py
+# split.tsv (the leak-free halves), cap applied after splitting
+parser.add_argument('--floor_other_half', default=None, help='--mode test: split.tsv of make_split_half.py')
+parser.add_argument('--floor_all_max_half', type=int, default=10,
+                    help='--floor_other_half: also the min over ALL other-half conformers if |half| <= this')
 args = parser.parse_args()
 
 
@@ -235,13 +240,22 @@ def stereo_labels(mol, cid=-1):
 
 
 # ----------------------------------------------------------------------------------------------- per-molecule job
+def floor_candidates(cost_row, i, topm, allowed=None):
+    """[round5 fix, EXP-1 §9 item 1 / E-JOINT-031 / D-003] the top-m candidate GT conformers for target i by
+    transplant cost, never i itself. The old slice np.argsort(cost_gg[i])[:topm] relied on cost_gg[i, i] = inf sorting
+    last, so for n_gt <= topm it included the target and floor_gtother collapsed to ~0. allowed: optional set of
+    candidate indices (the other split-half)."""
+    order = [int(j) for j in np.argsort(cost_row, kind='stable') if j != i and (allowed is None or j in allowed)]
+    return order[:topm]
+
+
 def clean_confs(smi, confs):
     smi = Chem.MolToSmiles(Chem.MolFromSmiles(smi, sanitize=False), isomericSmiles=False)
     return [c for c in confs if Chem.MolToSmiles(Chem.RemoveHs(c, sanitize=False), isomericSmiles=False) == smi]
 
 
 def job(item):
-    key, corrected, confs = item
+    key, corrected, confs, halves = item
     rows = []
     try:
         confs = clean_confs(corrected, confs)[:args.max_gt_confs]
@@ -299,9 +313,21 @@ def job(item):
             gg = np.nan
             if n > 1:
                 gg = np.inf
-                for jj in np.argsort(cost_gg[i])[:args.floor_topm]:
+                for jj in floor_candidates(cost_gg[i], i, args.floor_topm):
                     t3 = Chem.Mol(confs[int(jj)])
                     gg = min(gg, torsion_floor(t3, -1, gt, rel_t, amap, x_extra=[gt_tors[i]]))
+            half_cols = {}
+            if halves is not None:  # [round5 EXP-1 §10.5] leak-free other-half variant
+                other = halves[1] if i in halves[0] else halves[0]
+                allowed = {j for j in other if j < n}
+                floors = {int(jj): torsion_floor(Chem.Mol(confs[int(jj)]), -1, gt, rel_t, amap, x_extra=[gt_tors[i]])
+                          for jj in floor_candidates(cost_gg[i], i, args.floor_topm, allowed)}
+                half_cols['floor_gtother_half'] = min(floors.values()) if floors else np.nan
+                if len(other) <= args.floor_all_max_half and len(allowed) == len(other):
+                    rest = [j for j in sorted(allowed) if j not in floors]
+                    for jj in rest:
+                        floors[jj] = torsion_floor(Chem.Mol(confs[jj]), -1, gt, rel_t, amap, x_extra=[gt_tors[i]])
+                    half_cols['floor_gtother_half_all'] = min(floors.values()) if floors else np.nan
             # acyclic local-structure oracle on the best seed
             oracles = {}
             for name, wb in (('angle_oracle_rmsd', False), ('local_oracle_rmsd', True)):
@@ -327,7 +353,7 @@ def job(item):
                 angle_rmsd_gtgt=float(np.mean([rms(gt_loc[k][1] - ba_gt) for k in others])) if others else np.nan,
                 transplant_rmsd_assigned=float(cost[i, j]), transplant_rmsd_best=float(cost[i].min()),
                 floor_rmsd=floor, floor_best=float(best), floor_best_sym=float(best_sym),
-                floor_gtother=float(gg), **oracles,
+                floor_gtother=float(gg), **half_cols, **oracles,
                 stereo_match=stereo_labels(seeds, cids[j]) == gt_stereo,
                 stereo_match_best=stereo_labels(seeds, cids[jb]) == gt_stereo,
             ))
@@ -340,6 +366,16 @@ def run_test():
     df = pd.read_csv(args.test_csv)
     with open(args.true_mols, 'rb') as f:
         true_mols = pickle.load(f)
+    halves = {}
+    if args.floor_other_half:  # split.tsv halves (cleaned GT indices) keyed by corrected smiles
+        sp = pd.read_csv(args.floor_other_half, sep='	')
+        for r in sp.itertuples(index=False):
+            ia = {int(x) for x in str(r.idx_A).split(',')}
+            ib = {int(x) for x in str(r.idx_B).split(',')}
+            halves[r.corrected_smiles] = (ia, ib)
+        n_cap = int((sp.n_clean > args.max_gt_confs).sum())
+        print(f'other-half floor: {len(halves)} split-half molecules, {n_cap} with > {args.max_gt_confs} clean '
+              f'conformers (cap applied after splitting)')
     items = []
     for row in df.itertuples(index=False):
         key, corrected = row[0], row[2]
@@ -347,8 +383,8 @@ def run_test():
             key = getattr(row, 'smiles')
         if 'corrected_smiles' in df.columns:
             corrected = getattr(row, 'corrected_smiles')
-        if key in true_mols:
-            items.append((key, corrected, true_mols[key]))
+        if key in true_mols and (not args.floor_other_half or corrected in halves):
+            items.append((key, corrected, true_mols[key], halves.get(corrected)))
     if args.limit_mols:
         items = items[:args.limit_mols]
     print('molecules:', len(items))
@@ -535,7 +571,8 @@ if __name__ == '__main__':
               f'excess={d.excess.mean():.4f} boltz_null={d.boltz_null.mean():.4f}')
     os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
     df.to_csv(args.out, index=False)
-    cols = {'test': ['floor_rmsd', 'floor_best', 'floor_best_sym', 'floor_gtother', 'angle_oracle_rmsd',
+    cols = {'test': ['floor_rmsd', 'floor_best', 'floor_best_sym', 'floor_gtother', 'floor_gtother_half',
+                     'floor_gtother_half_all', 'angle_oracle_rmsd',
                      'local_oracle_rmsd', 'transplant_rmsd_best'],
             'run': ['obs_min_rmsd', 'floor_run', 'torsion_headroom'], 'std': ['match_rmsd'],
             'leak': ['hit', 'perm_null', 'excess']}[args.mode]
