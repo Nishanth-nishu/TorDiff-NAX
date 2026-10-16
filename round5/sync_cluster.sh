@@ -1,6 +1,6 @@
 #!/bin/bash
 # Round 5: copy the committed flexitors/, tools/ and experiments/ (if present) of HEAD to gnode118
-# ($PROJECT/{flexitors,tools,experiments}) and record the commit in $PROJECT/FLEXITORS_COMMIT. The frozen baseline
+# ($PROJECT/{flexitors,tools,experiments}, plus the round5/ledger/chem_data test fixtures and round5/data) and record the commit in $PROJECT/FLEXITORS_COMMIT. The frozen baseline
 # torsional-diffusion/ is never touched here (round2/sync_cluster.sh pattern; flexitors/tests/test_baseline_frozen.py
 # checks the cluster copy against the pins). Usage: bash round5/sync_cluster.sh
 set -euo pipefail
@@ -10,7 +10,8 @@ if [ -n "$(git status --porcelain --untracked-files=no -- flexitors tools experi
 fi
 COMMIT=$(git rev-parse HEAD)
 T=$(mktemp -d)
-DIRS="flexitors tools"; [ -d experiments ] && DIRS="$DIRS experiments"
+DIRS="flexitors tools round5/ledger/chem_data"; [ -d experiments ] && DIRS="$DIRS experiments"
+[ -d round5/data ] && DIRS="$DIRS round5/data"   # test fixtures and the committed E/Z target table
 git archive --format=tar.gz -o "$T/r5sync.tgz" HEAD $DIRS
 cat > "$T/r5apply.sh" <<EOS
 set -eu
@@ -18,6 +19,8 @@ P=/scratch/nishanth.r/tordiff
 rm -rf \$P/tmp/r5sync && mkdir -p \$P/tmp/r5sync && tar xzf ~/r5sync.tgz -C \$P/tmp/r5sync
 rm -rf \$P/flexitors && cp -a \$P/tmp/r5sync/flexitors \$P/flexitors
 cp -a \$P/tmp/r5sync/tools/. \$P/tools/
+rm -rf \$P/round5 && mkdir -p \$P/round5/ledger && cp -a \$P/tmp/r5sync/round5/ledger/chem_data \$P/round5/ledger/
+if [ -d \$P/tmp/r5sync/round5/data ]; then cp -a \$P/tmp/r5sync/round5/data \$P/round5/data; fi
 if [ -d \$P/tmp/r5sync/experiments ]; then rm -rf \$P/experiments && cp -a \$P/tmp/r5sync/experiments \$P/experiments; fi
 echo $COMMIT > \$P/FLEXITORS_COMMIT
 echo synced $COMMIT
