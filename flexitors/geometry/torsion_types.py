@@ -64,6 +64,19 @@ def td_rotatable_bonds(mh: Chem.Mol) -> list[int]:
     return [b.GetIdx() for b in mh.GetBonds() if td_rotated_side(mh, b.GetIdx()) is not None]
 
 
+def heavy_rotatable_bonds(mh: Chem.Mol) -> list[int]:
+    """TD-rotatable bonds with ≥ 2 heavy atoms on each side: the ``n_rot_heavy`` count of ``tools/breakdown.py:32-50``
+    that defines the rigid stratum (n_rot_heavy = 0; round5/DECISION.md fix 4, E-JOINT-007)."""
+    heavy = {a.GetIdx() for a in mh.GetAtoms() if a.GetAtomicNum() > 1}
+    out = []
+    for k in td_rotatable_bonds(mh):
+        b = mh.GetBondWithIdx(k)
+        side = _component(mh, b.GetBeginAtomIdx(), k)
+        if len(side & heavy) >= 2 and len(heavy - side) >= 2:
+            out.append(k)
+    return out
+
+
 def _first_neighbour(mh: Chem.Mol, atom: int, exclude: int) -> int:
     """First neighbour of ``atom`` other than ``exclude`` in bond-index order (TD's ``edge_list`` order)."""
     nbrs = sorted((b.GetIdx(), b.GetOtherAtomIdx(atom)) for b in mh.GetAtomWithIdx(atom).GetBonds())

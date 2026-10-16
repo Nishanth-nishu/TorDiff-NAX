@@ -137,3 +137,11 @@ def test_matches_td_mask_and_sampling_quadruples():
                 td_quads.append((int(c), int(a), int(b), int(d)))
         ours = [td_reference_quadruple(mol, k) for k in td_rotatable_bonds(mol)]
         assert ours == td_quads, s
+
+
+def test_heavy_rotatable_count_hand_cases():
+    # tools/breakdown.py:32-50 n_rot_heavy: TD-rotatable and >= 2 heavy atoms on both sides
+    from flexitors.geometry.torsion_types import heavy_rotatable_bonds
+    for s, want in (('CCCC', 1), ('CCO', 0), ('CC(C)C', 0), ('CCCO', 1), ('OCC1CC1', 1), ('C1CC1', 0),
+                    ('CC(=O)NC', 1), ('CCC(=O)NCC', 3), ('C#CC#C', 1)):
+        assert len(heavy_rotatable_bonds(mh(s))) == want, s
