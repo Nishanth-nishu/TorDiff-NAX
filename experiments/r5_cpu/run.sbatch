@@ -77,8 +77,7 @@ case $TASK in
       done
     done
     python -m flexitors.data.gate0_baselines summary --dir "$O" --val_l_error "$O/val_seeds/l_error.csv" \
-      --test_l_error "$QM9_SEEDS2/l_error.csv" --val_csv "$V/val_smiles.csv" --test_csv "$QM9_TEST_CSV" \
-      | tee "$O/gate0_baselines.txt"
+      --test_l_error "$QM9_SEEDS2/l_error.csv" | tee "$O/gate0_baselines.txt"
     ;;
   *) echo "unknown TASK $TASK"; exit 2 ;;
 esac

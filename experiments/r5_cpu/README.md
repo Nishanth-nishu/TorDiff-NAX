@@ -4,7 +4,8 @@ One sbatch, one task per submission (`run.sbatch` header lists them):
 
 ```
 bash round5/sync_cluster.sh                     # copy committed flexitors/ tools/ experiments/ to /scratch
-ssh ada 'cd /scratch/nishanth.r/tordiff && sbatch --export=ALL,TASK=<task> experiments/r5_cpu/run.sbatch'
+scp experiments/r5_cpu/run.sbatch ada:r5_cpu.sbatch   # /scratch is not visible from the login node
+ssh ada 'sbatch --export=ALL,TASK=<task> --job-name=r5_<task> ~/r5_cpu.sbatch'
 ```
 
 | Task | Spec | Output (`$RES/round5/<task>/`) |
