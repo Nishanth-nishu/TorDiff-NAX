@@ -1,0 +1,2 @@
+qm9_test_smiles_from_local_structure_test.csv: molecules 996; TD-rotatable double bond 102; structural stereo DB 37; specified in SMILES 3; TD-rotatable triple bond 113; double or triple (K1-canonical scope) 211; rdkit 2026.03.6
+drugs_test_smiles_corrected_geomol.csv: molecules 1000; TD-rotatable double bond 155; structural stereo DB 140; specified in SMILES 126; TD-rotatable triple bond 6; double or triple (K1-canonical scope) 160; rdkit 2026.03.6

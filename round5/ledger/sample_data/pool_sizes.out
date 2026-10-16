@@ -1,0 +1,7 @@
+4K 54924 2.0 x sum2K GPU-h@0.034s/conf 0.52
+max(128,4K) 151088 5.5 x sum2K GPU-h@0.034s/conf 1.43
+max(128,12K) 232804 8.48 x sum2K GPU-h@0.034s/conf 2.2
+128 128000 4.66 x sum2K GPU-h@0.034s/conf 1.21
+K>32: 80  4K>128: 80 max K 727
+rows 1000 K>30: 86 median K 4.0 mean K 13.731 sum2K 27462
+rows with smiles != corrected_smiles: 98

@@ -5,6 +5,15 @@ Round-4 IDs (E-ARCH, E-PRIOR) are quoted only where they were copied into the JO
 ORACLE = uses test-set true geometry; analysis only, never model selection (`orchestration/README.md` rule 5).
 INFERENCE = my design reasoning, not something a source shows.
 
+**Revision 2 (2026-10-16), after the coding consult (Q-P1-001…004, Q-P1-011, Q-P2-001…005, Q-P3-001…003,
+Q-P3-009).** The binding decisions are collected in **§10**, which supersedes conflicting text above. Each
+affected paragraph carries a pointer "Revised after Q-…". Real flaws the planners found, now fixed:
+- the M0 kill criterion was vacuous (Q-P2-004, Q-P3-003);
+- the γ′(t) target diverged at the endpoints (Q-P1-001, Q-P3-002);
+- H-terminated W rows let the geometry head do heavy-atom torsion work (Q-P2-001);
+- the training cache did not need rebuilding (Q-P1-002, Q-P3-001);
+- the A5 − A1 contrast was not compute-matched (Q-P2-005).
+
 **Revision 1 (2026-10-15), after verifier V5's disputes D-001 … D-008 (`round5/ledger/disputes.md`).** The
 corrections below are applied in place, and superseded text is kept struck through or quoted so the history stays
 readable:
@@ -151,7 +160,9 @@ improper terms that belong to L, so they may change; this is intended. Ring clos
 internal-coordinate parameterisations: RINGER needs SLSQP [E-JOINT-060] and GO-Flow leaves it open [E-JOINT-064].
 Below, read "P_L" as P_W everywhere. The symbol is kept so the earlier text stays readable.
 
-**Training (one sample).**
+**Training (one sample).** *(Revised after Q-P1-001 / Q-P2-003 / Q-P3-001 / Q-P3-002: endpoint (x₁) prediction, the
+pure-L target x_G*, the pair_ok mask and the chirality resampling are specified in §10.1, which supersedes steps 4–6
+below.)*
 1. Pick conformer k. Set x_R = `data.pos[k]` and x_G = `data.gt_pos[k]` (`dataset.py:79-99` [E-JOINT-023]).
 2. Draw σ ~ logU[0.01π, π] (torsion clock) and t ~ U[0,1] (geometry clock), independently. Independent clocks per
    factor follow DiffDock [E-JOINT-072] and the independent-time precedents UniDiffuser, Diffusion Forcing and
@@ -181,7 +192,7 @@ puckers into distorted rings.
 the rigid stratum (289 test molecules) and the ≥ 4-ring population. Cost is in §6. INFERENCE: 0.3 Å is the order of a
 ring-flip displacement.
 
-**Sampling.**
+**Sampling.** *(Revised after Q-P2-002 / Q-P3-002: x₁-prediction Euler update and exact torsion restoration, §10.2.)*
 1. ETKDG seed at t = 0; τ ~ U[0, 2π)^m (TD).
 2. For each step n = N … 1:
    - one network call gives (score_τ, v);
@@ -193,7 +204,8 @@ ring-flip displacement.
 The NFE is the same as TD's: one forward pass per step returns both heads. The projector adds one m+6 least-squares
 solve per molecule per step.
 
-**Stage 2, DAgger (mandatory).**
+**Stage 2, DAgger (mandatory).** *(Revised after Q-P1-004 / Q-P2-005: roll-outs start from fresh ETKDG embeddings,
+E_D = 20 epochs, compute-matched controls; §10.4.)*
 1. Roll the geometry head out on training molecules from ETKDG seeds.
 2. Re-run conformer matching of GT torsions against the rolled-out L with `standardize_confs.py` and
    `tools/build_paired_pickles.py`.
@@ -383,6 +395,7 @@ evaluator, and 100 epochs unless noted.
 |---|---|---|---|---|
 | A0 | V1 CTRL_rematch, RDKit L | have | 3 | baseline |
 | A1 | V1 + MMFF seeds; S5 | have | 3 | strongest cheap real-use baseline today (0.150) |
+| **A1+** | S5 (A1) fine-tuned E_D = 20 epochs on its own MMFF-matched data (added after Q-P2-005, §10.4) | new | 3 | **compute-matched real-use baseline; replaces A1 in the primary family** |
 | A2 | V1 + GFN2-xTB-relaxed seeds, torsion model retrained on xTB-matched seeds | new | 3 | **level-matched geometry baseline** [E-JOINT-134]; if Exp 1 ≤ A2, there is no method contribution |
 | A3 | V1 parameter-matched: FlexiTors network with the geometry head present but w = 0 and no geometry steps | new | 3 | controls for capacity and code changes; must equal A0 within noise (golden test) |
 | A4 | V2, no DAgger | new | 3 | coupled correction |
@@ -399,7 +412,8 @@ evaluator, and 100 epochs unless noted.
 | A13 | A0 output + post hoc learned refiner (FM-refiner style, trained on A0 samples) | new | 1 | "why not just refine TD's output?" [E-JOINT-077] |
 | A14 | A0 + MMFF after sampling; A0 + xTB after sampling | partly have (A3 round 1) | 3 | relaxation trades recall for precision [E-JOINT-135]; reported separately, never folded in |
 
-**Pre-declared primary contrasts (Holm family; revised after D-005):** A5 − A1, A8 − A1, **A5 − A6b, A8 − A6b**,
+**Pre-declared primary contrasts (Holm family; revised after D-005, and again after Q-P2-005 — A1 is replaced by the
+compute-matched A1+, §10.4):** A5 − A1+, A8 − A1+, **A5 − A6b, A8 − A6b**,
 each on AMR-R and COV-R@0.5. A5 − A6 and A8 − A6 move to the secondary family. Superseded: "A5 − A6, A8 − A6" as
 primary.
 **Secondary:** A5/A8 − A2, A4 − A5 (DAgger effect), A7 − A8, A9 − A8, A12 − A0, A13 − A5.
@@ -453,6 +467,9 @@ Every mechanism carries a comment `# <paper>, PDF p. N, eq. M` or `# [E-JOINT-NN
 
 ### 5.2 Smallest viable first milestone (M0 → M1)
 
+- *(Revised after Q-P2-004 / Q-P3-003 / Q-P1-003: the M0 below is superseded by §10.3. Its kill criterion was
+  vacuous: a linear projection of an oracle L-displacement recovers ≈ 100 % by construction, on the rigid stratum
+  and, to first order, everywhere.)*
 - **M0 (CPU only, ≈ 1–2 days of coding).** `geometry/jacobian.py`, `projector.py`, `constraints.py` and their tests.
   Then one offline experiment with **no learning**: take the round-2 paired cache and, for each QM9 test-set rigid
   molecule's matched RDKit seed, apply the *oracle* step x_R + P_W(x_R)(x_G − x_R), as ORACLE analysis only.
@@ -465,6 +482,8 @@ Every mechanism carries a comment `# <paper>, PDF p. N, eq. M` or `# [E-JOINT-NN
 
   This shows whether the subspace carries the error before any GPU is spent. **Kill criterion:** if the projected
   oracle step recovers < 50 % of the rigid-stratum RMSD gap (ETKDG 0.152 → own-GT), the representation is wrong.
+- *(Revised after Q-P1-003 / Q-P2-004 / Q-P3-003 / Q-P3-009: which parameters train, the sampler used for the
+  read-out, and the fact that **validation** decides σ_b and GO with test read once afterwards — all in §10.3.)*
 - **M1 = Gate 0: ≈ 10.5 GPU-h at TD speed, budget ceiling 16 GPU-h (revised after D-006; superseded figures "1 GPU-h
   each" and "4–6 GPU-h").** Train only the V2 geometry head (torsion loss weight 0, τ noise still applied) on the
   **full** QM9 training set: 30 epochs × 3 σ_b values × 1 seed (A11) = 0.3 × 11.7 × 3 = 10.5 GPU-h. The ceiling
@@ -542,8 +561,9 @@ Every mechanism carries a comment `# <paper>, PDF p. N, eq. M` or `# [E-JOINT-NN
    evidence, and it would be a legitimate negative result for "joint": the paper would become "learned L +
    sampler-matched training". A6b is a pre-declared primary contrast, so this cannot be hidden.
 2. **Multimodal L velocity.** Ring flips mean that too small a σ_b averages puckers into distorted rings. Mitigated by
-   A11, which is read out cheaply on the rigid stratum. The round-2 λ-blend defect (≈ 10 % of slots reused another conformer's blend)
-   means the paired cache must be rebuilt, not reused.
+   A11, which is read out cheaply on the rigid stratum. *(Revised after Q-P1-002 / Q-P3-001; superseded text: "the
+   round-2 λ-blend defect … means the paired cache must be rebuilt".)* That defect is in the test-time λ seed
+   pickles only. The training cache `cache_paired` keeps-and-flags pair_ok failures and **is reused** [E-JOINT-033].
 3. **Exposure bias.** Without DAgger, A4 behaves like S3/B1 on MMFF L [E-JOINT-005]. DAgger is mandatory, and its
    matching cost is unmeasured.
 4. **RMSD may not move even if geometry improves** [E-JOINT-152]. Both endpoints are pre-declared.
@@ -571,7 +591,8 @@ Every mechanism carries a comment `# <paper>, PDF p. N, eq. M` or `# [E-JOINT-NN
   1. **(unconditional)** the first TD-protocol GEOM benchmark of a learned-L torsion model on drug-like
      **polycyclic** rings, with pucker, stereo and xTB metrics, plus the leak-free *methodology* (own vs split,
      budget-matched) [E-JOINT-071, -079, -049];
-  2. **(minor method detail)** the ker-W ∩ rigid^⊥ Cartesian geometry step: dihedral-preserving to first order,
+  2. **(minor method detail)** the ker-W ∩ rigid^⊥ Cartesian geometry step: dihedral-preserving to first order and
+     made exact by rigid side-rotation restoration (revised after Q-P2-002, §10.2),
      closure-free for any ring topology, chirality-guarded [E-JOINT-032, -063, -072, -079]. It is **not** an "exact
      separation";
   3. **(hypothesis, not a finding)** that coupling L to τ helps beyond sampler-matched training. It counts only if
@@ -604,3 +625,133 @@ Every mechanism carries a comment `# <paper>, PDF p. N, eq. M` or `# [E-JOINT-NN
 4. **DAgger / re-matching CPU cost unmeasured** (§5.4 Q-*-003). It now applies to A5, A6b and A8.
 5. **Verification debt.** Ledger entries E-JOINT-130, -132, -136, -151 and -154 are UNVERIFIED-IN-R5 (quotes not
    re-extracted) and must not support any claim in a paper draft until re-checked.
+
+## 10. Revision 2: binding decisions after the coding consult (2026-10-16)
+
+This section supersedes any conflicting text in §2–§9. Each decision names the consult file(s) it answers.
+
+### 10.1 V2 training transform (Q-P1-001, Q-P1-002, Q-P2-001, Q-P2-003, Q-P3-001, Q-P3-002)
+
+1. **Data.** Reuse `cache_paired.{train,val}` [E-JOINT-033]. Keep TD's training population: molecules with m ≥ 1.
+   No m = 0 molecules are added, because they have no paired data and adding them would change A3/A0
+   comparability. Conformers with `pair_ok = False` stay in the batch with τ loss only, and their geometry loss is
+   masked to 0. The masked share is logged.
+2. **W rule (dihedral set): heavy-first.** For each rotatable bond (b, c), take the lowest-index heavy neighbour of b
+   (≠ c) and of c (≠ b); fall back to H only if a side has no heavy neighbour. Drop a row if
+   min(sin θ_abc, sin θ_bcd) < sin 10° (near-linear, e.g. next to a triple bond). If the heavy choice is near-linear,
+   try the next neighbour first. Count dropped rows. The share of H-terminated rows and the per-step change of
+   **all** heavy-atom dihedrals about rotatable bonds are diagnostics.
+   - Reason: with TD's first-neighbour rule an H-terminated row lets a geometry step change the heavy-atom dihedral
+     through "L" (Q-P2-001). Evaluation is heavy-atom RMSD.
+   - TD's torsion updates are whole-side rotations about the bond, so they do not depend on which quadruple defines
+     τ [E-JOINT-026].
+   - Option (c), all heavy quadruples, over-constrains angles at sp³ centres.
+   - Dihedral values are computed with exact atan2, not TD's clamped `acos` form (`utils/torsion.py:117-123` clamps
+     cos to ±(1 − 1e-5)).
+3. **Pure-L target x_G\*.** Set the m W-quadruple dihedrals of x_G (own GT) to x_R's values by rigid side rotations,
+   using `modify_conformer` with TD's sign convention (`torsion.py:68` comment: "positive rotation if pointing
+   inwards"). Unit-test the sign against atan2. Then Kabsch-align x_G\* to x_R on heavy atoms.
+   - Side rotations change no bond length or angle [E-JOINT-026], so x_G\* − x_R carries **no W-dihedral
+     difference by construction** (Q-P2-003). The residual DE torsion mismatch stays with the torsion factor, which is
+     trained on x_R's torsions as in TD.
+   - Then apply the same Δτ to x_R and x_G\* (§2.2 step 3).
+4. **Parameterisation: endpoint (x₁) prediction.**
+   - Input: x_t = interp(x_R′, x_G\*′, t) + γ(t)·P_W(x_R′) z, with γ(t) = σ_b√(t(1−t)) and **t ~ U[0, 1]**.
+   - The head outputs x̂₁ through a projected per-atom `1o` displacement: x̂₁ = x_t + P_W(x_t)·Δ̂.
+   - Loss: ‖P_W(x_t)(x̂₁ − x_G\*′)‖², summed per molecule, divided by rank(P_W) of that molecule, then averaged over
+     the molecules in the batch.
+   - Reason: the velocity target's γ′(t) term diverges at t = 0, 1, and ET-Flow states no clipping rule
+     [E-JOINT-082]. x₁ prediction is used by HarmonicFlow (p. 4: "we find it helpful to parameterize v to predict x1
+     instead of (x1 - x0)") and by PuckerFlow (SI Alg. 1, p. 20) [E-JOINT-080, -081]. No ε is invented.
+5. **Chirality in training states.** If x_t flips any stereocentre relative to x_R′ (signed volume, §2.8), resample z
+   (≤ 5 tries). If it still flips, mask the geometry loss for that sample and count it. This is consistent with V3a's
+   reject-and-resample.
+6. **Clocks.** The geometry clock t enters through the λ-embedding path with `lambda_embed_dim = 32`, the round-2 S4
+   mechanism [E-JOINT-023]. The torsion clock σ is unchanged. Loss weights: w_τ = 1, w_geo = w (§2.2).
+
+### 10.2 Sampler (Q-P1-001.2, Q-P2-002, Q-P3-002, Q-P3-003.2–3)
+
+- **Geometry update**, deterministic Euler, N = 20 uniform steps on t ∈ [0, 1] (TD's step count; same NFE):
+  x ← x + (Δt / (1 − t))·P_W(x)(x̂₁ − x), and the last step sets x ← x + P_W(x)(x̂₁ − x). ET-Flow's stochastic
+  sampling in t ∈ [0.8, 1] [E-JOINT-082] is a later ablation, not Gate 0.
+- **Exact torsion restoration ON in every sampler**: primary V2, DAgger roll-outs, and the A6/A6b "τ frozen" sampler.
+  After each geometry step, the m W-dihedrals are measured (atan2) and each moving side is rotated back by its change
+  with `modify_conformer`. This changes no bond length or angle and cannot flip a tetrahedral centre [E-JOINT-026].
+  It makes "τ frozen" exact, and it means the torsion head only ever sees torsions it produced. The P_W projection is
+  kept so that steps do not fight the restoration. `restore_torsions = off` is an ablation that is measured once.
+- **τ-frozen read-out (M1, A6, A6b sampler).** ETKDG seed, no torsion randomisation, torsion-clock input
+  σ = σ_min throughout. σ_min lies inside the training range [0.01π, π]. Ring dihedrals are L and are moved.
+- **m = 0 molecules**: geometry steps run with P_W = I − J_rigᵀ(J_rig J_rigᵀ)⁺J_rig. TD's sampler skips them
+  (`generate_confs.py:150-153`); FlexiTors does not.
+
+### 10.3 M0 and Gate 0 (Q-P1-003, Q-P2-004, Q-P3-003, Q-P3-009)
+
+- **M0, revised: oracle-velocity integration test.**
+  - Why: the old criterion was vacuous (see the §5.2 pointer).
+  - What is tested: whether the *sampler's* projected, torsion-restored, constraint-guarded update can follow an
+    oracle field over large, nonlinear ring moves.
+  - Population: the **validation** paired cache (`cache_paired.val`), molecules with ≥ 1 heavy rotatable bond **and**
+    a ring of ≥ 4 atoms. Rigid and m = 0 rows are reported as sanity rows.
+  - Procedure: integrate x ← x + (1/(N−n))·P_W(x)(x_G\* − x), N = 20, with restoration and the §2.6/§2.8 layer on.
+  - Metrics: recovery = 1 − median_pairs[RMSD_heavy(x_N, x_G\*)] / median_pairs[RMSD_heavy(x_R, x_G\*)]; ring-dihedral
+    RMSD to x_G\*; W-dihedral drift; chirality flips caught; constraint backtracks and skips.
+  - **Kill** if recovery < 50 % or if > 5 % of pairs end with a skipped step or a flipped centre.
+  - Test-set pairs are reported once and never decide.
+- **M1 training (Q-P1-001.3, Q-P3-009): option (a).** The whole network trains from random initialisation on the
+  geometry loss only (w_τ = 0, τ noise still applied). This matches the cost basis 0.3 × 11.7 GPU-h. A TD checkpoint
+  cannot be loaded strictly once the clock widens the embedding input. The question Gate 0 answers is "can this
+  architecture learn L". **A4 (M2) trains from scratch**, not from the M1 checkpoint, so its epoch count matches
+  A0/A3.
+- **Who decides (Q-P1-003.3, Q-P2-004.3, Q-P3-003.1): validation decides both σ_b\* and GO; test is read once
+  afterwards and reported.**
+  - Validation set: a fixed 1000-molecule subset of QM9 split 1 (sorted indices, RNG seed 0), with its ETKDG and MMFF
+    baselines computed first on CPU (the rigid stratum and ≥ 4-ring seeds of that subset).
+  - Thresholds stay as pre-declared: rigid AMR-R ≤ 0.10 Å, and the ≥ 4-ring > 10° share ≤ 20 %.
+  - **Scaling rule:** if a validation ETKDG baseline differs from the test value (0.152 Å; 49.6 %) by more than
+    10 % relative, the threshold scales by validation ÷ test.
+  - The ring criterion is read for σ_b\* only.
+  - Reason: README rule 5 forbids model selection on test, and the planners rightly noted that a test-read gate is a
+    decision.
+- **Ring metric pairing (Q-P1-003.2, Q-P2-004.4).** Primary: each flowed seed keeps its original (k, src_gt_idx)
+  pairing from `l_error.csv`, which is comparable with the 49.6 % baseline. Secondary: the best over all GT
+  conformers of the molecule.
+- **m = 0 test molecules (Q-P1-002.3).** These are not trained on, so they are reported as a separate sub-row. GO is
+  read on the n_rot_heavy = 0 stratum as pre-declared.
+
+### 10.4 A6b, DAgger and compute matching (Q-P1-004, Q-P2-005)
+
+- **Roll-out seeds.** For A5/A8 DAgger and for the A6b training data, roll-outs start from **fresh ETKDG embeddings**
+  made as `standardize_confs.py` makes them, then conformer matching. They do **not** start from the cache's
+  `data.pos[k]`, whose torsions were already matched to the target GT. A geometry head that sees τ would then see
+  GT-matched torsions in training but raw ETKDG torsions at test; for A6b that is a leak plus a mismatch. This is the
+  S5 recipe with a new L source [E-JOINT-006].
+- **E_D = 20 epochs** for every DAgger / fine-tune stage. This is a design choice, not taken from a source.
+- **A6b, primary:** A0 fine-tuned for E_D epochs on the re-matched sampler-L data, with the same optimiser and
+  schedule as A5's DAgger stage, so it is compute-matched to A5 (100 + E_D). **A6b-full**, an S5-style retrain from
+  scratch for 100 epochs, is secondary and is run only if A5 − A6b is significant (to rule out under-training of A6b).
+- **New arm A1+** (Q-P2-005): S5 (A1) fine-tuned for E_D epochs on its own MMFF-matched data, same optimiser and
+  schedule, 3 seeds, ≈ 3 × 2.3 GPU-h. It **replaces A1 in the primary family**, which is now A5 − A1+, A8 − A1+,
+  A5 − A6b, A8 − A6b. A5 − A1 is reported as secondary. Training GPU-h and epochs are recorded per arm. Restarting
+  uses `train.py --restart_dir`.
+- **Re-matching cost** stays UNVERIFIED. The orchestrator is to supply the round-1 `standardize_confs.py` CPU-h for
+  the QM9 training set; it sets the M2 ask.
+
+### 10.5 D-001 re-score and floor re-run (Q-P1-011, Q-P3-003.4)
+
+- **Family.** One Holm family of 8: CR, B1, S3, S4 × {AMR-R, COV-R@0.5} for split − ref_half, with the paired molecule
+  bootstrap and the hierarchical interval beside each row. COV-R@0.1 and split_d − ref_half_d are secondary.
+  Interpretation stays descriptive with respect to model selection (it corrects a published claim).
+- **ref_half.** It is computed as the **exact expectation** over random subsets of size s = 2·|half| drawn from the
+  N generated conformers. With per-target RMSDs sorted ascending r₍₁₎ ≤ … ≤ r₍N₎:
+  - E[min] = Σᵢ r₍ᵢ₎·C(N−i, s−1)/C(N, s);
+  - P(covered) = 1 − C(N−c, s)/C(N, s), with c the number of samples under δ.
+
+  This is the N → ∞ limit of V5's ~10 draws and has no Monte Carlo noise. Ten random draws are reported as a
+  consistency check.
+- **Floor re-run.** Both `--mode test` and `--mode test --mmff_seeds`, since both CSVs carry the bug.
+  - The other-half variant uses the **halves of `split.tsv`** from `tools/make_split_half.py` (the leak-free halves).
+    The 30-conformer cap is applied after splitting, and the 85 molecules with > 30 clean conformers are counted.
+  - Primary: top-3 by transplant cost among the other half (the same estimator as the existing column, so the
+    bug-fix comparison is clean).
+  - Reported beside it: the minimum over **all** other-half conformers for molecules with ≤ 10 per half, as a check
+    that top-3 approximates what the split-half seeds cycle through.

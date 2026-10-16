@@ -1,6 +1,7 @@
 # EVAL: Shared evaluation protocol for all round-5 experiments and Phase 5 generalisation
 
-Author: R-SAMPLE, round 5. Status: P1 spec complete 2026-10-15 (not yet verified). Evidence IDs refer to
+Author: R-SAMPLE, round 5. Status: P1 spec 2026-10-15; revised 2026-10-16 after D-101 and consults Q-P1-010,
+Q-P2-010, Q-P2-011, Q-P3-007 (§1, §1.1, §3.1). Evidence IDs refer to
 `round5/ledger/evidence_SAMPLE.md`. Entries E-SAMPLE-061…091 are round-4 BENCH entries with re-checked quotes; no
 round-4 verifier has finished them. Builds on `round4/cards/C-BENCH-01…07`. Experiment specs (EXP-1…5) may add
 metrics but must not change anything below without a consult (`round5/consult/`) answered by R-SAMPLE.
@@ -20,17 +21,50 @@ metrics but must not change anything below without a consult (`round5/consult/`)
 | Set | Split | Threshold δ | Samples | Use |
 |---|---|---|---|---|
 | GEOM-QM9 | GeoMol/TD random split 106586 / 13323 / 1000 [E-SAMPLE-061] | 0.5 Å [E-SAMPLE-063] | 2K per molecule, K = CREST conformers [E-SAMPLE-062, -003] | development, all experiments |
-| QM9 validation subset | 1000 molecules drawn from split index 1 with a fixed seed; list committed | 0.5 Å | 2K | tuning only |
+| QM9 validation subset | 1000 molecules from split index 1, built as in §1.1 (Revised after Q-P1-010/Q-P2-010/Q-P3-007) | 0.5 Å | 2K | tuning only |
 | GEOM-DRUGS | 243473 / 30433 / 1000 [E-SAMPLE-061] | 0.75 Å [E-SAMPLE-062] | 2K | Phase 5, staged (§9) |
 | GEOM-XL | 102 molecules, TD/MCF protocol | AMR only, as TD Table 6 [E-SAMPLE-005] | 2K | size OOD (§5) |
 
 - **Sample budget is part of the method.** TD's 2K rule uses the test-set count K [E-SAMPLE-003]. At matched total
-  samples, a K-free uniform allocation gives AMR-R 0.1450 against 0.1784 Å for the 2K rule on our 927-molecule set
-  [E-SAMPLE-022], and recall keeps rising with samples (0.1783 → 0.1255 Å from 1x to 3x) [E-SAMPLE-020]. Therefore:
+  samples, a uniform allocation gives AMR-R 0.1450 against 0.1784 Å for the 2K rule on our 927-molecule set
+  [E-SAMPLE-022]. *Revised after D-101:* that uniform figure redistributes budget from capped pools, so it is
+  K-informed. A strictly K-free uniform rule gives 0.1617 Å using only 69 % of the budget [E-SAMPLE-026], so the
+  direction holds. Recall keeps rising with samples (0.1783 → 0.1255 Å from 1x to 3x) [E-SAMPLE-020]. Therefore:
   (i) main-table rows use exactly 2K per molecule; (ii) any method that changes per-molecule counts, oversamples or
   selects reports NFE and sits in its own table with a matched-NFE TD row (Zhang et al. demand equal budgets
   [E-SAMPLE-083]; Zhou et al. show oversampling inflates recall [E-SAMPLE-082]).
 - QM9 at δ = 0.5 Å is called saturated [E-SAMPLE-081], so finer thresholds are required secondaries (§2).
+
+### 1.1 QM9 validation subset (Revised after Q-P1-010, Q-P2-010, Q-P3-007; 2026-10-16)
+One shared validation set serves the whole programme: Exp 1 σ_b selection, the Exp 5 selector, PG settings and
+anything else tuned. It must follow the test-set conventions. The provenance of TD's `test_mols.pkl` filtering is not
+in our repository, so the builder is **validated on the test split before it is used on validation**.
+1. **Universe.** Index 1 of `split.npy`, indexed into the sorted raw-pickle list exactly as
+   `torsional-diffusion/utils/dataset.py:165-179` does (13,323 molecules).
+2. **Order.** `order = np.random.default_rng(0).permutation(sorted(split[1]))`. Walk `order` and keep the first 1000
+   molecules that pass the builder's filters (step 4). Exclusions are listed with reasons.
+3. **Ground truth.** GT conformers are the raw GEOM `rd_mol` of every conformer of the molecule, uncapped. The test
+   csv has K up to 727, and TD tests on all CREST conformers [E-SAMPLE-054, -003]. They are not the standardized
+   pickles, which hold RDKit-matched conformers (the wording of EXP-5 §4.3 meant "the molecules of split 1"). There
+   is no cap at 30. That cap is a training-only rule.
+4. **Fields and filters.** `smiles` = the raw GEOM key (the pickle file stem; the test csv's `smiles` column has this
+   form). `corrected_smiles` and `n_conformers` follow whichever candidate rule reproduces the **test** files. The
+   candidates are: `corrected_smiles` = GEOM `mol_dic['smiles']`, or the canonical isomeric SMILES of the first
+   conformer's `rd_mol`; and `n_conformers` = the stored conformer count, or the count after `clean_confs`.
+   - **Acceptance test (Q-P2-010 default, adopted).** Applied to split index 2, the builder must reproduce
+     `test_smiles.csv` (`smiles`, `n_conformers`, `corrected_smiles`) and the per-molecule conformer counts of
+     `test_mols.pkl` for ≥ 99 % of the 1000 rows. Residual mismatches are listed in `population.txt`.
+   - Filters are the TD/GeoMol ones [E-SAMPLE-061]: drop molecules whose conformers all differ in SMILES, and
+     molecules RDKit cannot parse. Single-fragment rules are applied only if the test files show them.
+   - **Do not** filter on ETKDG embeddability or on featurisation success at generation time. Those failures are part
+     of the protocol (65 on test [E-SAMPLE-069]) and must also occur on validation.
+   - `clean_confs` stays inside the evaluator (`evaluate_confs.py:47-54`), as for test.
+5. **Commit.** `val_smiles.csv`, the selected indices, a `population.txt` comparing K, n_rot, n_heavy, ring classes
+   and the scaffold-novel share with test, and the sha256 of `val_mols.pkl`. The pickle itself is not committed
+   (size).
+6. **Reuse.** Exp 1 and Exp 5 use the same 1000 molecules. If a stratum is too small (e.g. Exp 1's rigid stratum), an
+   experiment extends it with the next molecules of the *same* `order`, so sets stay nested, and declares the
+   extension before any result.
 
 ## 2. Metrics
 | Tier | Metric | Definition / tool |
@@ -61,6 +95,20 @@ a win (EXP-5 shows that selection can move them in opposite directions [E-SAMPLE
   intersection (secondary). A method that adds retries or a fallback embedder for failed molecules must report that
   as a separate change, with its own row.
 - "Additional failures" (NaN RMSD rows, `evaluate_confs.py:117-120`) are counted and printed.
+
+### 3.1 Conformer-level invalidity (Revised after Q-P2-011; 2026-10-16)
+A generated conformer is invalid if any of these holds: it fails sanitisation; bond perception from 3D differs from
+the input graph; it has a clash (EXP-1 §3 row 5); or its stereo differs from the input (EXP-3 / `tools/stereo_check.py`).
+- **Primary (a):** the evaluator is unchanged. Invalid conformers are scored like any other conformer, as in TD and
+  every published table. The number of invalid conformers per arm and seed is printed beside every primary row.
+- **Secondary (b), "validity-adjusted":** each invalid conformer keeps its slot, so the output count stays 2K.
+  - For recall, its RMSD column is set to +∞, so it can never cover a reference.
+  - For precision, it counts as uncovered in COV-P. AMR-P is computed over valid conformers only, with the invalid
+    count printed.
+- **(c) Dropping invalid conformers is never allowed.** It changes the sample count (recall falls, precision rises).
+  EXP-1 §3 row 5 already says "failures counted, never dropped".
+- Any method that *filters* invalid conformers before output (e.g. a selector) must declare the filter as part of
+  the method, keep the output at exactly 2K, and report it in its own row.
 
 ## 4. Strata (always printed for the primary metrics; Holm not applied, descriptive)
 - **Flexibility:** heavy rotatable bonds 0 / 1 / 2 / 3 / 4+ (QM9); DRUGS 0–3 / 4–6 / 7–9 / 10–12 / 13+ (TD Fig. 8 range

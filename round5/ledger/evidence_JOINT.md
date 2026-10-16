@@ -445,6 +445,24 @@ Sections:
 - Supports card(s): EXP-1 §2.2, §2.7, §2.8, §5.3
 - Confidence: high
 
+### E-JOINT-033
+- Claim: The round-2 "λ-blend defect" (an unsafe λ ∈ (0,1) pair replaced by another safe pair of the same molecule)
+  lives in the **test-time λ seed pickles** (`tools/make_l_seed_pickles.py`), **not** in the training paired cache. The
+  training cache (`tools/build_paired_pickles.py`) attaches each matched conformer's own GT conformer by `geom_id`,
+  verifies it against the stored DE RMSD, and keeps-and-flags `pair_ok` failures rather than replacing them. TD's
+  standardisation also excludes molecules with no rotatable bond from training.
+- Source type: code
+- Locator: code: `tools/make_l_seed_pickles.py:158`; `tools/build_paired_pickles.py:20`;
+  `torsional-diffusion/standardize_confs.py:76`.
+- Exact quote:
+  > whose pair is unsafe gets the x_lambda of one of that molecule's SAFE pairs instead (cycling over them, so
+  > conf['pair_reason']. rd_mol is untouched. Only verification failures (steps 1-3) are dropped; pair_ok failures are kept
+  > if not rotable_bonds: return log_error("no_rotable_bonds")
+- Shows vs infers: SHOWS. NEW (after Q-P1-002 / Q-P3-001). It corrects EXP-1 §7 risk 2: the training cache
+  `cache_paired` can be reused.
+- Supports card(s): EXP-1 §2.2, §7
+- Confidence: high
+
 ---
 
 ## C. Torsional Diffusion: the equations Exp 1 and Exp 4 extend
@@ -853,6 +871,45 @@ Sections:
   is the argument for anchoring the geometry factor at the RDKit L rather than at noise; and the post hoc chirality
   flip is published precedent for a stereo-repair step.
 - Supports card(s): EXP-1 §2.2, §2.5, §2.8
+- Confidence: high
+
+### E-JOINT-080
+- Claim: HarmonicFlow found it helpful to parameterise the flow network to predict the endpoint x₁ rather than the
+  velocity (x₁ − x₀).
+- Source type: paper
+- Locator: paper: `papers/related/2023_stark_harmonicflow.pdf`, PDF p. 4 (§3; the extraction interleaves two columns).
+- Exact quote:
+  > Notably, we find it helpful to parameterize v to predict x1 instead of (x1 - x0).
+- Shows vs infers: SHOWS (docking). Reused from E-ARCH-060 (VERIFIED, round 4); **re-checked on PDF p. 4 in round 5**
+  (the sentence is split across the two-column interleave). INFERENCE: x₁-prediction removes the γ′(t) divergence of
+  the stochastic-interpolant velocity target at t → 0, 1 (Q-P1-001, Q-P3-002).
+- Supports card(s): EXP-1 §2.2
+- Confidence: high
+
+### E-JOINT-081
+- Claim: PuckerFlow trains its CP flow with **x₁ prediction**, drawing t ~ U(0, 1) and regressing u_θ(x_t, t) onto x₁
+  (SI Algorithm 1).
+- Source type: paper
+- Locator: paper: `papers/related/2026_schaufelberger_puckerflow.pdf`, PDF p. 20 (SI Algorithm 1).
+- Exact quote:
+  > Algorithm 1: Flow Matching training with Cremer-Pople coordinate (x1) prediction
+- Shows vs infers: SHOWS. NEW in round 5 (the round-4 E-ARCH-039 summarised it; the heading was re-extracted here).
+  INFERENCE: the closest-prior-art geometry flow uses the same parameterisation EXP-1 V2 now adopts.
+- Supports card(s): EXP-1 §2.2
+- Confidence: high
+
+### E-JOINT-082
+- Claim: ET-Flow trains with t ~ U(0, 1) (no clipping stated in the main text), samples by Euler integration from
+  t = 0 to 1, and applies stochastic sampling only in the final range t ∈ [0.8, 1.0].
+- Source type: paper
+- Locator: paper: `papers/related/2024_hassan_etflow.pdf`, PDF p. 4 (§3.1, Eq. 5) and PDF p. 5 (§3.3).
+- Exact quote:
+  > For training, we sample (i) x0 0, x1 1, and t U (0, 1), (ii) interpolate according to Equation 2, (iii) add noise from a standard Gaussian,
+  > We apply stochastic sampling only during the final part of the inte- gration steps, specifically within the range t [0.8, 1.0].
+- Shows vs infers: SHOWS (glyphs ∼, ρ, ∈ lost in extraction). NEW in round 5. INFERENCE: the source gives no endpoint
+  clipping rule for the γ′ term. EXP-1 avoids the issue by x₁ prediction (E-JOINT-080/-081) rather than inventing an
+  ε.
+- Supports card(s): EXP-1 §2.2
 - Confidence: high
 
 ### E-JOINT-077

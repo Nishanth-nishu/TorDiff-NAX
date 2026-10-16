@@ -31,6 +31,11 @@ with a potential stereo double bond (58 acyclic C=C, 96 C=N, 3 N=N), 141 with on
 reflected half-circle kernel, or E/Z conditioning); verify stereo at every reverse step; compare with original TD and
 TD + post-hoc filter/flip. QM9 is a weak test bed (≈ 100 molecules, all C=N, partly unspecified); the primary test is
 GEOM-DRUGS with the released TD DRUGS checkpoint, plus an E/Z-enriched set from DRUGS validation molecules.
+*Revised after Q-P2-007 / Q-P3-004 (2026-10-16):* by the version-independent structural test, QM9 has **37** molecules
+with a stereo double bond, only **3** specified in the SMILES; DRUGS has **140**, **126** specified [E-CHEM-066]. The 67
+"specified" QM9 molecules under RDKit 2026.03.6 are explicit-H imines, invisible to heavy-atom RMSD. QM9 can therefore
+only test consistency with the GT ensemble plus planarity; the specified-target endpoint is a DRUGS endpoint. All
+consult decisions are collected in §9.
 
 **Novelty verdict: INCREMENTAL (engineering fix + measurement), not a headline contribution.**
 - E/Z conditioning by special graph edges: PRIOR ART — suggested by TD itself [E-CHEM-003] and implemented in LoQI
@@ -96,6 +101,12 @@ Target planar value per constrained double bond b with TD reference atoms (c, a,
 target: SMILES stereo when specified (bond stereo atoms s1, s2 and STEREOCIS/TRANS or E/Z; each of c ≠ s1, d ≠ s2
 toggles cis↔trans); otherwise (unspecified) the seed's own 3D state, flagged so these bonds are reported separately.
 `double_nonstereo` and unspecified bonds get the planarity constraint only (target set {0, π}).
+*Revised after Q-P1-006 / Q-P2-007:* (a) "specified" = the structural bond carries SMILES bond stereo when parsed with
+the pinned RDKit 2026.03.6, frozen once as a committed target table (SMILES, atom indices of `MolFromSmiles`+`AddHs`,
+φ_b on TD's reference quadruple); (b) unspecified and non-stereo bonds must NOT be pinned to the seed's isomer: RDKit's
+random isomer is wrong far more often than TD's own choice (A0 147/526 vs R0 65/526 E/Z-absent-from-GT,
+E-CHEM-061). For them, K1 does not freeze and K2-inf applies a **late planarity fold**: free until the first reverse
+step with σ ≤ 0.1π, then folded around the nearest of {0, π} at that step (§9.2).
 
 ### 3.2 Arms for the constrained operator
 Let δ_b = wrap(τ_b − φ_b) ∈ (−π, π].
@@ -141,9 +152,12 @@ labels from 3D (DB-only and chirality-only canonical SMILES, as `chem_data/ez_fl
   `drugs_default` checkpoint and data from `drugs.tar.gz` (25.3 GB; needs user approval for the download, C-BENCH
   card); (iii) **E/Z-enriched set**: DRUGS validation molecules (not used for training) with ≥ 1 specified acyclic
   stereo C=C or C=N, ≈ 500 molecules sampled with a fixed seed, plus all 141 DRUGS-test stereo molecules.
-- Primary endpoint for Exp 3 (pre-declared): **E/Z fidelity** = fraction of generated conformers whose DB-only label
+- ~~Primary endpoint for Exp 3 (pre-declared): **E/Z fidelity** = fraction of generated conformers whose DB-only label
   equals the target, on molecules with specified stereo; and planarity (fraction of constrained bonds within 20°).
-  Co-primary non-inferiority: AMR-R and COV-R on all molecules, margin +0.004 Å / −0.5 points (round-2 convention).
+  Co-primary non-inferiority: AMR-R and COV-R on all molecules, margin +0.004 Å / −0.5 points (round-2 convention).~~
+  *Revised after Q-P2-007 / Q-P1-006 / Q-P3-004:* the primary endpoints and contrast family are now defined in §9.3.
+  The E/Z label is geometric (sign of cos δ_b on TD's reference quadruple against the committed target table), and RDKit
+  3D labels are secondary. Non-inferiority is on the affected subset; the all-molecule figure is derived.
 - Secondary: AMR-R/AMR-P/COV-R@0.5/@0.1 on the stereo subset; LoQI-comparable E/Z score (ordered descriptor equality,
   E-CHEM-041); per torsion class: torsion error of nearest-GT-matched pairs; violations per reverse step; NFE.
 - Report both RDKit versions' stereo subsets (E-CHEM-060) and the 3 QM9 molecules whose GT ensembles mix E/Z.
@@ -165,7 +179,9 @@ labels from 3D (DB-only and chirality-only canonical SMILES, as `chem_data/ez_fl
 | K3 + K2-train | retrain / fine-tune | both |
 
 Step 0 (CPU, before any GPU): on R0 outputs, snap every TD-rotatable double bond of each generated conformer to its
-target planar value (oracle target from GT for unspecified bonds, labelled ORACLE) and re-score AMR-R/P. This bounds
+target planar value (oracle target from GT for unspecified bonds, labelled ORACLE; *Revised after Q-P1-006*: the
+state of that generated conformer's nearest GT conformer, the column argmin of `eval.pkl` rmsd[:, k], with the
+majority GT label as a sensitivity row) and re-score AMR-R/P. This bounds
 what any K arm can gain on QM9; if the all-molecule AMR-R ceiling is < 0.002 Å, run QM9 inference arms only and move the
 retrained arms to DRUGS.
 
@@ -202,6 +218,9 @@ stereo molecules; (7) stereo_eval reproduces ezflip_qm9.out's R0 line (65/526) f
 | DRUGS fine-tunes K2-train/K3 (20 epochs from released) | 2 × 0.3–0.9 GPU-days ≈ 15–45 per seed (round-4 BENCH estimate of 23–63 min/epoch) |
 Recommendation: Step 0 → QM9 inference arms (≈ 10 GPU-h) → DRUGS inference arms → fine-tunes only if K1/K2-inf leave a
 gap between E/Z fidelity and 100 %.
+*Revised after Q-P1-006 / Q-P1-007 / Q-P3-004:* arms are generated only on the affected molecules and spliced (§9.1).
+Stage A is QM9 ≈ 1 GPU-h plus DRUGS ≤ 4.5–5 GPU-h (1 seed, 140 + 20 molecules; §9.4). The 40–100 GPU-h DRUGS line
+applied to full 1000-molecule runs and is superseded.
 
 ## 8. Risks
 - Too few molecules on QM9 (38–103 depending on RDKit) and mostly C=N, where GT ensembles can mix isomers (3/38);
@@ -213,3 +232,85 @@ gap between E/Z fidelity and 100 %.
   recall. Report specified and unspecified separately; never use the GT isomer outside ORACLE arms.
 - Gains in AMR-R may be within noise; the primary endpoint is fidelity, AMR is non-inferiority.
 - Novelty is incremental; the contribution is the measurement plus a fix FlexiTors inherits.
+
+## 9. Decisions after the coding consults (added 2026-10-16; Q-P1-005/006/007, Q-P2-006/007, Q-P3-004/008)
+
+### 9.1 Subset generation and splicing (Q-P1-006 item 1, Q-P3-004 item 3) — ACCEPTED, with conditions
+- Every Stage A operator is the identity on molecules without a constrained bond. Generate O and every arm only on the
+  affected molecules, and splice the identical baseline conformers in for every other molecule. On those molecules
+  the paired difference is exactly 0, and the all-molecule difference equals (n_affected / N) × the subset
+  difference.
+- Conditions:
+  1. per-molecule seeding (plan_P3 §3.2);
+  2. **O is regenerated on the subset with the same seeding as the arms.** The released conformers serve only as the
+     common filler outside the subset;
+  3. a test asserts bit-identity of every arm with O on unaffected molecules, using the K1-canonical scope for that
+     arm;
+  4. absolute all-molecule levels are quoted from one source only: the released pickle for DRUGS, R_s for QM9.
+- Subsets:
+  - QM9: 102 molecules with a TD-rotatable double bond; 211 for K1-canonical;
+  - DRUGS: 155 with a TD-rotatable double bond; 160 for K1-canonical (E-CHEM-066).
+
+### 9.2 Operator details (Q-P1-006 items 4–5)
+- K2-inf seeds: `perturb_seeds` makes every torsion uniform on the circle. Folding a uniform angle gives a uniform
+  angle on I, which is the K2 prior. **Confirmed.**
+- Fold centre:
+  - specified structural bonds: φ_b from the target table;
+  - unspecified and `double_nonstereo` bonds: **not** the seed's state (P1's default is rejected), but the late
+    planarity fold of §3.1 (E-CHEM-061: RDKit's random isomer loses to TD's choice).
+- K1: freezes specified structural bonds only. Unspecified bonds stay free.
+- F-filter: if fewer than 2K valid conformers remain after 3 extra rounds, fill to 2K with the least-violating
+  invalid conformers (smallest |δ_b| − π/2). The fills are flagged and counted as failures in E/Z fidelity, and the
+  number of molecules needing a fill is reported. The reason is E-CHEM-064: output without replacement lowers recall.
+
+### 9.3 Endpoints and contrast family (Q-P1-006 item 2, Q-P2-007)
+- **E/Z label.**
+  - Primary: geometric, cis iff cos δ_b > 0 on TD's reference quadruple, against the committed target table (§3.1).
+  - Secondary: RDKit `AssignStereochemistryFrom3D` labels under both 2022.09.5 and 2026.03.6 (E-CHEM-060, -066).
+- **"Specified"** is defined by RDKit 2026.03.6 on the structural set. 2022.09.5 produced the existing numbers and
+  is kept as the reproduction subset of E-CHEM-061.
+- **Primary endpoints:**
+  - DRUGS: E/Z fidelity to target on the 126 specified molecules, and planarity (|δ_b| ≤ 20°) on all structural
+    bonds;
+  - QM9 (confirmatory): E/Z consistency with the GT ensemble on the 37 structural molecules, and planarity on the 102.
+- **Primary family:** {K1 − O, K2-inf − O, F-flip − O, F-filter − O} × {E/Z fidelity, planarity}. Paired molecule
+  bootstrap, Holm over the 8 tests, per dataset.
+- **Non-inferiority (co-primary):** the same four contrasts, on the affected subset. AMR-R margin +0.004 Å, COV-R@0.5
+  margin −0.5 points, hierarchical bootstrap. The all-molecule value is derived by §9.1.
+- **Secondary:** K1-wrong − K1 and K1-canonical − K1, plus F-filter's extra NFE.
+
+### 9.4 DRUGS Stage A scope (Q-P1-007, Q-P3-004) — download approved by the user
+- **Molecules:** the 140 structural-stereo DRUGS test molecules, plus the remainder of the 160-molecule K1-canonical
+  scope for that arm only.
+- **Arms:** O, K1, K1-wrong, K1-canonical, K2-inf, with F-flip and F-filter on O's output.
+- **Seeds:** 1 sampling seed first. E/Z fidelity is resolved at the molecule level over ≈ 140 × 2K conformers.
+  Seeds 2–3 go to O and the leading K arm if the budget remains, because they matter for AMR non-inferiority.
+- **Budget:** a hard 4.5–5 GPU-h cap, with a measured 20-molecule timing run first. Cut order: K1-canonical, then
+  K1-wrong. If K1-wrong is cut, no claim that K1's effect is "about stereo" may be made until it runs.
+- **Generation and targets:** generation runs under the cluster's RDKit 2022.09.5. Targets and "specified" come from
+  the 2026.03.6 table, and the structural test decides what is constrained.
+- **E/Z-enriched validation set:** moves to Stage B, unless budget remains. When run:
+  - ≈ 500 molecules from the validation indices of `data/DRUGS/splits/split0.npy`, the split of the released model
+    (`model_parameters.yml`: `split_path: data/DRUGS/splits/split0.npy`, papers/blogs/td_gdrive_listing.txt:59);
+  - structural and specified stereo, random selection with seed 0;
+  - 32 conformers per molecule, 1 seed, fidelity and planarity only (no AMR, so 2K is not needed);
+  - molecules whose GT ensembles mix E/Z are kept and flagged, with a sensitivity row excluding them.
+
+### 9.5 What FlexiTors (Exp 1) inherits (Q-P1-005, Q-P2-006, Q-P3-008)
+- **Pre-declared rule.** After Exp 3 Stage A, Exp 1's V2 sampler inherits the inference arm (K1 or K2-inf) with the
+  highest E/Z fidelity among those passing subset non-inferiority (§9.3). DRUGS decides, or QM9 if DRUGS is missing.
+  If the fidelity CIs overlap, K1 wins: no NFE cost and no retraining. F-arms are not inherited, because their extra
+  NFE would confound Exp 1's compute comparisons.
+- **No K2 transform in V2 training** unless Exp 3's K2-train is tested first. Both inherited operators are
+  inference-only, so V2 training does not wait for Exp 3.
+- **Applying the operator in Exp 1.** It is applied identically to every arm, the A1 baseline included, so it cancels
+  in Exp 1's contrasts. Exp 1 also reports every primary arm without it.
+- **Stage A M1** (τ frozen) measures E/Z and planarity only, with no E/Z guard.
+  - Reason: the P_W rows of TD-rotatable double bonds keep those dihedrals fixed to first order (EXP-1 §2.2 after
+    D-004).
+  - A second guard would add backtracks that confound the Gate-0 ring metric.
+  - Pre-declared trip-wire: if M1 changes the E/Z state relative to the seed in > 1 % of conformers of the structural
+    subset at any σ_b, Stage B adds the guard (|δ_b| > π/2 → backtrack). The 1 % threshold is a decision rule, not a
+    sourced number.
+- **One classifier.** `flexitors/geometry/torsion_types.py` (§3.1) applies the structural test and is the single
+  source of truth for Exp 1 and Exp 3. RDKit's stereo flag is kept only as a secondary column.

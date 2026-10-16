@@ -521,6 +521,27 @@ TD's `data/DRUGS/test_smiles.csv` not byte-checked: the 25 GB archive was not do
 - Supports: EXP-2 §0, §2, §4
 - Confidence: high (floor); medium (inference)
 
+### E-CHEM-066
+- Claim (added 2026-10-16 for consults Q-P1-006/007, Q-P2-007, Q-P3-004): with the version-independent structural
+  test (TD-rotatable, bond order 2, both atoms ≥ 2 heavy-atom neighbours), the QM9 test set has 37 molecules with a
+  stereo double bond, of which only 3 are specified in the SMILES; GEOM-DRUGS test has 140, of which 126 are specified.
+  The "67 specified" QM9 molecules of E-CHEM-050 are imines written with an explicit H ([H]/N=C…): RDKit 2026.03.6
+  counts the explicit H as a stereo neighbour, but the N has one heavy neighbour, so the bond is invisible to
+  heavy-atom RMSD. K1-canonical scope (TD-rotatable double or triple bond): QM9 211 molecules, DRUGS 160.
+- Source type: our-data
+- Locator: our-data: round5/ledger/chem_data/structural_subsets.out lines 1-2 (script structural_subsets.py);
+  round5/ledger/chem_data/slash_check.out lines 1-2
+- Exact quote:
+  > molecules 996; TD-rotatable double bond 102; structural stereo DB 37; specified in SMILES 3; TD-rotatable triple bond 113; double or triple (K1-canonical scope) 211
+  > molecules 1000; TD-rotatable double bond 155; structural stereo DB 140; specified in SMILES 126; TD-rotatable triple bond 6; double or triple (K1-canonical scope) 160
+  > molecules "specified" under RDKit 2026.03.6: 67 ; of these with a / or \ in the SMILES: 67
+- Shows vs infers: SHOWS. The structural count (37) agrees with the cluster's RDKit 2022.09.5 perception (38,
+  E-CHEM-060), so the version gap is the explicit-H imines. INFERENCE: on QM9, fidelity to a SMILES-specified target
+  can be measured on 3 molecules only; QM9's usable E/Z endpoint is consistency with the GT ensemble. DRUGS (126
+  specified) is the test bed for the specified-stereo endpoint.
+- Supports: EXP-3 §0, §3.1, §4 (Revised after Q-P2-007)
+- Confidence: high
+
 ## D. Prior art: matching-free / distribution / energy objectives (Exp 2)
 
 ### E-CHEM-014

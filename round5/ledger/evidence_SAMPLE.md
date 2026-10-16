@@ -10,8 +10,8 @@ Conventions
   the PDF text on 2026-10-15 where marked "re-checked".
 - Computations are marked [SAMPLE-calc]; scripts in the session scratchpad
   (`C:\Users\HP\AppData\Local\Temp\claude\C--Users-HP-Desktop-tor-diff\ebb0c292-63dd-41c3-ab3b-16fa6f4d7fcc\scratchpad\sample\`).
-- Status: P1 complete 2026-10-15; 61 entries (A 001–005, B 010–015, C 040–043, D 030–034, E 020–025, G 050–053,
-  F 061–091 reused from BENCH). Spec files: round5/specs/EXP-5.md, round5/specs/EVAL.md.
+- Status: P1 complete 2026-10-15; 68 entries (A 001–005, B 010–015, C 040–043, D 030–034, E 020–026, G 050–053,
+  F 061–091 reused from BENCH; H 054–058 and D 035 added in the consult round 2026-10-16). Spec files: round5/specs/EXP-5.md, round5/specs/EVAL.md.
 
 ## A. Prior art: steps / budgets in torsional diffusion
 ### E-SAMPLE-001
@@ -278,6 +278,7 @@ dropped). Values are on this success set (failures excluded), NOT the TD convent
 - Shows vs infers: SHOWS. Caveat: every allocator is capped at the pool size N_i = 6K_i (the cap binds for 24–71 % of molecules under uniform, column "share at pool cap"), so the cap leaks K into all rows and the oracle headroom is a lower bound; uncapped curves need a larger sample pool (EXP-5 §5 step S0). Expected precision is unchanged by random-subset reallocation (the expectation of a per-sample mean does not depend on n), so these allocations trade nothing on COV-P/AMR-P in expectation.
 - Supports: EXP-5 §3 (headroom), §5 (baselines must include uniform and static rules); EVAL §1
 - Confidence: high (calculation); medium (cap caveat)
+- Revised after D-101 (V5, 2026-10-16): "uniform (no K)" is relabelled "uniform with cap redistribution (K-informed)": the cap N_i = 6K_i tells every allocator which molecules saturate. The strictly K-free figure is E-SAMPLE-026. The static and two-stage rules were cross-fitted on other-fold TEST curves, so 0.1442 / 0.1443 are analysis numbers, not deployable baselines.
 
 ### E-SAMPLE-023
 - Claim: [SAMPLE-calc] ORACLE headroom over the best K-free static rule at matched compute is small: AMR-R −0.0042 Å (0.1442 → 0.1400) and COV-R@0.5 +0.44 points at 1x Σ2K; −0.0080 Å / +1.41 points at 0.5x; −0.0190 Å / +3.74 points at 0.25x. A two-stage GT-free signal controller (Good-Turing singleton fraction of rotamer strings on 6 stage-1 samples, cross-fitted) reaches 0.1443 / 0.1772 / 0.2365, i.e. it recovers none of the headroom at 1x and 0.5x; a purely sequential Good-Turing controller is worse than uniform (0.1694 at 1x).
@@ -289,6 +290,18 @@ dropped). Values are on this success set (failures excluded), NOT the TD convent
 - Shows vs infers: SHOWS. INFERENCE: an adaptive controller has at most ≈ 0.004–0.008 Å AMR-R (≈ 3–5 %) to gain over a static rule at TD-like budgets on QM9, and simple GT-free signals do not find it; DRUGS (more flexible, wider K spread) may have more headroom and must be measured before any claim.
 - Supports: EXP-5 §0, §3, §11 (kill criterion)
 - Confidence: high (calculation); medium (transfer to DRUGS)
+- Revised after D-101 (V5, 2026-10-16): the INFERENCE "at most ≈ 0.004–0.008 Å" is WITHDRAWN. Because the cap removes exactly the saturation information an adaptive controller must discover, the capped oracle − static gap (0.0042 / 0.0080 / 0.0190 Å) is a LOWER bound on the uncapped headroom, not an upper bound. The uncapped value is to be recomputed on the K-free 128-sample block (EXP-5 §5 S0, ORACLE, CPU).
+
+### E-SAMPLE-026
+- Claim: [SAMPLE-calc] (added after D-101) A strictly K-free uniform rule (n per molecule fixed, capped at the pool N_i = 6K_i with NO redistribution, i.e. samples beyond the pool assumed worthless) gives AMR-R 0.1617 Å / COV-R@0.5 94.90 % at n = 27 while using only 68.9 % of the Σ2K budget (54 % of molecules capped); at n = 55 (105 % of budget) 0.1432 / 97.12 %. TD's 2K rule at 100 % of the budget gives 0.1783 / 94.93 % (E-SAMPLE-020).
+- Source type: our-data
+- Locator:
+  - our-data: round5/ledger/sample_data/strictcap.out (script strictcap.py on curves.pkl); reproduces V5's `capcheck.py` figure quoted in round5/ledger/disputes.md D-101
+- Exact quote:
+  > "uniform n=27: budget used/B=0.689 capped share=0.540 AMR-R=0.1617 COV-R@0.5=0.9490"
+- Shows vs infers: SHOWS. INFERENCE: the direction of E-SAMPLE-022 survives without any K leak: a K-free uniform rule beats TD's K-proportional rule on AMR-R with 31 % less compute (pessimistic for uniform, since capped molecules get no further samples). The 0.1450 figure of E-SAMPLE-022 is "uniform with cap redistribution (K-informed)".
+- Supports: EXP-5 §0, §3; EVAL §1; D-101
+- Confidence: high
 
 ### E-SAMPLE-024
 - Claim: [SAMPLE-calc] GT-free per-molecule signals measured on the first batch correlate with the oracle gain (1x → 3x AMR-R) about as well as the static rotatable-bond count: Spearman 0.451 (Good-Turing singleton fraction of rotamer strings, 6 samples), 0.446 (distinct rotamers in 2K samples), 0.441 (MMFF94 single-point energy SD), 0.474 (n_rot), 0.273 (K, oracle).
@@ -311,6 +324,7 @@ dropped). Values are on this success set (failures excluded), NOT the TD convent
 - Shows vs infers: SHOWS (single 2x/3x pools from 3 sampling seeds; no CI yet). INFERENCE: oversample-then-select is Zhou et al.'s RDKit + clustering idea applied to TD (E-SAMPLE-082/083, prior art) and Ma et al.'s best-of-N with a verifier (E-SAMPLE-013); an energy-filter + diversity selector is a cheap, GT-free Pareto improvement over random at 2x proposals and must be compared at matched NFE with PG (E-SAMPLE-030), which needs no extra proposals.
 - Supports: EXP-5 §3, §4 (selector), §6
 - Confidence: medium (point estimates; paired CIs to be computed in the experiment)
+- Revised after D-102 (V5, 2026-10-16): TEST-SET EXPLORATORY. The selector was picked on the test set from 4 candidates × c ∈ {2, 3} with 3 pool orders and no CI; at c = 3 it no longer improves every metric (COV-P@0.5 91.04 < 91.20). At c = 2, "MMFF-filter 50 % + FPS" keeps exactly 2K proposals and is identical to "lowest MMFF E" (degenerate row). The comparison is at matched OUTPUT, not matched compute vs P0 (2x sampling NFE + MMFF single points); the NFE control is random-from-2x (P1). The selector is re-chosen on validation (EXP-5 §4.4).
 
 ## G. Our data for the shared evaluation protocol
 ### E-SAMPLE-050
@@ -355,6 +369,73 @@ dropped). Values are on this success set (failures excluded), NOT the TD convent
   > "User time (seconds): 1173.38" … "Elapsed (wall clock) time (h:mm:ss or m:ss): 14:18.22"
 - Shows vs infers: SHOWS. INFERENCE: ≈ 0.034 s wall per conformer including RDKit seeding, so a 3x-sample QM9 pool costs ≈ 45 min of one GPU; Exp 5 is cheap on QM9. The 25,330 count is the sum of n_model over evaluated molecules in eval.pkl (E-SAMPLE-020 inputs).
 - Supports: EXP-5 §10; EVAL §8
+- Confidence: high
+
+## H. Added in the consult round (2026-10-16)
+### E-SAMPLE-054
+- Claim: [SAMPLE-calc] The QM9 test csv used by every arm has no cap on K: n_conformers ranges 1–727 (median 4, mean 13.7), 86 molecules have K > 30 and 80 have 4K > 128; Σ2K = 27,462 over the 1000 rows. Pool totals: 4K → 54,924 conformers (2.0 x Σ2K); max(128, 4K) → 151,088 (5.5x); max(128, 12K) → 232,804 (8.5x); fixed 128 → 128,000 (4.7x).
+- Source type: our-data
+- Locator:
+  - our-data: round5/ledger/sample_data/pool_sizes.out (from a read-only copy of gnode118 `/scratch/nishanth.r/tordiff/data/QM9/test_smiles.csv`)
+- Exact quote:
+  > "K>32: 80  4K>128: 80 max K 727" … "max(128,4K) 151088 5.5 x sum2K"
+- Shows vs infers: SHOWS (last line of pool_sizes.out: "rows 1000 K>30: 86 median K 4.0 mean K 13.731 sum2K 27462"). INFERENCE: a fixed 128-sample pool does not cover c = 2 Track-P demand (4K) for 80 molecules; the "max K = 30" figure in Q-P2-008 comes from a capped local-structure csv, not from the test csv. GPU estimates use the 0.034 s/conformer anchor of E-SAMPLE-053.
+- Supports: EXP-5 §5, §10; Q-P1-008, Q-P2-008, Q-P3-005
+- Confidence: high
+
+### E-SAMPLE-055
+- Claim: TD computes its per-conformer `mmff_energy` and its pre/post-MMFF relaxations with the MMFF94s variant.
+- Source type: code
+- Locator:
+  - code: torsional-diffusion/diffusion/likelihood.py:19-20; torsional-diffusion/diffusion/sampling.py:29
+- Exact quote:
+  > "energy = AllChem.MMFFGetMoleculeForceField(mol, AllChem.MMFFGetMoleculeProperties(mol, mmffVariant='MMFF94s')).CalcEnergy()" … "res = AllChem.MMFFOptimizeMoleculeConfs(mol, mmffVariant='MMFF94s')"
+- Shows vs infers: SHOWS. INFERENCE: the selector should reuse TD's MMFF94s single point (one force field in the programme); the test-set prototype (`sample_data/signals.py`) used RDKit's default MMFF94, a difference to note in conformance.
+- Supports: EXP-5 §4.2; Q-P1-009
+- Confidence: high
+
+### E-SAMPLE-056
+- Claim: TD's PG implementation couples only the conformers of one DataLoader batch: the repulsion term is computed inside the per-batch loop with n = data.num_graphs.
+- Source type: code
+- Locator:
+  - code: torsional-diffusion/diffusion/sampling.py:123 (DataLoader, batch_size), :176 (batch loop), :207 (`n = data.num_graphs`), :229 (repulsion / n)
+- Exact quote:
+  > "for batch_idx, data in enumerate(loader):" … "n = data.num_graphs"
+- Shows vs infers: SHOWS. With E-SAMPLE-033 (PG caps its joint set at 128 and runs batches of 128 on DRUGS) and the README's `--batch_size 128` for every PG command (E-SAMPLE-058), per-128 coupling IS the published PG protocol.
+- Supports: EXP-5 §5 (PG arms); Q-P1-009, Q-P2-009, Q-P3-006
+- Confidence: high
+
+### E-SAMPLE-057
+- Claim: The round-2 analysis pre-declared a non-inferiority margin of 0.004 Å AMR-R, judged with a hierarchical bootstrap.
+- Source type: code
+- Locator:
+  - code: tools/analyze_round2.py:14, :57-58
+- Exact quote:
+  > "S2 margin : non-inferiority of B6 to CTRL_base on RDKit L, margin 0.004 A AMR-R, judged with a HIERARCHICAL bootstrap"
+- Shows vs infers: SHOWS. INFERENCE: the same 0.004 Å margin is reused for the precision side-condition of the selector choice (AMR-P), so no new margin is invented; the COV-P margin (0.5 pt) is a new, declared choice (UNSOURCED, stated as such).
+- Supports: EXP-5 §4.4; Q-P1-009, Q-P2-009, Q-P3-005
+- Confidence: high
+
+### E-SAMPLE-058
+- Claim: The TD README gives four PG settings (permutation-invariant or not × minimising recall or precision error), all for the DRUGS model `workdir/drugs_default` on the DRUGS test csv with `--batch_size 128`, 20 steps; none for QM9.
+- Source type: code (repo README)
+- Locator:
+  - code: torsional-diffusion/README.md:73-88
+- Exact quote:
+  > "python generate_confs.py --tqdm --batch_size 128 --no_energy --inference_steps=20 --model_dir=workdir/drugs_default --test_csv=data/DRUGS/test_smiles.csv --pg_invariant=True"
+- Shows vs infers: SHOWS (quote is the prefix of README line 78). INFERENCE: on QM9 PG has no published setting, so PG gets the same validation-selection budget as our selector (EXP-5 §5).
+- Supports: EXP-5 §5; Q-P1-009, Q-P2-009, Q-P3-006
+- Confidence: high
+
+### E-SAMPLE-035
+- Claim: PG's authors state that fixed-potential PG parameters can be fit cheaply at inference time and that a too-large guidance weight harms sample quality.
+- Source type: paper
+- Locator:
+  - paper: papers/related/2023_corso_particle_guidance.pdf, PDF p. 21, App. B.2 "Other limitations"
+- Exact quote:
+  > "in fixed potential particle guidance, its parameters can be easily fit at inference time, therefore, it is typically relatively inexpensive to test the optimal value of the guidance"
+- Shows vs infers: SHOWS. INFERENCE: tuning the four README settings on the QM9 validation subset is the authors' own recommended practice, and gives PG the same tuning budget as the selector.
+- Supports: EXP-5 §5; Q-P1-009, Q-P2-009, Q-P3-006
 - Confidence: high
 
 ## F. Evaluation protocol (reused from round-4 BENCH; quotes RE-CHECKED 2026-10-15)

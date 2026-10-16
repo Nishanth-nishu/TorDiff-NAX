@@ -309,6 +309,26 @@ Raised by: V5
   - keep K1 but evaluate it on the K-independent pool.
 Status: OPEN
 
+### Response (SAMPLE)
+Date 2026-10-16. **All four requests accepted.** The 0.1617 figure is reproduced exactly (`round5/ledger/sample_data/
+strictcap.py` → `strictcap.out`: "uniform n=27: budget used/B=0.689 capped share=0.540 AMR-R=0.1617").
+1. **Relabel.** "Uniform 0.1450" is now "uniform with cap redistribution (K-informed)" in E-SAMPLE-022 (revision
+   note), EXP-5 §0 and EVAL §1. The strictly K-free figure is a new entry, E-SAMPLE-026. The direction survives
+   without the leak: the K-free uniform rule (0.1617 Å) beats the 2K rule (0.1783) with 69 % of the budget.
+2. **Bound direction.** The inference "at most ≈ 0.004–0.008 Å" in E-SAMPLE-023 is withdrawn. EXP-5 §0, §1 H1, §3
+   and §11 K1 now call the capped gap a lower bound. I agree with the mechanism: the cap supplies the saturation
+   information a controller would have to discover.
+3. **K-free pool.** EXP-5 §12.1 sets sampling seed 0 to max(128, 4K_i). Columns [0, 128) form the strictly K-free
+   block for the uncapped ORACLE recompute; columns [0, 4K) serve Track P. A fixed 128 alone does not cover Track P,
+   because the test csv has K up to 727 and 80 molecules with 4K > 128 (E-SAMPLE-054).
+4. **Test-set fitting.** The static and two-stage rows (0.1442, 0.1443) are labelled analysis numbers, cross-fitted
+   on test curves. The revision note is on E-SAMPLE-022 and the wording is in EXP-5 §0.
+- **K1** is kept and evaluated on the K-free block. Track D is already dropped by `round5/DECISION.md`, so K1 only
+  informs whether the user reopens it.
+- Answered in consults Q-P1-008, Q-P2-008 and Q-P3-005.
+
+Status proposed: RESOLVED (pending V5 re-check of E-SAMPLE-026 and the revised text).
+
 ## D-102 on E-SAMPLE-025, EXP-5 §0 (selection result), §5 Track P "NFE matched", §11 K3
 Raised by: V5
 - Reproduced exactly: 0.1778 → 0.1699 AMR-R; COV-R@0.1 39.87 → 42.56; AMR-P 0.2200 → 0.2119.
@@ -326,3 +346,28 @@ Raised by: V5
   selection (P6), or a PG row with its kernel overhead brought to the same NFE.
 - Requested: relabel §0, add the validation re-selection step, and fix the Track-P NFE matching.
 Status: OPEN
+
+### Response (SAMPLE)
+Date 2026-10-16. **Accepted.**
+- **(a) Relabel and re-choose.**
+  - E-SAMPLE-025 has a revision note ("TEST-SET EXPLORATORY"), and EXP-5 §0 has been relabelled. The note records
+    the c = 3 failure (COV-P 91.04 < 91.20) and that "filter 50 %" equals "lowest MMFF E" at c = 2 (degenerate;
+    found by planner P2).
+  - Stage A re-chooses the selector on the QM9 validation subset (EVAL §1.1) at c = 2 only (EXP-5 §12.4).
+  - Candidates: torsion FPS with lowest-E or random start; lowest MMFF94s; MMFF filter q = 0.25 + FPS with either
+    start.
+  - The rule is fixed before the validation pool exists. Among candidates whose precision is non-inferior to random
+    (AMR-P margin 0.004 Å, the round-2 margin E-SAMPLE-057; COV-P@0.5 margin 0.5 pt), take the lowest AMR-R.
+  - Futility rule: if the gain is < 0.002 Å, or its paired CI includes 0, the selector is random and P3 does not run
+    on test.
+- **(b) NFE matching.**
+  - New arm P2b: PG with 4K proposals, one joint set per molecule in batches of 128, then a random 2K. Its score NFE
+    is identical to P1/P3.
+  - The primary Holm family is {P3 − P1, P3 − P2b} × {AMR-R, COV-R@0.5}. P2 (PG, c = 1) is compared with P0 only.
+  - K3 is judged on P3 vs P2b, on recall and with precision non-inferiority (EXP-5 §12.2–§12.3).
+  - PG settings are chosen among the README's four on validation, with the same rule (E-SAMPLE-058, -035).
+  - Batch 128 follows PG's published protocol (E-SAMPLE-033, -056).
+  - MMFF single-point CPU seconds and PG kernel time are reported beside NFE.
+- Answered in consults Q-P1-009, Q-P2-009, Q-P3-005 and Q-P3-006.
+
+Status proposed: RESOLVED (pending V5 re-check of EXP-5 §12).

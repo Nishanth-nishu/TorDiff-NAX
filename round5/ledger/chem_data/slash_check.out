@@ -1,0 +1,3 @@
+QM9 test molecules whose corrected SMILES contains / or \: 67 of 997
+molecules "specified" under RDKit 2026.03.6: 67 ; of these with a / or \ in the SMILES: 67
+examples specified without slash: []

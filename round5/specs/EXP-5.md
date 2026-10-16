@@ -1,22 +1,29 @@
 # EXP-5: Uncertainty-aware adaptive torsional diffusion (matched-compute sample allocation and selection)
 
-Author: R-SAMPLE, round 5. Status: P1 spec complete 2026-10-15 (not yet verified). Evidence IDs refer to
+Author: R-SAMPLE, round 5. Status: P1 spec 2026-10-15; **revised 2026-10-16 after V5 disputes D-101/D-102 and
+consults Q-P1-008…010, Q-P2-008…011, Q-P3-005…007**. The Stage A protocol is §12; it supersedes §5–§6 where they
+differ (Track D and the allocator are dropped by `round5/DECISION.md`). Evidence IDs refer to
 `round5/ledger/evidence_SAMPLE.md`; analysis scripts and outputs in `round5/ledger/sample_data/` (README there).
 Shared evaluation rules are in `round5/specs/EVAL.md` and are not repeated here.
 
 ## 0. Verdict in one paragraph
 
-On QM9, an adaptive per-molecule sample allocator has little to win over a good *static* rule. With the released TD
-model and pooled 3 x 2K samples per molecule, an ORACLE allocator that knows each molecule's true recall curve reaches
-AMR-R 0.1400 Å at TD's total budget (Σ 2K_i). That is −0.038 Å against TD's own 2K rule (0.1784), but only −0.0042 Å
-against a cross-fitted static rotatable-bond rule (0.1442) [E-SAMPLE-022, E-SAMPLE-023]. The gap is −0.0080 Å at half
-the budget and −0.019 Å at a quarter. The GT-free online signals we could compute offline (Good–Turing missing mass,
+*Revised after D-101/D-102 (2026-10-16).* With the released TD model and pooled 3 x 2K samples per molecule (pool
+capped at 6K_i), an ORACLE allocator that knows each molecule's true recall curve reaches AMR-R 0.1400 Å at TD's total
+budget (Σ 2K_i). That is −0.038 Å against TD's own 2K rule (0.1784) and −0.0042 Å against a static rotatable-bond rule
+cross-fitted on *test* curves (0.1442, an analysis number) [E-SAMPLE-022, E-SAMPLE-023]. The gap is −0.0080 Å at half
+the budget and −0.019 Å at a quarter. **These gaps are capped LOWER bounds** (V5, D-101). The cap tells every
+allocator which molecules saturate, which is exactly what an adaptive controller would have to discover. The uncapped
+value is recomputed on a K-free 128-sample block (§12, ORACLE, no decision attached). The GT-free online signals we could compute offline (Good–Turing missing mass,
 distinct rotamers, MMFF energy spread) recover none of that gap; they correlate with the oracle gain no better than
-n_rot does (Spearman 0.44–0.45 against 0.47) [E-SAMPLE-024]. Most of the "adaptive" headroom is an artefact of TD's
-2K rule, which uses the test-set count K and gives single-conformer molecules only 2 samples [E-SAMPLE-003,
-E-SAMPLE-022]. Extra compute pays more through **selection** at a fixed 2K output: dropping the 25 % highest-MMFF
-proposals and then taking torsion farthest points improves every metric at 2x proposals (AMR-R 0.1778 → 0.1699,
-COV-R@0.1 39.9 → 42.6 %, AMR-P 0.2200 → 0.2119) [E-SAMPLE-025]. **Novelty: INCREMENTAL at best.** The allocation
+n_rot does (Spearman 0.44–0.45 against 0.47) [E-SAMPLE-024]. TD's 2K rule uses the test-set count K and gives single-conformer
+molecules only 2 samples, which makes it a poor allocator [E-SAMPLE-003]. Even a strictly K-free uniform rule, with no
+redistribution of capped budget, reaches 0.1617 Å using 69 % of the budget [E-SAMPLE-026]. (The earlier "uniform
+0.1450" redistributes the capped budget and is therefore K-informed [E-SAMPLE-022, revision note].) Extra compute pays more through **selection** at a fixed 2K output: dropping the 25 % highest-MMFF
+proposals and then taking torsion farthest points improved every metric at 2x proposals (AMR-R 0.1778 → 0.1699,
+COV-R@0.1 39.9 → 42.6 %, AMR-P 0.2200 → 0.2119) [E-SAMPLE-025]. This result is **test-set exploratory**: the selector
+was picked on test, there is no CI, and the output is matched but P0 uses half the NFE. Stage A re-chooses the
+selector on validation and compares it with an NFE-matched PG arm (§12). **Novelty: INCREMENTAL at best.** The allocation
 algorithm (water-filling or greedy over concave gains) is GAINS [E-SAMPLE-010/011]. Uncertainty-driven adaptive compute
 is AdaDiff and Seij et al. [E-SAMPLE-012, -015]. Ensemble-growth stopping is CREST [E-SAMPLE-042], rotor-based caps are
 OMEGA [E-SAMPLE-040], and Good–Turing convergence is Koukos and Glykos [E-SAMPLE-043]. Oversample-and-select is Zhou
@@ -33,8 +40,9 @@ contribution.
 - **Q.** At a matched total compute budget, does allocating TD sampling compute per molecule from GT-free signals,
   and selecting the reported conformers from the proposals, beat the best fixed-budget rule?
 - **H1 (allocation).** A controller using online signals beats the strongest static rule (rotor-strata, fitted on
-  validation) on AMR-R and COV-R@0.5 at equal NFE. Prior on QM9 from §3: an effect of at most ≈ 0.004 Å (oracle
-  bound), and probably ≈ 0.
+  validation) on AMR-R and COV-R@0.5 at equal NFE. *Revised after D-101:* the capped oracle gap (0.0042 Å) is a
+  lower bound, so §3 gives no upper bound for H1. The GT-free signals tested recovered none of the capped gap
+  [E-SAMPLE-023, -024]. **H1 is not tested in Stage A** (`round5/DECISION.md`).
 - **H2 (selection).** At a fixed 2K output and c = 2 proposals per output slot, a GT-free selector beats random
   selection (= TD) on recall *without losing precision*, and beats PG at matched NFE. Prior from §3: about −0.008 Å
   AMR-R vs random. Untested against PG.
@@ -87,7 +95,8 @@ GT, analysis only.
 | 0.5 | 0.2414 / 87.6 | 0.1804 / 92.7 | 0.1767 / 93.9 | 0.1772 / 93.8 | 0.2005 / 91.6 | 0.1687 / 95.3 | −0.008 Å / +1.4 pt |
 | 1.0 | 0.1784 / 95.1 | 0.1450 / 97.0 | 0.1442 / 97.7 | 0.1443 / 97.7 | 0.1694 / 95.6 | 0.1400 / 98.1 | −0.004 Å / +0.4 pt |
 
-   **Headline number (the bound for Exp 5):** at TD's budget the oracle allocator gains 0.0042 Å AMR-R (2.9 %) and
+   *Revised after D-101: this is a capped LOWER bound, not a bound from above; the uncapped value comes from §12.1.*
+   **Headline number (capped):** at TD's budget the oracle allocator gains 0.0042 Å AMR-R (2.9 %) and
    0.44 COV-R@0.5 points over the best static rule. The bound is 0.008 Å at half budget. Caveat: all rows are capped at
    the pool size 6K_i, and the cap binds for 24–71 % of molecules under uniform allocation. The cap leaks K into every
    row and makes these lower bounds. Step S0 (§5) removes the cap.
@@ -123,7 +132,8 @@ to NFE; they are never hidden. RDKit seeding is reported as CPU time (EVAL §8).
   binned in 3 × 120°) [E-SAMPLE-043]; (b) the new-mode rate of the last batch, i.e. the share of its rotamer strings
   unseen before. This is CREST's ensemble-growth criterion [E-SAMPLE-042]. (c) The mean PG kernel similarity
   `exp(−‖Δτ‖²/h)` with PG's torsion wrapping (`sampling.py:217-221`) [E-SAMPLE-031].
-- **S3 energy**: MMFF94 single-point energy of each final conformer (RDKit; xtb 6.7.1 GFN2 single point on gnode118
+- **S3 energy**: MMFF94s single-point energy of each final conformer (*revised after Q-P1-009*: TD's own
+  `mmff_energy`, `diffusion/likelihood.py:19-20` [E-SAMPLE-055]; the test-set prototype used MMFF94; RDKit; xtb 6.7.1 GFN2 single point on gnode118
   as the alternative; 0.135 s median per QM9 optimisation, single points cheaper [E-SAMPLE-091]). Signals: the drop in
   best energy over the last batch, and the share of samples inside a 10 kcal/mol window (OMEGA's default window
   [E-SAMPLE-040]).
@@ -170,6 +180,8 @@ see K_i or GT. Track D never uses K_i. All GT-based curves in §3 are ORACLE ana
 - **Track D arms** (budget B ∈ {0.5, 1, 2} × Σ2K NFE-equivalent, 20 steps): D0 TD 2K rule (reference; uses K);
   D1 uniform n; D2 static rotor rule (OMEGA-style ranges, fitted on validation); D3 static S0 gain model; D4 the full
   controller (S0–S4); D5 = D4 with random batch order (control for adaptivity); ORACLE allocator (analysis row).
+- *Superseded by §12.2 (Revised after D-102): P2 at c = 1 is not NFE-matched to c = 2 arms; the NFE-matched PG
+  comparator is P2b (PG 4K → random 2K).*
 - **Track P arms** (output exactly 2K_i; proposals c ∈ {1, 2} × Σ2K; NFE matched): P0 TD (c = 1); P1 TD c = 2 +
   random selection (equals P0 in expectation; NFE control); P2 TD + PG at c = 1, with the tuned README
   hyper-parameters (`generate_confs.py:38-46`), and PG's NFE overhead (kernel cost) reported; P3 uniform c = 2 +
@@ -194,7 +206,7 @@ see K_i or GT. Track D never uses K_i. All GT-based curves in §3 are ORACLE ana
 | selector: random / FPS only / energy only / filter + FPS | selection components | Where Track P's gain comes from |
 | PG on/off | within-set diversity | Additivity with PG |
 
-Pre-declared primary contrasts (Holm family): D4 − D2 and D4 − D3 at B = 1x; P5 − P3, P5 − P2 and P3 − P0 at c = 2.
+*Superseded by §12.3 for Stage A (Revised after D-102).* Original pre-declared primary contrasts (Holm family): D4 − D2 and D4 − D3 at B = 1x; P5 − P3, P5 − P2 and P3 − P0 at c = 2.
 Each is tested on AMR-R and COV-R@0.5 (TD convention), so 10 tests. Everything else is secondary or descriptive.
 
 ## 7. Evaluation
@@ -255,7 +267,9 @@ QM9 total ≈ 20 GPU-h (about one node-day on a single GPU); DRUGS ≈ 40–80 G
 ## 11. Risks and kill criteria
 
 - **K1 (after S0, QM9):** uncapped oracle − static gap at 1x < 0.003 Å AMR-R → drop Track D and report the
-  negative result (it is still a useful protocol finding). Our capped estimate is 0.0042 Å [E-SAMPLE-023].
+  negative result (it is still a useful protocol finding). Our capped estimate is 0.0042 Å [E-SAMPLE-023], a lower
+  bound. *Revised after D-101:* the user has already dropped Track D (`round5/DECISION.md`). K1 is evaluated on the
+  K-free 128 block (§12) and only informs whether the user should reopen Track D.
 - **K2 (validation):** if D4 does not beat D3 on validation by ≥ 0.002 Å with a paired CI excluding 0, do not run
   D4 on test. Run only the static and selection arms.
 - **K3 (Track P):** if P3/P5 do not beat PG (P2) at matched NFE on recall *and* precision, the selector is reported
@@ -270,3 +284,85 @@ QM9 total ≈ 20 GPU-h (about one node-day on a single GPU); DRUGS ≈ 40–80 G
   the same for S1.
 - **Risk: novelty.** Every component has prior art (§2). The contribution is at most an empirical, matched-compute
   study. The novelty red-teamer must rule before any claim.
+
+## 12. Stage A protocol (Revised after D-101, D-102 and consults Q-P1-008…010, Q-P2-008…011, Q-P3-005…007; 2026-10-16)
+
+Scope: the selection part of Exp 5 only (`round5/DECISION.md`): QM9, the released model, 20 steps, c = 2 only.
+
+**12.1 Pools (D-101).** The QM9 test csv does not cap K: K runs from 1 to 727, and 80 molecules have 4K > 128
+[E-SAMPLE-054].
+- **Sampling seed 0.** One pool of N_i = max(128, 4K_i) conformers per molecule (151,088 conformers, ≈ 1.4 GPU-h).
+  - Columns [0, 2K_i) are P0.
+  - Columns [0, 4K_i) are the proposals for P1 and P3.
+  - Columns [0, 128) form a **K-free block**. Only the ORACLE headroom recompute reads it: allocation curves as in
+    `curves.py`/`alloc2.py`, uniform, the static n_rot rule cross-fitted on test (labelled ORACLE-informed), and
+    oracle greedy, with the cap-binding share printed. The recompute is CPU-only. It closes D-101 with an uncapped
+    number and carries no decision unless the user reopens Track D (K1).
+- **Sampling seeds 1 and 2.** N_i = 4K_i each (≈ 0.5 GPU-h each). Replicates are independent seeds, not disjoint
+  blocks of one pool. Q-P2-008's 12K proposal assumed "max K = 30"; that holds for a capped local-structure csv, not
+  for the test csv [E-SAMPLE-054].
+- A test asserts that every arm reads a prefix of its pool and never reads the pool length.
+
+**12.2 Arms.** Every arm outputs exactly 2K_i. TD and PG arms at c = 2 have equal score NFE. PG kernel time and MMFF
+single-point CPU seconds are reported, not folded into NFE.
+
+| Arm | Proposals | Output | Role |
+|---|---|---|---|
+| P0 | TD 2K | all | reference (1x NFE) |
+| P1 | TD 4K (same proposals as P3) | random 2K | NFE control for the selector |
+| P2 | PG 2K | all | PG at its published budget; compared with P0 only |
+| P2b (P2's "P6r") | PG 4K, one joint set per molecule in batches of 128 | random 2K | **NFE-matched PG comparator** (D-102 b) |
+| P3 | TD 4K | validation-chosen selector | method |
+| P6 | PG 4K (P2b's proposals) | the same selector | composition |
+| ORACLE | P3's proposals | greedy min-AMR | analysis bound |
+
+**12.3 Primary family (Holm).**
+- {P3 − P1, P3 − P2b} × {AMR-R, COV-R@0.5}, in the TD convention.
+- Paired molecule bootstrap over 3 sampling seeds, using the per-molecule seed mean and printing the seed SD.
+- Key secondary family, with its own Holm correction: the same two contrasts on COV-R@0.1, success intersection.
+- Descriptive only: P6 − P2b, P2 − P0, P2b − P1, P1 − P0 (sanity check, expected ≈ 0), all precision metrics, and
+  the strata.
+- **K3.** The selector counts as a method only if all three hold:
+  - P3 beats P2b on AMR-R (Holm);
+  - P3 is non-inferior on AMR-P, with a margin of 0.004 Å (the round-2 margin [E-SAMPLE-057]);
+  - P3 is non-inferior on COV-P@0.5, with a margin of 0.5 pt (a new choice, declared here).
+
+  Otherwise the selector is reported as a baseline.
+
+**12.4 Selector choice on validation (D-102 a).** The choice is made on the QM9 validation subset (EVAL §1.1), seed 0,
+with 4K proposals.
+- Five GT-free candidates:
+  - torsion FPS, starting from the lowest-energy proposal;
+  - torsion FPS, random start;
+  - lowest MMFF94s energy;
+  - MMFF filter q = 0.25, then FPS from the lowest-energy proposal;
+  - MMFF filter q = 0.25, then FPS from a random start.
+- "Filter q = 0.5" is dropped. At c = 2 it keeps exactly 2K proposals, so it equals "lowest energy" (Q-P2-009; ledger
+  revision note on E-SAMPLE-025).
+- **Rule, fixed before the validation pool exists:**
+  - Keep candidates with AMR-P ≤ AMR-P(random) + 0.004 Å and COV-P@0.5 ≥ COV-P(random) − 0.5 pt.
+  - Among those, take the lowest AMR-R. Ties within 0.001 Å go to the higher COV-R@0.1.
+  - If no candidate qualifies, or the winner's AMR-R gain over random is < 0.002 Å, or its paired 95 % CI includes
+    0, the selector is "random" and P3/P6 are not run on test (K2-equivalent).
+- Energies use TD's MMFF94s single point [E-SAMPLE-055].
+
+**12.5 PG on QM9 (D-102 b).**
+- No QM9 setting is published. The README's four settings are for the DRUGS model with `--batch_size 128`
+  [E-SAMPLE-058], and PG's authors recommend fitting PG parameters at inference time [E-SAMPLE-035].
+- On the validation subset, run the four README settings at c = 1 (2K particles, batch 128). Pick one with the §12.4
+  rule against TD P0 on validation. This costs ≈ 1 GPU-h and gives PG a tuning budget comparable to the selector's
+  five candidates.
+- Use the chosen setting for P2, P2b and P6.
+- The batch size stays 128. TD's PG couples one loader batch [E-SAMPLE-056], and PG's own DRUGS protocol caps the
+  joint set at 128 and runs batches of 128 [E-SAMPLE-033].
+- "Batch = all conformers of the molecule" (Q-P3-006) is rejected. It departs from the published protocol and is not
+  feasible for K = 727 (2,908 conformers).
+
+**12.6 Compute (Stage A, QM9).**
+- Test TD pools: ≈ 1.4 + 2 × 0.5 GPU-h.
+- Test PG pools (2K and 4K, 3 seeds): ≈ 2.5 GPU-h plus kernel overhead.
+- Validation: TD 4K pool ≈ 0.5 GPU-h; PG's 4 settings at 2K ≈ 1 GPU-h.
+- **Total ≈ 6–7 GPU-h**, from the 0.034 s per conformer anchor [E-SAMPLE-053, -054]. Re-measure on the first job.
+
+**12.7 Invalid conformers.** These follow EVAL §3.1 (Q-P2-011). The evaluator is unchanged for the primary metrics,
+a validity-adjusted secondary is added, and invalid conformers are never dropped.
