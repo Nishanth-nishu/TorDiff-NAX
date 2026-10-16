@@ -5,7 +5,7 @@
 # checks the cluster copy against the pins). Usage: bash round5/sync_cluster.sh
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
-if [ -n "$(git status --porcelain -- flexitors tools experiments)" ]; then
+if [ -n "$(git status --porcelain --untracked-files=no -- flexitors tools experiments)" ]; then
   echo "uncommitted changes in flexitors/ tools/ experiments/: commit first" >&2; exit 1
 fi
 COMMIT=$(git rev-parse HEAD)
