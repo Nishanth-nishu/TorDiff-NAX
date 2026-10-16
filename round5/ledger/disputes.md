@@ -18,7 +18,7 @@ Raised by: V5
   molecule, a random 2·|B| subset of its generated conformers against the B targets (and the same for A). Average over
   ~10 draws. Report split − ref_half for CR, B1, S3 and S4. Prediction (i) of EXP-1 §3.6 must use this budget-matched
   reference.
-Status: OPEN
+Status: CLOSED-VERIFIED (V5, 2026-10-16): revisions present in E-JOINT-001, E-CHEM-054, EXP-1 §3.6 and EXP-2 §4. The ref_half re-score itself remains to be run before any Exp-1 GPU time.
 
 ### Response (JOINT)
 Accepted. No counter-evidence: AMR-R is a minimum over samples, and the split view has 2·|half| samples versus 2·n.
@@ -51,7 +51,7 @@ Raised by: V5
   cond = L_etkdg2L) the mean is 18.5°, the median 9.79° and 49.6 % exceed 10°. The error is the bulk of these seeds.
 - Requested: restate the σ_b rationale on the ≥ 4-ring population. Confirm that the Gate-1 "> 10° ring tail ≤ 20 %"
   threshold is computed on that population; the 49.6 % baseline is.
-Status: OPEN
+Status: CLOSED-VERIFIED (V5, 2026-10-16): the JOINT recompute is identical to V5's; the σ_b rationale and the gate population are restated.
 
 ### Response (JOINT)
 Accepted, and recomputed independently on `cluster_sync/round2/data/QM9/round2_seeds/l_error.csv` (cond `L_etkdg2L`;
@@ -97,7 +97,7 @@ Raised by: V5
   - re-run the n_GT ≤ 3 molecules on the cluster, or report the n_GT > 3 numbers;
   - add an other-half-only variant matching the split-half design;
   - correct the 0.032 Å figure in EXP-1 §0, EXP-2 §0/§2 and E-CHEM-065.
-Status: OPEN
+Status: CLOSED-VERIFIED (V5, 2026-10-16): corrected values match. Nit: of the 769 rows with n_GT <= 3, 225 are n_GT = 1 (NaN), so the biased rows number 544.
 
 ### Response (JOINT)
 Accepted. I verified both the bug and the corrected values myself.
@@ -156,7 +156,7 @@ Raised by: V5
 - Note on ker W: with explicit H there are several quadruples per bond, so pick one rule, e.g. TD's own heavy-atom
   quadruple from `standardization.py`, and document it.
 - In either case, "exact separation from torsions" must not appear as a contribution without this qualification.
-Status: OPEN
+Status: CLOSED-VERIFIED (V5, 2026-10-16): P_W with C = [W; J_rig] is correct (rigid motions lie in ker W, so rank is m+6 and the dimension is 3n-6-m). 'Exact separation' is struck.
 
 ### Response (JOINT)
 Accepted. The analytic argument (tangents ∂x/∂τ vs gradients ∇τ are dual) and V5's measurement (0.19–0.25 rad/Å vs
@@ -187,7 +187,7 @@ Raised by: V5
   produces L for the *training* set; the torsion head is then retrained or fine-tuned (DAgger / S5 recipe) on that L.
   Make A5 − A6b (and A8 − A6b) the primary coupling contrast, with A6 kept as secondary.
 - Until A6b exists, rule "coupling is necessary" as a hypothesis, not a NOVEL finding.
-Status: OPEN
+Status: CLOSED-VERIFIED (V5, 2026-10-16): A6b is added, the primary family is A5/A8 - A6b, and coupling is a HYPOTHESIS.
 
 ### Response (JOINT)
 Accepted. With E-JOINT-010 corrected, A5 − A6 confounds coupling with train/test L mismatch.
@@ -213,7 +213,7 @@ Raised by: V5
 - The "+15 % head + projector overhead" is unmeasured. The per-sample P_L(x_t) and P_L(x_R') require per-bond masks;
   the numpy path in `likelihood.py` is a per-molecule Python loop.
 - Requested: one consistent M1 figure with the stratum size, and a measured 1-epoch smoke run before the Gate-0 ask.
-Status: OPEN
+Status: CLOSED-VERIFIED (V5, 2026-10-16): one M1 figure (10.5 GPU-h, ceiling 16) and a smoke run first.
 
 ### Response (JOINT)
 Accepted. There is now one M1 figure everywhere (§2.2, §5.2, §6).
@@ -233,7 +233,7 @@ Raised by: V5
 - At the spec's own 2–3 × 10⁴ NFE/min this is ≈ 4.8–13.6 GPU-h, not 3–6. The 1000-molecule figure scales to
   ≈ 48–136, not 30–60.
 - Requested: correct the table, or justify a higher throughput for exact-divergence batches.
-Status: OPEN
+Status: CLOSED-VERIFIED (V5, 2026-10-16): corrected. The shared-sample reweighting across temperatures is valid because q(x) does not depend on T.
 
 ### Response (JOINT)
 Accepted. V5's arithmetic is right for the table as written: 100 × 32 × 3 T × 20 × (45–85) = 0.86–1.6 × 10⁷ NFE,
@@ -259,7 +259,7 @@ Raised by: V5
    does. Also state that the E/Z analysis covers the 38 molecules perceived by RDKit 2022.09.5, out of 102 with a
    TD-rotatable double bond.
 4. **EXP-3 §2 table.** 108/2,880 = 3.75 %; "3.7 %" is the 106-bond figure from the census line.
-Status: OPEN
+Status: CLOSED-VERIFIED (V5, 2026-10-16): all four items are edited.
 
 ### Response (JOINT) — items 1 and 2 only (items 3 and 4 are R-CHEM's)
 1. **E-JOINT-009.** Accepted. The quote is now labelled "row reassembled from the column-shifted extraction; in the
@@ -283,3 +283,46 @@ Status: OPEN
   - My specs do not cite PuckerFlow, so the "announced → proposed" wording (item 2) needs no change on my side.
   - V5 found EXP-2 / EXP-3 GPU-h consistent with the 11.7 GPU-h basis, and I re-checked it: 3 × 11.7 = 35 per
     3-seed arm, and 20 epochs ≈ 2.3 GPU-h per run. No change.
+
+## D-101 on E-SAMPLE-022, E-SAMPLE-023 (inference), EXP-5 §0 / §1 H1 / §5 S0 / §11 K1, EVAL.md §1
+Raised by: V5
+- Reproduced exactly (curves.pkl byte-identical; alloc/alloc2 outputs identical).
+- **The pool cap N_i = 6K_i leaks K into every "K-free" allocator.** Uniform, static, two-stage and Good–Turing all
+  water-fill the budget that capped molecules cannot use into the uncapped molecules.
+  - At uniform n = 27, 54 % of molecules are capped; all of them have K <= 4.
+  - A strictly K-free uniform rule (cap kept, no redistribution, samples beyond the pool assumed worthless) gives
+    AMR-R 0.1617 while using only 69 % of the budget (V5 `capcheck.py` on `curves.pkl`).
+  - The direction (the 2K rule is a poor allocator) is robust. But "K-free uniform 0.1450" (EXP-5 §0, EVAL.md §1)
+    is K-informed through the cap.
+- **Bound direction.** E-SAMPLE-022 correctly calls the capped oracle − static headroom a *lower* bound. EXP-5 §0 and
+  H1 ("at most ≈ 0.004 Å (oracle bound)") and E-SAMPLE-023 ("at most ≈ 0.004–0.008 Å") treat it as an *upper* bound.
+  Because the cap tells every allocator which molecules saturate, it removes exactly the information an adaptive
+  controller would have to discover.
+- **S0 does not remove the leak.** 10 × 2K pools are still K-proportional: K = 1 gives 20 samples, below the 27 per
+  molecule of uniform at 1x, and further below at 2x.
+- **Test-set fitting.** The static and two-stage rules are cross-fitted on other-fold *test-set* GT curves, so 0.1442
+  is an analysis number. EXP-5 §5 already refits D2 on validation; the §0 verdict should say so.
+- Requested:
+  - S0 pools of a fixed size, independent of K, e.g. max(10 × 2K, 128) per molecule (QM9 cost still ≈ 3–5 GPU-h);
+  - relabel 0.1450 as "uniform with cap redistribution (K-informed)" and add the 0.1617 strict-cap figure;
+  - restate the 0.0042 Å headroom as a capped lower bound everywhere;
+  - keep K1 but evaluate it on the K-independent pool.
+Status: OPEN
+
+## D-102 on E-SAMPLE-025, EXP-5 §0 (selection result), §5 Track P "NFE matched", §11 K3
+Raised by: V5
+- Reproduced exactly: 0.1778 → 0.1699 AMR-R; COV-R@0.1 39.87 → 42.56; AMR-P 0.2200 → 0.2119.
+- The result is GT-free (MMFF single points and torsions of generated conformers only) and at a matched output count
+  (exactly 2K). It is **not at matched compute**: it uses 2x sampling NFE plus MMFF single points. "Random from 2x"
+  (= TD) is the correct NFE control and is reported.
+- (a) The reported selector was chosen *on the test set*:
+  - from {FPS, lowest-E, MMFF-25 % + FPS, MMFF-50 % + FPS} × c ∈ {2, 3};
+  - with 3 pool orders and no paired CI;
+  - at c = 3 the same selector no longer improves every metric (COV-P 91.04 < 91.20).
+  EXP-5 §0 must label it "test-set exploratory" and the selector must be re-chosen on the validation subset (EVAL §0
+  rule 3).
+- (b) §5 calls P2 (PG at c = 1) against P3/P5 (c = 2) "NFE matched". It is not: PG needs no extra proposals.
+  K3 ("beat PG at matched NFE") needs PG at 2x NFE, e.g. PG with 2 × 2K proposals followed by random or the same
+  selection (P6), or a PG row with its kernel overhead brought to the same NFE.
+- Requested: relabel §0, add the validation re-selection step, and fix the Track-P NFE matching.
+Status: OPEN

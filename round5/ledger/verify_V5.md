@@ -145,3 +145,56 @@ Not supported as written:
   - 108/2,880 = 3.75 %, so write "3.8 %" or "3.75 %".
   - The E/Z analysis covers the 38 molecules that RDKit 2022.09.5 perceives, out of 102 with a TD-rotatable double bond. State this coverage next to the headline.
 - The DRUGS census was not re-run (sampled out).
+
+---
+
+# Part 2 (2026-10-16): EXP-5, EVAL.md, evidence_SAMPLE.md; closure of D-001 to D-008
+
+## Summary (Part 2)
+
+| Check | Result |
+|---|---|
+| Reproduction of the R-SAMPLE pipeline | I re-ran `curves.py`, `alloc.py`, `alloc2.py` (budgets 0.25, 0.5, 1.0) and `select.py` with `python -I` on the copied cluster pickles. `curves.pkl` is byte-identical to theirs, and `alloc.out`, `alloc2.out` and `select.out` are line-identical. Every quoted number reproduces: oracle 0.1400, TD 2K rule 0.1784, static 0.1442, uniform 0.1450, −0.0080 at 0.5x, −0.019 at 0.25x, Spearman 0.451 / 0.446 / 0.441 / 0.474 / 0.273. |
+| Logic of the expected curves | Correct. They are hypergeometric expectations for a random n-subset of the 6K pool, and realised prefixes agree (0.1784 vs 0.1783). |
+| "2K rule uses test-set K" | VERIFIED. `generate_confs.py:183-187` calls `sample_confs(raw_smi, 2 * n_confs, smi)` with `n_confs` = the `n_conformers` column of `test_smiles.csv` (GT count). TD PDF p. 8 confirms, and Zhou et al. use N_ref the same way (p. 4). |
+| GT leakage into the "GT-free" signals | `signals.py` reads only generated conformers (`confs.pkl`) and MMFF94 single points, so the **signals are GT-free**. **But the K-dependent pool cap N_i = 6K_i leaks K into every allocator row**, including "uniform (no K)", static, two-stage and Good–Turing. All of them water-fill the budget that capped molecules cannot use into the uncapped ones. A strictly K-free uniform rule (cap kept, no redistribution, samples beyond the pool assumed worthless) gives **AMR-R 0.1617 using only 69 % of the budget**. 54 % of molecules are capped at n = 27, all with K ≤ 4. The direction (the 2K rule is a poor allocator) is robust; the size, and the "K-free 0.1450", are not. The static and two-stage rules are also cross-fitted on *test-set* GT curves of the other fold, so 0.1442 is an analysis number, not a deployable one. → D-101 |
+| "Headroom ≤ 0.004 Å" | Inconsistent across documents. E-SAMPLE-022 correctly calls the capped oracle headroom a **lower bound**, but EXP-5 §0 and H1 ("at most ≈ 0.004 Å (oracle bound)") treat it as an upper bound. S0's planned fix (10 × 2K pools) is still K-dependent: K = 1 gives 20 samples, below the 27 per molecule of uniform at 1x. → D-101 |
+| Selection result (2x, MMFF-25 % + torsion FPS) | Output count is **matched** (exactly 2K). Compute is **not matched**: it uses 2x sampling NFE plus MMFF single points. It is **GT-free**: MMFF energies and torsions come from generated conformers, and FPS uses an RNG start. "Random from 2x" equals TD and is the correct NFE control. The improvement on every metric at 2x is reproduced (0.1778 → 0.1699; COV-R@0.1 +2.7; AMR-P 0.2200 → 0.2119; COV-P 91.2 → 91.9). Caveats: (a) the variant (25 % vs 50 % filter, FPS vs energy) and c = 2 were picked by looking at the test set, with no CI and 3 pool orders; (b) EXP-5 §5 lists P2 (PG at c = 1) against P3 (c = 2) as "NFE matched", which it is not. → D-102 |
+| Prior-art quotes (GAINS, AdaDiff, Seij et al., Ma et al., Gotta-Go-Fast, Koukos–Glykos, PG ×5, Zhou, TD, GeoMol, ET-Flow, S23D, GEOM, Zhang) | 37 quote lines: 26 matched automatically. The other 11 were found by hand on the claimed pages; they failed only because of `[δ]` substitutions, quotes spanning two pages, or Å glyphs. PDF identity (title and authors on page 1) was checked for the five new PDFs. **All VERIFIED.** OMEGA and CREST are documentation snapshots, not re-fetched; the CREST restart rule and the CREST paper are self-labelled UNVERIFIED and stay so. |
+| EVAL.md failure handling | VERIFIED. TD: `evaluate_confs.py:81-84` handles model failures; `:152` and `:166-167` append `[0] * num_failures` to COV only, and AMR uses `nanmean`; `:47-54` is `clean_confs`; `:117-120` handles additional failures. ET-Flow: snapshot `covmat.py:136-137`, `:139-140`, `:153-155` all `continue`. A live fetch of `main` confirms that skipped molecules are excluded from the COV/MAT averages, not counted as 0. Timing anchor 14:18 wall (`R0_base_seed0_generate.log:2069`) VERIFIED. `generate_confs.py:153` (model skipped when n_rot = 0) VERIFIED. |
+
+**Rulings:**
+- **EXP-5: WEAKENED** (D-101, D-102). The negative/INCREMENTAL verdict is well sourced and probably right. But the kill-criterion number (0.0042 Å) is a cap-shaped lower bound presented as an upper bound, and the S0 design does not remove the K-dependence.
+- **EVAL.md: SUPPORTED**, with one correction (D-101): §1 must not call the 0.1450 uniform allocation "K-free".
+
+## Per-entry verdicts (SAMPLE, checked)
+- **E-SAMPLE-003**: VERIFIED (TD p. 8, p. 17; code `generate_confs.py:187`).
+- **E-SAMPLE-010 / -011 GAINS**: VERIFIED (p. 1; arXiv 2609.22867, Cao, Tang, Li, Zheng).
+- **E-SAMPLE-012 AdaDiff**: VERIFIED (p. 1, arXiv 2309.17074v3).
+- **E-SAMPLE-013 Ma et al.**: VERIFIED (p. 1).
+- **E-SAMPLE-014 Gotta Go Fast**: VERIFIED.
+- **E-SAMPLE-015 Seij et al.**: VERIFIED (p. 1 abstract; p. 4 Fig. 2 caption on GEOM-Drugs).
+- **E-SAMPLE-030 to -034 Particle Guidance**: VERIFIED (p. 8 Table 1 and §6.2; p. 21 App. B, B.2).
+- **E-SAMPLE-040 / -041 OMEGA, -042 CREST**: snapshot only, not re-fetched. The quotes are as the author states; partial items are self-labelled UNVERIFIED.
+- **E-SAMPLE-043 Koukos & Glykos**: VERIFIED (p. 2).
+- **E-SAMPLE-020, -021, -023, -024, -025**: VERIFIED (reproduced exactly). The inference in -023 ("at most ≈ 0.004–0.008 Å") **DOES NOT SUPPORT** as an upper bound (D-101).
+- **E-SAMPLE-022**: VERIFIED, including its own cap caveat. Its "K-free" uniform label is wrong (D-101).
+- **E-SAMPLE-053**: VERIFIED.
+- **E-SAMPLE-062, -063, -072, -076, -079, -080, -081, -082, -086**: VERIFIED on the claimed pages (found by hand).
+- **E-SAMPLE-065 / -066**: VERIFIED. ET-Flow confirmed live, not only from the snapshot.
+- Others (-001, -002, -004, -005, -061, -064, -068, -070, -071, -073, -074, -075, -083, -084, -085): quotes matched automatically, VERIFIED. Entries -050 to -052, -069 and -087 to -091: not checked (sampled out).
+
+## Closure of D-001 to D-008
+I checked each response against the edited files:
+- **D-001**: E-JOINT-001 and E-CHEM-054 are revised to descriptive. The ref_half re-score is in EXP-1 §3.6 and EXP-2 §4 and is assigned to the analysis driver. **CLOSED-VERIFIED** (the re-score itself is still to be run).
+- **D-002**: the recompute matches mine exactly, and the σ_b rationale and gates are restated on the ≥ 4-ring population. **CLOSED-VERIFIED**.
+- **D-003**: E-JOINT-010 / E-CHEM-065 are revised, EXP-1 §0 and EXP-2 §0 cite 0.036 vs 0.114 Å, and the bug is logged (EXP-1 §9, E-JOINT-031). **CLOSED-VERIFIED**. One nit in the JOINT response: "all 769 rows with n_GT ≤ 3 have floor_gtother ≤ 1.97e-5". Of those 769, 225 are n_GT = 1 rows with NaN; the biased rows number 544.
+- **D-004**: EXP-1 §2.2 now uses P_W = I − Cᵀ(CCᵀ)⁺C with C = [W; J_rig]. This is correct: rigid motions lie in ker W, so rank C = m + 6 and the dimension is 3n−6−m. "Exact separation" is struck, and M0 (a) and the tests are re-declared. **CLOSED-VERIFIED**.
+- **D-005**: A6b is in §4, the primary Holm family is A5/A8 − A6b, and coupling is ruled a HYPOTHESIS. **CLOSED-VERIFIED**.
+- **D-006**: one figure: 10.5 GPU-h at TD speed, 16 GPU-h ceiling, smoke run first. **CLOSED-VERIFIED**.
+- **D-007**: corrected to 4.8–13.6 / 48–136 GPU-h. The added shared-sample reweighting across temperatures is valid: q(x) has no T, so one sample set from q can be importance-weighted to each e^{−E/kT}, at 1.6–4.5 GPU-h. **CLOSED-VERIFIED**.
+- **D-008**: items 1–4 are all edited (E-JOINT-009 label; "proposed"; EXP-3 §0 gives 12.4 / 10.3 / 10.5 %, mean 11.1 %, with 38/102 coverage; 3.75 %). **CLOSED-VERIFIED**.
+
+**Updated Part-1 rulings after closure:**
+- **EXP-1**: WEAKENED → **SUPPORTED as revised**. Coupling is now a pre-registered hypothesis with a valid control (A6b), and the projector is correct.
+- **EXP-2, EXP-3, EXP-4**: SUPPORTED.
