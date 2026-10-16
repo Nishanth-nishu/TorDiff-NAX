@@ -42,6 +42,19 @@ CIs: (a) molecule bootstrap on the seed-averaged per-molecule differences (tools
 percentile, two-sided bootstrap p); (b) hierarchical bootstrap -- training seeds resampled with replacement within each
 model, then molecules (score_VALIDITY_r1.md V-4) -- 95 % percentile interval.
 
+BUDGET-MATCHED REFERENCE (round 5; EXP-1 §3.6 and §10.5, D-001; pre-declared in the Q-P1-011 answer before any
+ref_half value existed; only with --ref_subsample N, default 0 = the round-4 analysis above, outputs unchanged):
+  ref_half: the full-set steps20_seed0 eval.pkl of each run (rows = cleaned GT conformers, columns = the 2 n_csv
+    generated conformers) scored against half H with a uniformly random subset of s = 2|H| columns, i.e. the
+    generated-sample budget of the split condition that targets H. Primary = the EXACT expectation over subsets
+    (sorted per-target RMSDs r_(1) <= ... <= r_(N): E[min] = sum_i r_(i) C(N-i, s-1) / C(N, s);
+    P(covered at t) = 1 - C(N-c, s) / C(N, s), c = #samples with r < t); N random draws are reported as a
+    consistency check. The two directions are averaged as in view().
+  BUDGET family (one Holm family of 8): CR, B1, S3, S4 x {AMR-R, COV-R@0.5} for split - ref_half, paired molecule
+    bootstrap on seed-averaged differences, hierarchical interval (seeds, then molecules) beside each row.
+  Secondary (no Holm): COV-R@0.1, and split_d - ref_half_d on the distinct-target universe.
+  Descriptive: split - ref_rdkitL (the published full-budget gaps) on the same universe.
+
 Usage (on gnode118, after slurm/r4_leakfree_array.sbatch):
   python tools/analyze_leakfree.py --res $RES --split_dir $QM9_DIR/round4_splithalf \
       --s4_subset $QM9_SEEDS2/S4_test_subset.txt --out $RES/analysis_r4_leakfree
@@ -52,6 +65,7 @@ from argparse import ArgumentParser
 
 import numpy as np
 import pandas as pd
+from scipy.special import gammaln
 
 # ------------------------------------------------------------------------------------------------ pre-declared
 RUN = dict(CR='qm9_CTRL_rematch_100ep_e100_s{}', B1='qm9_B1_train_gtL_e100_s{}', S3='qm9_S3_mixL_p0.5_e100_s{}',
@@ -196,7 +210,8 @@ def load_all(res, families, masks=None):
     return data, pd.DataFrame(info), missing
 
 
-def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=('CR', 'B1', 'S3', 'S4')):
+def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=('CR', 'B1', 'S3', 'S4'),
+            ref_subsample=0):
     os.makedirs(out, exist_ok=True)
     split = pd.read_csv(os.path.join(split_dir, 'split.tsv'), sep='\t').set_index('corrected_smiles')
     masks, NN = nn_masks(split_dir)
@@ -399,7 +414,181 @@ def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=(
     with open(os.path.join(out, 'leakfree_summary.txt'), 'w') as f:
         f.write(txt + '\n')
     print(txt)
+    if ref_subsample:
+        budget_matched(res, split, universe, universe_d, masks, V, fams, out, ref_subsample, n_boot, seed)
     return models, C, S
+
+
+# ------------------------------------------------------------------------------------------------ round 5: ref_half
+BUDGET_MODELS = ['CR', 'B1', 'S3', 'S4']
+
+
+def log_comb(n, k):
+    """log C(n, k) elementwise; -inf where k > n or k < 0"""
+    n, k = np.broadcast_arrays(np.asarray(n, float), np.asarray(k, float))
+    ok = (k >= 0) & (k <= n)
+    out = np.full(n.shape, -np.inf)
+    out[ok] = gammaln(n[ok] + 1) - gammaln(k[ok] + 1) - gammaln(n[ok] - k[ok] + 1)
+    return out
+
+
+def subset_min_expectation(M, s):
+    """exact E[min over a uniformly random s-subset of the columns] for every row of M (n_rows x N); NaN rows -> NaN"""
+    N = M.shape[1]
+    i = np.arange(1, N + 1)
+    w = np.exp(log_comb(N - i, s - 1) - log_comb(N, s))  # P(the subset minimum is the i-th smallest)
+    nan = np.isnan(M).any(axis=1)
+    with np.errstate(invalid='ignore'):  # inf * 0 in NaN rows, overwritten below
+        out = np.sort(np.where(np.isnan(M), np.inf, M), axis=1) @ w
+    out[nan] = np.nan
+    return out
+
+
+def subset_cover_prob(M, s, t):
+    """exact P(min over a random s-subset < t) per row of M (strict <, as evaluate_confs.py); NaN rows -> NaN"""
+    N = M.shape[1]
+    c = np.sum(M < t, axis=1)
+    out = 1.0 - np.exp(log_comb(N - c, s) - log_comb(N, s))
+    out[np.isnan(M).any(axis=1)] = np.nan
+    return out
+
+
+def ref_half_molecule(M, idx, mask, rng, n_draws):
+    """budget-matched reference of one molecule. M: full-set RMSD matrix (rows = cleaned GT order); idx: {half: row
+    indices}; mask: {half: bool array over that half's rows} (distinct targets) or None.
+    Returns (exact metrics dict incl. *_d, list of n_draws MC AMR-R values), both direction-averaged as view()."""
+    ex, ex_d, mc = {m: [] for m in METRICS}, {m: [] for m in METRICS}, np.zeros((n_draws, 2))
+    for h_i, h in enumerate('AB'):
+        rows = M[idx[h]]
+        s = 2 * len(idx[h])
+        vals = {'AMR-R': subset_min_expectation(rows, s), **{m: subset_cover_prob(rows, s, t) for m, t in THRS.items()}}
+        mk = mask[h] if mask is not None else None
+        for m in METRICS:
+            ex[m].append(float(np.mean(vals[m])))
+            if mk is not None and mk.any():
+                ex_d[m].append(float(np.mean(vals[m][mk])))
+        for d in range(n_draws):
+            cols = rng.choice(M.shape[1], s, replace=False)
+            mc[d, h_i] = float(np.mean(rows[:, cols].min(axis=1)))
+    out = {m: float(np.mean(v)) for m, v in ex.items()}
+    out.update({m + '_d': float(np.mean(v)) if v else np.nan for m, v in ex_d.items()})
+    return out, list(mc.mean(axis=1))
+
+
+def load_ref_half(res, fam, seed_, split, universe, masks, rng_mc, n_draws):
+    """ref_half per molecule for one run, plus MC-check rows and exclusions (molecule absent, row count != n_clean,
+    or 2|H| larger than the number of generated conformers)"""
+    with open(os.path.join(res, RUN[fam].format(seed_), REF_TAGS['ref_rdkitL'], 'eval.pkl'), 'rb') as f:
+        by_corr = {corr: r['rmsd'] for (smi, corr), r in pickle.load(f)['results'].items()}
+    rows, mc_rows, excl = {}, [], []
+    for mol in universe:
+        M = by_corr.get(mol)
+        n_clean = int(split.loc[mol, 'n_clean'])
+        idx = {h: [int(x) for x in str(split.loc[mol, f'idx_{h}']).split(',')] for h in 'AB'}
+        if M is None:
+            reason = 'missing'
+        elif M.shape[0] != n_clean:
+            reason = f'rows {M.shape[0]} != n_clean {n_clean}'
+        elif 2 * max(len(idx['A']), len(idx['B'])) > M.shape[1]:
+            reason = f'2|H| > {M.shape[1]} generated'
+        else:
+            reason = None
+        if reason:
+            excl.append(dict(model=fam, seed=seed_, mol=mol, reason=reason))
+            continue
+        mk = {h: masks[h].get(mol, np.zeros(len(idx[h]), bool)) for h in 'AB'} if masks is not None else None
+        rows[mol], mc = ref_half_molecule(M, idx, mk, rng_mc, n_draws)
+        mc_rows.append(dict(model=fam, seed=seed_, mol=mol, exact=rows[mol]['AMR-R'],
+                            **{f'draw{d}': v for d, v in enumerate(mc)}))
+    return pd.DataFrame.from_dict(rows, orient='index'), mc_rows, excl
+
+
+def mc_check_lines(MC, fams):
+    """consistency of the exact expectation with the random draws (AMR-R)"""
+    dcols = [c for c in MC.columns if c.startswith('draw')]
+    MC['mc_mean'] = MC[dcols].mean(axis=1)
+    MC['mc_se'] = MC[dcols].std(axis=1, ddof=1) / np.sqrt(len(dcols))
+    z = (MC.mc_mean - MC.exact).abs() / MC.mc_se.replace(0, np.nan)
+    lines = ['## MC consistency check (AMR-R; exact expectation vs the mean of the random draws)',
+             f'per (run, molecule): mean |MC - exact| = {(MC.mc_mean - MC.exact).abs().mean():.5f} A; '
+             f'share within 3 MC SE = {float(np.mean(z.fillna(0) <= 3)):.4f}']
+    for fam in fams:
+        g = MC[MC.model == fam]
+        dm = g.groupby('seed')[dcols].mean().mean(axis=0)  # dataset mean per draw, averaged over seeds
+        lines.append(f'  {fam}: exact {g.exact.mean():.4f}  mean over draws {dm.mean():.4f}  '
+                     f'SD of the dataset mean over draws {dm.std(ddof=1):.4f}')
+    return lines + ['']
+
+
+def budget_matched(res, split, universe, universe_d, masks, V, fams, out, n_draws, n_boot, seed):
+    """EXP-1 §3.6 / §10.5 budget-matched leak-free reference and the pre-declared BUDGET family (module doc)."""
+    rng_mc = np.random.default_rng([seed, 2026])
+    rng = np.random.default_rng(seed)
+    fams = [f for f in BUDGET_MODELS if f in fams]
+    REFH, MC, excl = {}, [], []
+    for fam in fams:
+        for s_ in SEEDS[fam]:
+            REFH[(fam, s_)], mc, ex = load_ref_half(res, fam, s_, split, universe, masks, rng_mc, n_draws)
+            MC += mc
+            excl += ex
+    excl = pd.DataFrame(excl, columns=['model', 'seed', 'mol', 'reason'])
+    bad = set(excl.mol)
+    U = [m for m in universe if m not in bad]
+    Ud = [m for m in universe_d if m not in bad]
+    lines = ['# Budget-matched leak-free reference ref_half (ORACLE; EXP-1 §3.6 / §10.5; tools/analyze_leakfree.py)',
+             f'split-half universe {len(universe)}; excluded from ref_half (every view and model) {len(bad)}; '
+             f'analysed {len(U)}; distinct-target universe {len(Ud)}; MC check draws per half {n_draws}', '']
+    MC = pd.DataFrame(MC)
+    lines += mc_check_lines(MC, fams)
+    MC.to_csv(os.path.join(out, 'budget_mc_check.csv'), index=False)
+    excl.to_csv(os.path.join(out, 'budget_excluded.csv'), index=False)
+
+    def stack(fam, col, mols, view_):
+        if view_ == 'ref_half':
+            return np.stack([REFH[(fam, s_)].loc[mols, col].values for s_ in SEEDS[fam]])
+        if view_ == 'ref_rdkitL':
+            return np.stack([REFL[(fam, s_)].loc[mols, col].values for s_ in SEEDS[fam]])
+        return np.stack([V[(fam, s_, view_)].loc[mols, col].values for s_ in SEEDS[fam]])
+
+    REFL = {(fam, s_): per_mol(os.path.join(res, RUN[fam].format(s_), REF_TAGS['ref_rdkitL'], 'eval.pkl'))[0]
+            for fam in fams for s_ in SEEDS[fam]}
+    levels, crow = [], []
+    for fam in fams:
+        for sfx, mols in (('', U), ('_d', Ud)) if masks is not None else (('', U),):
+            for m in METRICS:
+                A, Rh = stack(fam, m, mols, 'split' + sfx), stack(fam, m + sfx, mols, 'ref_half')
+                levels += [dict(model=fam, view='split' + sfx, metric=m, n=len(mols), value=float(A.mean())),
+                           dict(model=fam, view='ref_half' + sfx, metric=m, n=len(mols), value=float(Rh.mean()))]
+                D = A - Rh  # (seeds, molecules), paired within model
+                mean, lo, hi, p = boot(D.mean(0), rng, n_boot)
+                hlo, hhi = hier_ci(D, None, rng, n_boot)
+                sc = 1.0 if m == 'AMR-R' else 100.0
+                crow.append(dict(id=f'B.{fam}.split{sfx}-ref_half{sfx}', metric=m, n=len(mols),
+                                 family='budget' if (sfx == '' and m in PRIMARY_METRICS) else 'secondary',
+                                 arm_value=A.mean() * sc, ref_value=Rh.mean() * sc, diff=mean * sc, ci_lo=lo * sc,
+                                 ci_hi=hi * sc, p_boot=p, hier_lo=hlo * sc, hier_hi=hhi * sc))
+        for m in METRICS:  # descriptive: the published full-budget gap on the same molecules
+            A, Rl = stack(fam, m, U, 'split'), stack(fam, m, U, 'ref_rdkitL')
+            sc = 1.0 if m == 'AMR-R' else 100.0
+            levels.append(dict(model=fam, view='ref_rdkitL', metric=m, n=len(U), value=float(Rl.mean())))
+            crow.append(dict(id=f'D.{fam}.split-ref_rdkitL', metric=m, n=len(U), family='descriptive',
+                             arm_value=A.mean() * sc, ref_value=Rl.mean() * sc, diff=float((A - Rl).mean()) * sc))
+    P, C = pd.DataFrame(levels), pd.DataFrame(crow)
+    C['p_holm'] = np.nan
+    fb = C.family == 'budget'
+    C.loc[fb, 'p_holm'] = holm(C.loc[fb, 'p_boot'].values)
+    P.to_csv(os.path.join(out, 'budget_per_model.csv'), index=False)
+    C.to_csv(os.path.join(out, 'budget_contrasts.csv'), index=False)
+    lines += ['## Levels (AMR-R in A, COV as fraction)',
+              P.pivot_table(index='model', columns=['view', 'metric'], values='value', sort=False).round(4)
+              .to_string(), '',
+              '## Contrasts (AMR-R in A, COV in %; p_holm over the BUDGET family of 8)',
+              C.round(4).to_string(index=False)]
+    txt = '\n'.join(lines)
+    with open(os.path.join(out, 'budget_matched_summary.txt'), 'w') as f:
+        f.write(txt + '\n')
+    print(txt)
+    return P, C
 
 
 if __name__ == '__main__':
@@ -410,5 +599,7 @@ if __name__ == '__main__':
     ap.add_argument('--s4_subset', default=None)
     ap.add_argument('--n_boot', type=int, default=5000)
     ap.add_argument('--seed', type=int, default=0)
+    ap.add_argument('--ref_subsample', type=int, default=0,
+                    help='[round5] > 0: also the budget-matched ref_half (EXP-1 §3.6) with this many MC check draws')
     a = ap.parse_args()
-    analyse(a.res, a.split_dir, a.out, a.s4_subset, a.n_boot, a.seed)
+    analyse(a.res, a.split_dir, a.out, a.s4_subset, a.n_boot, a.seed, ref_subsample=a.ref_subsample)
