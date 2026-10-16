@@ -17,7 +17,6 @@ REPO = PKG.parent
 # library API whose first non-test caller arrives with a later milestone (round5/IMPLEMENTATION.md, milestone 1)
 TEST_ONLY_API = {
     'validate_conformer': 'Gate-0 / Exp 3 evaluation CLIs (milestone 2)',
-    'structural_stereo_bonds': 'E/Z target table builder (next commit)',
 }
 
 
