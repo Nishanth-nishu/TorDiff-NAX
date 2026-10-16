@@ -1,0 +1,12 @@
+# QM9 validation subset (EVAL §1.1): first 1000 of the seed-0 permutation of split index 1 passing the filters; corrected_smiles rule geom_if_any_graph
+walked 1000 positions: {'kept': 1000}
+excluded:
+val: n=1000  K mean 13.90 median 4 max 738  n_heavy mean 8.86  n_rot_td mean 2.94  n_rot_heavy=0 (rigid) 328
+  n_rot_heavy bins {0: 328, 1: 294, 2: 193, 3: 94, 4: 91} (4 = 4+)
+  ring classes {'ring >= 4, polycyclic': 487, 'ring >= 4, monocyclic': 306, '3-ring only': 114, 'acyclic': 93}
+  scaffold-novel (Murcko scaffold absent from split index 0): 89 (8.9 %); acyclic 93
+test: n=998  K mean 13.76 median 4 max 727  n_heavy mean 8.84  n_rot_td mean 2.90  n_rot_heavy=0 (rigid) 318
+  n_rot_heavy bins {0: 318, 1: 316, 2: 179, 3: 94, 4: 91} (4 = 4+)
+  ring classes {'ring >= 4, polycyclic': 485, 'ring >= 4, monocyclic': 289, '3-ring only': 115, 'acyclic': 109}
+  scaffold-novel (Murcko scaffold absent from split index 0): 85 (8.5 %); acyclic 111
+val_mols.pkl sha256 e96c627483c43d06ad96ce8ff95252b1e9bc3c38dd4417cfbf840558b6e4f5ef

@@ -1,0 +1,16 @@
+# EVAL §1.1 builder self-check on the 1000 test rows (Q-P2-010 acceptance: >= 99 % reproduced)
+corrected_smiles rule scores (smiles, n_conformers, test_mols counts and corrected_smiles all equal): {'geom': 0.902, 'conf0': 0.802, 'geom_if_conf0_graph': 0.99, 'geom_if_any_graph': 0.991}
+n_conformers rule scores (n_csv equal to the count): {'stored': 1.0, 'clean': 0.996}
+chosen rule: geom_if_any_graph; n_conformers rule: stored conformer count (n_csv == n_stored for 1000 rows; test_mols count == stored for 1000; GT positions identical to raw for 1000)
+reproduced rows: 991 / 1000 = 99.1 %  -> PASS
+test rows that the filters would exclude: unparsable 2, no clean GT 3 (kept in the test csv)
+residual mismatches:
+  C#CC1(C#C)CN[CH][N]1
+  C1C[C@H]2[C@H]3C[N][C](O1)N23
+  Cc1nc(O)n[nH]c1[NH]
+  Cn1nnc([NH])cc1F
+  N#N.[NH]C1=N[CH]OC1=O
+  N[C]1[N][C@H]2[C@H]3O[C@@H]1[C@@]23N
+  O[C@H]1[CH][C]2[C@H]3[C@H]4[C@@H]2[C@@H]1N34
+  [NH][C]1O[C@@H]2[C@H]3C[C@@H]2[C@@H]1N3
+  [NH][C]1O[C@H]2C[C@@H]3CN[C@]123

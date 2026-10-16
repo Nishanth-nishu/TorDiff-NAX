@@ -1,0 +1,23 @@
+{
+ "commit": "38e06409071bb6a89500562a49cb210375ef9c49",
+ "dirty": "unknown",
+ "python": "3.9.23",
+ "rdkit": "2022.09.5",
+ "numpy": "1.23.5",
+ "host": "gnode118",
+ "argv": [
+  "/scratch/nishanth.r/tordiff/flexitors/data/qm9_val.py",
+  "--raw_dir",
+  "data/QM9/qm9/",
+  "--split",
+  "data/QM9/split.npy",
+  "--test_csv",
+  "data/QM9/test_smiles.csv",
+  "--test_mols",
+  "data/QM9/test_mols.pkl",
+  "--train_scaffolds",
+  "--out_dir",
+  "/scratch/nishanth.r/tordiff/results/round5/valset"
+ ],
+ "baseline_changed_files": []
+}

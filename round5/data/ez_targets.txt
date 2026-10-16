@@ -1,0 +1,4 @@
+# E/Z target table, RDKit 2026.03.6
+qm9_test: 1000 molecules; structural stereo bonds 38 in 37 molecules; specified 3 in 3 molecules; embed check {'agree': 3}
+qm9_val: 1000 molecules; structural stereo bonds 35 in 34 molecules; specified 3 in 3 molecules; embed check {'agree': 3}
+drugs_test: 1000 molecules; structural stereo bonds 154 in 140 molecules; specified 138 in 126 molecules; embed check {'agree': 138}
