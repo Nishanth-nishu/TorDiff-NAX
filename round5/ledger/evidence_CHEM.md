@@ -379,6 +379,14 @@ TD's `data/DRUGS/test_smiles.csv` not byte-checked: the 25 GB archive was not do
   > CR      0.2195    0.8564    0.5019  0.1603    0.8891    0.6304 -0.0593 ...     0.1873    0.9447    0.3438 ...
   > B1      0.3046    0.7373    0.4002  0.0303    0.9911    0.9512 -0.2743 ...     0.2565    0.8670    0.2297 ...
   (rows truncated with "..."; the full rows are in the file)
+- Revised after the budget-matched re-score (2026-10-17; round5/IMPLEMENTATION.md §5,
+  `cluster_sync/round5/rescore/budget_contrasts.csv`; 711 molecules; split − ref_half AMR-R [95 % CI], Holm):
+  CR −0.0384 [−0.0482, −0.0289], p < 0.001; B1 −0.0170 [−0.0310, −0.0030], Holm p = 0.060 (n.s.);
+  S3 +0.0171 [+0.0048, +0.0296], p = 0.021; S4 −0.0069 [−0.0178, +0.0041], p = 0.47 (n.s.).
+  **The round-4 reading "with another conformer's L every model is worse than with RDKit L" was a sample-budget
+  artefact and is WITHDRAWN.** With the budget matched, the standard model (CR) is *better* with other-conformer
+  true L. Only S3 is worse, and B1 and S4 are not distinguishable. COV-R@0.5 is unchanged for CR (+0.07 pt) and lower
+  for B1, S3 and S4 (−4.4 to −8.7 pt). The claim line and quote below are kept as history.
 - Revised after D-001: the values stand, but split (2·|half| samples) vs ref_rdkitL (2·n samples) is not
   budget-matched, so "worse than RDKit L" is descriptive/UNVERIFIED; only the own − split leak contrast is
   budget-matched. EXP-2 now uses a budget-matched ref_half (EXP-2 §4).

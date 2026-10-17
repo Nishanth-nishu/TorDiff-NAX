@@ -5,6 +5,11 @@ Round-4 IDs (E-ARCH, E-PRIOR) are quoted only where they were copied into the JO
 ORACLE = uses test-set true geometry; analysis only, never model selection (`orchestration/README.md` rule 5).
 INFERENCE = my design reasoning, not something a source shows.
 
+**Revision 3 (2026-10-17), after the budget-matched leak-free re-score** (`round5/IMPLEMENTATION.md` milestone 1
+§5–6; `cluster_sync/round5/rescore/`; E-JOINT-011). The round-4 claim "other-conformer true L is worse than RDKit L
+for every model" does **not** survive budget matching. What the result does and does not support, and the design
+consequences, are in **§11**; the affected paragraphs carry "Revised after re-score".
+
 **Revision 2 (2026-10-16), after the coding consult (Q-P1-001…004, Q-P1-011, Q-P2-001…005, Q-P3-001…003,
 Q-P3-009).** The binding decisions are collected in **§10**, which supersedes conflicting text above. Each
 affected paragraph carries a pointer "Revised after Q-…". Real flaws the planners found, now fixed:
@@ -34,6 +39,9 @@ ring geometry [E-JOINT-003, E-JOINT-004]. In the leak-free split-half test [E-JO
 another conformer's true L scored worse (CR 0.2195 Å) than the descriptive full-set RDKit-L reference (0.1873 Å).
 *(Revised after D-001: that comparison is not budget-matched — the split view has half the samples — so the size and
 even the sign of the gap are pending the re-score in §3.6. Only the own-vs-split leak contrast is budget-matched.)*
+*(Revised after re-score: at matched budget, another conformer's true L **helps** the RDKit-trained CR model
+(AMR-R −0.038 Å overall; −0.015 Å [−0.027, −0.003] on distinct targets). It hurts the GT/mixed-trained B1, S3 and S4
+on distinct targets (+0.047 to +0.085 Å) [E-JOINT-011]. See §11.)*
 
 *(Revised after D-003; superseded text: "another conformer's L leaves only a 0.032 Å floor".)* With torsions
 optimised directly against the target, L from the target's closest other GT conformers (an oracle best-of-3) leaves a
@@ -380,7 +388,11 @@ descriptive only and are not cited as evidence. Owner: the orchestrator's analys
 Pre-declared predictions (revised after D-001/D-005; superseded: "no worse than its RDKit-L AMR-R, unlike CR
 (+0.032) …"):
 - (i) a coupled model's split − ref_half gap is no larger than A6b's split − ref_half gap, i.e. no larger than
-  that of a decoupled model with sampler-matched training;
+  that of a decoupled model with sampler-matched training. *(Revised after re-score: (i) is read on the
+  **distinct-target view** split_d − ref_half_d, which is now the primary view of this oracle analysis. This choice was made after seeing the round-4 models' re-score, but before any Exp-1 checkpoint exists, so it is pre-declared for Exp 1 only. The
+  all-target view is dominated by near-duplicates: COV-R@0.1 is +19.7 to +25.2 pt for every model [E-JOINT-011]. An
+  added pre-declared reference: (i′) the coupled model's split_d − ref_half_d ≤ 0, i.e. no worse than RDKit L at
+  matched budget, which CR meets (−0.015 Å) and B1/S3/S4 fail.)*
 - (ii) its own − split leak gap is smaller than S4's (0.17 Å).
 
 If (i) fails, the coupling hypothesis is not supported by the oracle analysis, whatever the primary metrics show. Report the `split_d` distinct-target view
@@ -400,7 +412,7 @@ evaluator, and 100 epochs unless noted.
 | A3 | V1 parameter-matched: FlexiTors network with the geometry head present but w = 0 and no geometry steps | new | 3 | controls for capacity and code changes; must equal A0 within noise (golden test) |
 | A4 | V2, no DAgger | new | 3 | coupled correction |
 | A5 | V2 + DAgger | new | 3 | **main V2 arm** |
-| A6 | Decoupled, unmatched: A5's geometry head run alone (τ frozen at seed) to produce L, then the frozen A0 torsion model (trained on RDKit L) on that L | new (no training) | 3 | **secondary** (revised after D-005): confounds coupling with train/test L mismatch, so it reproduces the S3/B1 regime by construction |
+| A6 | Decoupled, unmatched: A5's geometry head run alone (τ frozen at seed) to produce L, then the frozen A0 torsion model (trained on RDKit L) on that L | new (no training) | 3 | **secondary** (revised after D-005): confounds coupling with train/test L mismatch. *(Revised after re-score: the phrase "reproduces the S3/B1 regime by construction" is withdrawn. The RDKit-trained CR **gains** from independent other-conformer GT L at matched budget, −0.015 Å on distinct targets [E-JOINT-011], which is the oracle ceiling for A6.)* |
 | **A6b** | **Decoupled, sampler-matched** (added after D-005): A5's geometry head run alone (τ frozen at seed) as an independent L sampler on the **training** set; GT torsions re-matched to that L (`standardize_confs.py`); a torsion head re-trained (S5 recipe) or DAgger-fine-tuned from A0 on it; at test the same sampler gives L, then this torsion head | new | 3 | **primary coupling control**: A5 − A6b isolates "geometry head sees τ" from "torsion head trained on its own L" |
 | A7 | V3a, shared clock | new | 3 | joint diffusion |
 | A8 | V3a + DAgger | new | 3 | **main V3 arm** |
@@ -555,7 +567,10 @@ Every mechanism carries a comment `# <paper>, PDF p. N, eq. M` or `# [E-JOINT-NN
 
 ## 7. Risks
 
-1. **Coupling may not matter (revised after D-003/D-005).** The best-of-3 other-conformer floor is 0.036 Å vs
+1. *(Revised after re-score: this risk is now stronger. An unmodified RDKit-trained TD model already gains from
+   independent better L (CR −0.015 Å on distinct targets [E-JOINT-011]), so A6 and A6b may both gain, and the
+   marginal value of coupling (A5 − A6b) is expected to be small.)*
+   **Coupling may not matter (revised after D-003/D-005).** The best-of-3 other-conformer floor is 0.036 Å vs
    0.114 Å for RDKit L on the same rows [E-JOINT-010 rev.], and the leak-free failure is explained by L mismatch. So
    **A6b (decoupled, sampler-matched) may do as well as A5**. That is the *a priori* most likely outcome given current
    evidence, and it would be a legitimate negative result for "joint": the paper would become "learned L +
@@ -755,3 +770,67 @@ This section supersedes any conflicting text in §2–§9. Each decision names t
     bug-fix comparison is clean).
   - Reported beside it: the minimum over **all** other-half conformers for molecules with ≤ 10 per half, as a check
     that top-3 approximates what the split-half seeds cycle through.
+
+## 11. Revision 3: reading the budget-matched re-score (2026-10-17)
+
+**Data** [E-JOINT-011]: 711 molecules (606 distinct-target), split − ref_half, exact expectation, BUDGET Holm family
+of 8.
+
+| Model (training L) | AMR-R, all targets | COV-R@0.5, all (pt) | AMR-R, distinct targets |
+|---|---|---|---|
+| CR (matched RDKit) | **−0.038** [−0.048, −0.029], p_Holm < 0.001 | +0.1 (n.s.) | **−0.015** [−0.027, −0.003] |
+| B1 (own GT) | −0.017 [−0.031, −0.003], p_Holm 0.06 | −4.4 | **+0.067** |
+| S3 (50/50 mix) | **+0.017** [+0.005, +0.030], p_Holm 0.021 | −8.7 | **+0.085** |
+| S4 (λ blends) | −0.007 (n.s.) | −5.3 | **+0.047** |
+
+**Analysis check (R-JOINT, before relying on it).** I re-read `tools/analyze_leakfree.py:426-505`:
+- `subset_min_expectation` uses P(min = i-th smallest) = C(N−i, s−1)/C(N, s);
+- `subset_cover_prob` uses 1 − C(N−c, s)/C(N, s) with strict `<`, as the evaluator does;
+- s = 2|H| per target half is the split runs' budget;
+- directions are averaged as in `view()`;
+- molecules where 2|H| exceeds the generated count are excluded, not truncated;
+- the 32 excluded molecules are removed from every view, so the contrasts stay paired;
+- the 10-draw MC means agree with the exact values to ≤ 0.0005 Å, and the round-4 part reproduces round 4 byte for
+  byte.
+
+I found no error. Remaining caveat: the distinct-target threshold (0.1 Å) is the round-4 pre-declared one, and
+targets of the same CREST ensemble are never fully independent.
+
+**What it supports**
+1. The round-4 / PLAN phase-2 statement "with another conformer's true geometry every model is worse than with RDKit
+   geometry" was a **budget artefact** and is withdrawn (E-JOINT-001 revision 2). The orchestrator should correct
+   `round5/PLAN.md` phase 2; R-CHEM should correct E-CHEM-054.
+2. **Better-but-not-own L helps an unmodified, RDKit-trained TD model.** CR gains −0.015 Å on distinct targets, and
+   −0.038 Å overall including near-duplicates. That is ≈ 5 % of its distinct-target AMR-R, with no COV-R@0.5 change.
+   This is an *oracle ceiling* for a decoupled learned-L arm built on A0 (A6).
+3. **Torsion models trained on GT or blended L become identity-dependent.** B1, S3 and S4 are worse than RDKit L on
+   distinct targets (+0.047 to +0.085 Å) and lose 4–9 pt COV-R@0.5. Their all-target "gains" come from near-duplicate
+   targets; COV-R@0.1 is +20–25 pt for every model. This is the strongest evidence yet for the sampler-matched /
+   DAgger rule: never train the torsion head on target GT L [E-JOINT-005, -006, -137].
+
+**What it does not support**
+- Coupling being necessary or helpful. Nothing in this test couples L to τ, and the one model that gains is
+  decoupled. Coupling stays a hypothesis, tested only by A5/A8 − A6b.
+- Any effect size for *learned* L. GT-quality L is the ceiling; a learned L of lower quality gives less.
+- "Geometry is the lever" in the strong round-2/3 sense. The leak-free gain for CR (−0.015 Å distinct) is far smaller
+  than the own-conformer ring oracle (0.178 → 0.119 Å), most of which was therefore conformer identity
+  [E-JOINT-003, read as an upper bound].
+
+**Design and gate consequences (Stage A)**
+- **Gates unchanged.** M0, Gate 0 and Gate 1 measure L quality and real use, not the oracle.
+- **New pre-declared expectation for A4 (V2 without DAgger).** V2's training feeds the torsion head interpolants
+  toward the *own* conformer's GT L (x_t → x_G\* as t → 1). That is the same exposure as S4, which fails on distinct
+  targets (+0.047 Å). Expectation: A4 ≥ A1+ on AMR-R, with an S4-like split_d deficit. This is why DAgger stays
+  mandatory, and A4 − A5 (the DAgger effect) stays in the secondary family, **now with a pre-declared sign**
+  (A5 < A4).
+- **§3.6 oracle analysis.** The primary view is split_d − ref_half_d, with prediction (i′) added. CR's −0.015 Å is
+  the reference "healthy decoupled" value.
+- **A6 is re-scoped.** It is not "doomed by construction". It measures how much learned L helps the unmodified TD
+  model, with oracle ceiling −0.015 Å (distinct targets). It stays secondary; A6b stays the primary coupling control.
+- **Expected effect sizes for the M2 ask.** A6 − A0 ≥ −0.015 Å (ceiling). The real-use target of A5 − A1+ is
+  ≤ −0.005 Å (Gate 1). The coupling contrast A5 − A6b is expected to be small; its detectability at 3 seeds × ≈ 900
+  molecules is about ±0.002–0.004 Å (round-2 CI half-widths, e.g. S3 [+0.0013, +0.0052], S4 [−0.0009, +0.0078]). A null A5 − A6b is the *a priori* likely outcome and is
+  reported as such.
+- **Paper framing.** The unconditional contributions (EXP-1 §8 item 1) now include a correction to our own round-4
+  conclusion and the identity-dependence result for GT-trained torsion models. Both are budget-matched oracle
+  analyses, labelled ORACLE.

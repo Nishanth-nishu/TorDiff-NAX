@@ -217,3 +217,33 @@ reproducibility, local-only `l_error.csv`); tools 15 passed.
 
 Still queued (unchanged): `gate0` (now with the like-for-like scaling) and the floor re-run (with the alignment
 assert).
+
+### Conformance (CHEM): E/Z and chirality in the validity layer (milestone 1 + fixes)
+Checked 2026-10-17 by R-CHEM against EXP-3 §3.1 (revised), §3.3 and §9, and against my consult answers
+(Q-P1-005/006/007, Q-P2-006/007, Q-P3-004/008). Code read at `59c395f`. Outputs read: `round5/data/ez_targets.{csv,txt}`
+and the cluster test log summarised in milestone-1 fixes. "Spec" quotes are from `round5/specs/EXP-3.md`.
+
+| Mechanism | Spec quote | Code | Ruling |
+|---|---|---|---|
+| Structural stereo test (version-independent) | §3.1: "constrain by the structural test (bond order 2, acyclic, both atoms ≥ 2 heavy neighbours)"; §9.5: "applies the structural test … single source of truth" | `flexitors/geometry/torsion_types.py:103-108` (`is_structural_stereo`), restricted to TD-rotatable bonds at `:137-144` | MATCHES |
+| TD reference quadruple | §3.1: "TD reference atoms (c, a, b, d) (as chosen in `diffusion/sampling.py:135-142`)" | `torsion_types.py:80-96` (rotated side = TD's mask, `:44-59`; first neighbours in edge order) | MATCHES |
+| Target φ_b and the cis/trans toggle | §3.1: "φ_b = 0 if c and d are cis, π if trans … each of c ≠ s1, d ≠ s2 toggles cis↔trans" | `torsion_types.py:111-134` | MATCHES. Note: the spec allowed "STEREOCIS/TRANS or E/Z", and Z/E are CIP labels, not necessarily relative to the stereo atoms. The code reads them relative to the stereo atoms as the spec says. The latent ambiguity is closed empirically by the ETKDG cross-check: the builder refuses any disagreement (`ez_targets.py:76-78`), and the table records agree for 3/3 QM9-test, 3/3 QM9-val and 138/138 DRUGS specified bonds (`ez_targets.txt`) |
+| Committed target table, pinned RDKit 2026.03.6 defines "specified" | §9.3: "'Specified' is defined by RDKit 2026.03.6 on the structural set"; Q-P2-007: "built once with 2026.03.6 and keyed by SMILES and `MolFromSmiles`+`AddHs` atom indices" | `flexitors/data/ez_targets.py:28` (`PINNED_RDKIT`), `:61-62` (refuses another version), `:41-53` (keys), `:46` (`AddHs(MolFromSmiles)`) | MATCHES |
+| Counts reproduce E-CHEM-066 | §0 rev.: "QM9 has 37 … only 3 specified; DRUGS has 140, 126 specified" | `ez_targets.txt`: qm9_test 37 molecules / 3 specified; drugs_test 140 / 126; asserted in `flexitors/tests/test_ez_targets.py:30-32` | MATCHES |
+| Version independence under the cluster's 2022.09.5 | §9.4: "Generation runs under the cluster's 2022.09.5. Targets and 'specified' come from the 2026.03.6 table" | `test_ez_targets.py:46-69`: same bond index, bond type and quadruple under 2022.09.5 + TD featurisation, and ETKDG under 2022.09.5 honours every specified target; passes on gnode118 (67 passed) | MATCHES |
+| Primary geometric E/Z label | §9.3: "cis iff cos δ_b > 0 on TD's reference quadruple, against the committed target table" | `flexitors/eval/validity.py:142-152` (`math.cos(t - b.phi) > 0`) | MATCHES |
+| Unspecified bonds in the label | §3.1 rev.: unspecified bonds get "the planarity constraint only (target set {0, π})" and must not be pinned to the seed's isomer | `validity.py:145-151`: `phi is None` counts as matching; planarity is measured against the nearest of {0, π} | MATCHES for the validity screen: EVAL §3.1 judges stereo "against the input", and an unspecified bond has none |
+| Planarity threshold | §3.3 / §9.3: "|δ_b| ≤ 20°" | `validity.py:49` `PLANARITY_DEG = 20.0`; `:213` | MATCHES |
+| Chirality | §3.3: "chirality check via signed volumes for completeness"; E/Z, not chirality, is Exp 3's target (E-CHEM-062: TD never changes it) | `validity.py:64-70`, `:94-113` (degree-4 atoms and degree-3 ring-fusion atoms, |χ_ref| ≥ 0.05 Å³ floor) | MATCHES. Advisory: the 24 GT-calibration failures are signed-volume flips at ring N (invertomers inside GEOM ensembles). For Exp 3 reports, show degree-3 N flips separately from carbon centres, so that N inversion is not read as a stereo error |
+
+**Not yet implemented (milestone-2 scope, no MISMATCH in milestone 1). Required before the Exp 3 arms are analysed:**
+1. **GT-ensemble consistency for unspecified bonds.** This is the QM9 primary E/Z endpoint (§9.3: "E/Z consistency
+   with the GT ensemble on the 37 structural molecules"). Validity counts unspecified bonds as matching, so this must
+   live in the analysis or `stereo_eval` layer. Use the generated conformer's geometric state against the set of GT
+   states on the same quadruple; the atom order must be mapped, because GT indices are not the table's.
+2. **Planarity over all 102 QM9 molecules.** §9.3: "planarity on the 102", i.e. every TD-rotatable double bond,
+   imine N–H and non-stereo bonds included. The table holds structural bonds only.
+3. **Sampler-side rules.** §9.2: "K1: freezes specified structural bonds only"; unspecified and non-stereo bonds get
+   the late planarity fold at the first σ ≤ 0.1π, never the seed's isomer. Also the F-filter fill to 2K, counted.
+
+Verdict: **no MISMATCH**, so nothing in the E/Z or chirality logic blocks the push. — R-CHEM

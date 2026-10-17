@@ -53,6 +53,11 @@ Sections:
     corrected, the failure is fully explained by a train/test L-distribution mismatch in the torsion models. The test
     gives no evidence that coupling is *necessary*. Coupling is now a **hypothesis**, tested by arm A6b (EXP-1 §4).
   - Confidence of the coupling conclusion: high → **none (hypothesis)**.
+- **Revision 2, after the budget-matched re-score (2026-10-17, E-JOINT-011).** The comparative claim "another
+  conformer's true L makes every model worse than RDKit L" is **withdrawn: it was a budget artefact**. At matched
+  budget, other-conformer GT L is *better* for CR (−0.038 Å overall, −0.015 Å on distinct targets). It is worse for
+  B1, S3 and S4 only on distinct targets (+0.047 to +0.085 Å) and on COV-R@0.5. The VERIFIED numbers above stay as
+  recorded; only their inference changes.
 
 ### E-JOINT-002
 - Claim: The split-half test's population: 744 of 1000 QM9 test molecules have ≥ 2 clean GT conformers, 743 are in the
@@ -231,6 +236,32 @@ Sections:
     its revision note.
   - Requested by V5 and not yet run: a fixed-code re-run for n_GT ≤ 3, and an other-half-only variant matching the
     split-half design. These are listed in EXP-1 §9 "Known issues".
+
+### E-JOINT-011
+- Claim: **Budget-matched leak-free re-score** (ORACLE; 711 molecules, 606 distinct-target; ref_half = exact
+  expectation over 2|H|-subsets of the full RDKit-L run; BUDGET Holm family of 8). split − ref_half AMR-R:
+  - CR −0.0384 [−0.0482, −0.0289] (Holm p < 0.001);
+  - B1 −0.0170 [−0.0310, −0.0030] (Holm p 0.060);
+  - S3 +0.0171 [+0.0048, +0.0296] (Holm p 0.021);
+  - S4 −0.0069 [−0.0178, +0.0041] (n.s.).
+
+  COV-R@0.5: CR +0.07 pt (n.s.), B1 −4.41, S3 −8.70, S4 −5.34 pt. On distinct targets (split_d − ref_half_d AMR-R):
+  CR −0.0147 [−0.0269, −0.0026], B1 +0.0666, S3 +0.0851, S4 +0.0469. COV-R@0.1 split − ref_half is +19.7 to +25.2 pt
+  for every model.
+- Source type: our-data
+- Locator: our-data: `cluster_sync/round5/rescore/budget_matched_summary.txt` ("## Contrasts" table);
+  `budget_contrasts.csv`; `round5/IMPLEMENTATION.md` milestone 1 §5. Code: `tools/analyze_leakfree.py:426-505`
+  (exact expectation, cover probability, ref_half per molecule), `:523` (`budget_matched`).
+- Exact quote (budget_matched_summary.txt):
+  > B.CR.split-ref_half     AMR-R 711      budget     0.2214     0.2598  -0.0384  -0.0482  -0.0289  0.0000  -0.0482  -0.0284  0.0000
+  > B.CR.split_d-ref_half_d     AMR-R 606   secondary     0.2666     0.2813  -0.0147  -0.0269  -0.0026  0.0184  -0.0270  -0.0024     NaN
+- Shows vs infers: SHOWS. R-JOINT checked the formulas and the exclusions in code (EXP-1 §11). INFERENCE:
+  - (a) better-but-not-own L helps the RDKit-trained TD model modestly, so a decoupled learned-L arm has a
+    distinct-target oracle ceiling of ≈ −0.015 Å;
+  - (b) GT- or blend-trained torsion models are identity-dependent (worse on distinct targets);
+  - (c) nothing here tests coupling.
+- Supports card(s): EXP-1 §0, §3.6, §4 (A6), §7, §11
+- Confidence: high (numbers and code check); medium (distinct-target view, threshold 0.1 Å, same-ensemble targets)
 
 ---
 

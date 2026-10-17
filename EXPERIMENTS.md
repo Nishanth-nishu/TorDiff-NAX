@@ -520,6 +520,15 @@ split-half test (round 4) is running to settle what remains of S3's oracle gain.
   oracle gains of B1, S3 and S4 were almost entirely conformer-identity leakage. Correct geometry in general does not
   help; geometry helps only when it matches the specific conformer being generated. **Local structure and torsions are
   strongly coupled.** This re-reads A1 (−54 %) and the ring-only result (0.119) as upper bounds that include leakage.
+- **Correction (17 Oct, round-5 budget-matched re-score, 711 molecules):** the split-half runs above drew half as many
+  samples as the RDKit runs. With matched sample counts, another conformer's true geometry vs RDKit geometry gives
+  AMR-R: standard model **−0.038 Å, better** (Holm p < 0.001; −0.015 Å on genuinely distinct targets), B1 −0.017
+  (p = 0.06), S3 +0.017 (worse, p = 0.021), S4 −0.007 (n.s.). So "worse for every model" was a budget artefact and is
+  withdrawn. What survives: the big oracle gains of B1/S3/S4 were leakage, and models trained on true or mixed geometry
+  depend on conformer identity; better geometry does help the standard model modestly. Coupling is a hypothesis, not a
+  finding. Separately, a bug at `tools/local_structure_analysis.py:302` (target counted among "others" for molecules
+  with ≤ 3 conformers) had biased the "another conformer's geometry" floor to 0.032 Å; corrected it is 0.036 Å vs
+  0.114 Å for RDKit geometry. Fixed with a regression test in round 5.
 - **What we did next:** the round-5 programme is built around a *coupled* geometry–torsion model (Experiment 1) instead
   of an independent geometry predictor, and the split-half test becomes a standard analysis tool.
 - **Worth it?** Yes, decisively: ~4 GPU-h, and it prevented a paper built on a leaked oracle. The test itself is a

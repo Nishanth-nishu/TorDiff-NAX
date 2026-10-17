@@ -18,7 +18,12 @@ the published 0.032 included the target itself for n_GT ≤ 3, bug at `tools/loc
 0.114 Å with RDKit L on the same rows [E-CHEM-065 rev.]. Trained models score 0.22–0.30 Å on other-half L
 [E-CHEM-054], but the comparison with RDKit L (0.187) is not budget-matched (the split view has 2·|half| samples), so
 only the direction "other-conformer geometry is far better than what the models make of it" is used here [D-001].
-What fails is the torsion model's use of L it was not trained with. Conformer matching is a *training-distribution* device (which L is paired with which
+What fails is the torsion model's use of L it was not trained with.
+*Revised after the budget-matched re-score (2026-10-17, E-CHEM-054 rev.):* split − ref_half AMR-R is
+CR −0.038 Å (significant), B1 −0.017 (n.s.), S3 +0.017 (significant), S4 −0.007 (n.s.). The RDKit-matched standard
+model does gain from other-conformer true L; the true-L or mixed-L recipes gain nothing (B1, S4) or lose (S3). This
+sharpens the EXP-2 framing: the training pairing decides whether a model can use better L. The design is unchanged,
+and the L-robustness panel (§4) already uses ref_half. Conformer matching is a *training-distribution* device (which L is paired with which
 τ target) [E-CHEM-008, E-CHEM-009]. So Exp 2 is really about what the (L, τ) pairing teaches, and every variant must be
 read on several L sources (RDKit, MMFF, split-half other-conformer L), not only RDKit L.
 
@@ -57,6 +62,7 @@ generate L themselves; Exp 2 matters for any model that conditions on an externa
 | B5 heavy-atom DE | +0.0058 [0.0038, 0.0080] | E-CHEM-052 |
 | B1 true L, no matching | +0.0536 [0.0469, 0.0600] | E-CHEM-053 |
 | Leak-free ORACLE, other-conformer L: CTRL 0.2195 vs RDKit-L 0.1873; B1 0.3046 (split vs RDKit-L is not budget-matched, D-001: descriptive only; own-vs-split leak contrast stands) | — | E-CHEM-054 |
+| Budget-matched re-score, split − ref_half (Revised 2026-10-17) | CR −0.038*, B1 −0.017 n.s., S3 +0.017*, S4 −0.007 n.s. | E-CHEM-054 rev. |
 | Other-conformer L geometric floor (no model; oracle best of 3 closest others, n_GT > 3) | ~~0.032~~ 0.036 Å ring molecules vs 0.114 RDKit L on the same rows (Revised after D-003) | E-CHEM-065 |
 | S5 (MMFF-matched training) on MMFF L | −0.0041 [−0.0064, −0.0019] | round4/BRIEF.md |
 Reading: what transfers is "train on the L you deploy" (S5); assignment details do not move AMR-R.
