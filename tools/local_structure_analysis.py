@@ -86,7 +86,10 @@ parser.add_argument('--raw_dir', default='data/QM9/qm9/', help='--mode leak: raw
 parser.add_argument('--n_perm', type=int, default=200)
 # [round5 EXP-1 §10.5 / Q-P1-011] other-half floor: candidates restricted to the other half of tools/make_split_half.py
 # split.tsv (the leak-free halves), cap applied after splitting
-parser.add_argument('--floor_other_half', default=None, help='--mode test: split.tsv of make_split_half.py')
+parser.add_argument('--floor_other_half', default=None,
+                    help='--mode test: split.tsv of make_split_half.py; halves on uncapped cleaned indices, then the '
+                         '--max_gt_confs cap (indices < cap of each half); molecules whose clean count differs from '
+                         'split.tsv n_clean are reported as split_misaligned errors')
 parser.add_argument('--floor_all_max_half', type=int, default=10,
                     help='--floor_other_half: also the min over ALL other-half conformers if |half| <= this')
 args = parser.parse_args()
@@ -258,7 +261,11 @@ def job(item):
     key, corrected, confs, halves = item
     rows = []
     try:
-        confs = clean_confs(corrected, confs)[:args.max_gt_confs]
+        confs = clean_confs(corrected, confs)
+        if halves is not None and len(confs) != halves[2]:  # [round5 review P2 S6] split.tsv index alignment
+            return [dict(smiles=key, corrected_smiles=corrected,
+                         error=f'split_misaligned: {len(confs)} clean != n_clean {halves[2]}')]
+        confs = confs[:args.max_gt_confs]
         if not confs:
             return rows
         n = len(confs)
@@ -368,14 +375,16 @@ def run_test():
         true_mols = pickle.load(f)
     halves = {}
     if args.floor_other_half:  # split.tsv halves (cleaned GT indices) keyed by corrected smiles
-        sp = pd.read_csv(args.floor_other_half, sep='	')
+        sp = pd.read_csv(args.floor_other_half, sep='\t')
         for r in sp.itertuples(index=False):
             ia = {int(x) for x in str(r.idx_A).split(',')}
             ib = {int(x) for x in str(r.idx_B).split(',')}
-            halves[r.corrected_smiles] = (ia, ib)
+            halves[r.corrected_smiles] = (ia, ib, int(r.n_clean))
         n_cap = int((sp.n_clean > args.max_gt_confs).sum())
+        # reading of "cap applied after splitting" (EXP-1 §10.5): halves are split.tsv's (uncapped cleaned indices);
+        # targets and candidates are then the cleaned indices < --max_gt_confs, i.e. ~15 per half when n_clean > 30
         print(f'other-half floor: {len(halves)} split-half molecules, {n_cap} with > {args.max_gt_confs} clean '
-              f'conformers (cap applied after splitting)')
+              f'conformers (cap applied after splitting: indices < {args.max_gt_confs} of each half)')
     items = []
     for row in df.itertuples(index=False):
         key, corrected = row[0], row[2]

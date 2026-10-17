@@ -38,8 +38,11 @@ def test_target_never_among_candidates(lsa):
             row[i] = np.inf  # job() sets cost_gg[i, i] = inf
             cand = lsa.floor_candidates(row, i, 3)
             assert i not in cand and len(cand) == min(3, n - 1)
+            old = [int(j) for j in np.argsort(row)[:3]]  # the buggy slice of :302
             if n > 3:  # rows with n_gt > 3 are unchanged by the fix (the old slice never reached the inf entry)
-                assert cand == [int(j) for j in np.argsort(row)[:3]]
+                assert cand == old
+            else:  # and for n_gt <= 3 the old slice did contain the target itself (the bug)
+                assert i in old
 
 
 def test_allowed_restricts_to_other_half(lsa):
@@ -60,7 +63,7 @@ def test_two_conformer_floor_no_longer_collapses(lsa):
     had floor_gtother <= 2e-5 A). A rigid bicycle has no heavy torsion, so the floor is the aligned RMSD itself."""
     smi = 'C1CC2CCC1C2'
     confs = gt_mols(smi, 2, 5)
-    rows = pd.DataFrame(lsa.job((smi, smi, confs, ({0}, {1})))).sort_values('gt_idx')
+    rows = pd.DataFrame(lsa.job((smi, smi, confs, ({0}, {1}, 2)))).sort_values('gt_idx')
     assert 'error' not in rows
     amap = lsa.heavy_automorphisms(confs[0])
     want = [lsa.heavy_rmsd(Chem.Mol(confs[1 - i]), confs[i], -1, -1, amap) for i in (0, 1)]
@@ -69,3 +72,10 @@ def test_two_conformer_floor_no_longer_collapses(lsa):
     # the other-half variant with halves {0} / {1} uses exactly the other conformer
     assert np.allclose(rows.floor_gtother_half.values, want, atol=1e-6)
     assert np.allclose(rows.floor_gtother_half_all.values, want, atol=1e-6)
+
+
+def test_split_misalignment_is_reported(lsa):
+    """review P2 S6: split.tsv halves index the cleaned GT list; a different clean count must not be used silently"""
+    confs = gt_mols('C1CC2CCC1C2', 2, 5)
+    (row,) = lsa.job(('C1CC2CCC1C2', 'C1CC2CCC1C2', confs, ({0, 2}, {1}, 3)))
+    assert row['error'].startswith('split_misaligned')
