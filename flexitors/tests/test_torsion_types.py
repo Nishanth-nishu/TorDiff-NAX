@@ -75,6 +75,7 @@ def test_phi_target_hand_cases():
     (b,) = structural_stereo_bonds(m)
     assert b.quad[0] == 1 or b.quad[3] == 1
     assert set(m.GetBondWithIdx(b.bond_idx).GetStereoAtoms()) & {2}
+    assert b.phi == math.pi  # F2 cis to C4 (Z) => the reference methyl C1 is trans to C4: one toggle
 
 
 @pytest.mark.parametrize('smiles', ['C/C=C/C', 'C/C=C\\C', 'C/C(F)=C/C', 'C/C(F)=C\\C', 'F/C(C)=C/CC', 'C/C=N/O',
@@ -92,7 +93,7 @@ def test_phi_target_agrees_with_embedding(smiles):
 
 def test_unspecified_has_no_target():
     m = mh('CC=CC')
-    k = td_rotatable_bonds(m)[1] if len(td_rotatable_bonds(m)) > 1 else td_rotatable_bonds(m)[0]
+    (k,) = [b for b in td_rotatable_bonds(m) if m.GetBondWithIdx(b).GetBondType() == Chem.BondType.DOUBLE]
     assert smiles_phi_target(m, k, td_reference_quadruple(m, k)) is None
 
 

@@ -42,7 +42,8 @@ def clean_confs(smiles: str, confs: list) -> list:
     return import_baseline('make_split_half').clean_confs(smiles, confs)
 
 
-def _graph(smiles_or_mol) -> str | None:
+def _graph(smiles_or_mol: str | Chem.Mol) -> str | None:
+    """Non-isomeric canonical SMILES of a SMILES string (parsed unsanitised) or a molecule; None if unparsable."""
     m = Chem.MolFromSmiles(smiles_or_mol, sanitize=False) if isinstance(smiles_or_mol, str) else smiles_or_mol
     return None if m is None else Chem.MolToSmiles(m, isomericSmiles=False)
 
