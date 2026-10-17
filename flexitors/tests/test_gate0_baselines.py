@@ -41,7 +41,13 @@ def test_summary_on_synthetic_inputs(tmp_path):
     assert res['val']['rigid_amr_r']['ETKDG'] == pytest.approx(0.15) and res['val']['n_rigid']['MMFF'] == 2
     assert res['val']['ring_share_gt10']['ETKDG'] == pytest.approx(0.5) and res['val']['n_ring_seeds']['ETKDG'] == 2
     assert len(pd.read_csv(tmp_path / 'val_ring_seeds.csv')) == 2
-    assert json.loads((tmp_path / 'gate0_baselines.json').read_text())['gate0_thresholds']['rigid_amr_r']
+    J = json.loads((tmp_path / 'gate0_baselines.json').read_text())
+    # like-for-like scaling: val and test come from the same recipe here, so the ratio is exactly 1 (review P2 B2)
+    assert J['gate0_thresholds']['rigid_amr_r']['val_over_test'] == pytest.approx(1.0)
+    assert not J['gate0_thresholds']['ring_share_gt10']['scaled']
+    rc = J['recipe_check']['rigid_amr_r']['ETKDG']
+    assert rc['rel_diff'] == pytest.approx(0.15 / 0.152 - 1) and not rc['flagged']
+    assert J['recipe_check']['rigid_amr_r']['MMFF']['flagged']  # 0.15 vs published 0.128: > 10 %
 
 
 @pytest.mark.skipif(not TEST_L_ERROR.exists(), reason='l_error.csv is not committed (size)')

@@ -11,7 +11,10 @@ CPU, with exactly the recipe of the published test numbers:
 * ring metric: share of paired seeds of molecules whose largest ring has ≥ 4 atoms with endocyclic ring-dihedral RMSD
   > 10° (E-JOINT-004 rev.); published test values ETKDG 49.6 %, MMFF 35.1 % on 4,181 seeds.
 Thresholds (EXP-1 §10.3): rigid AMR-R ≤ 0.10 Å and ring share ≤ 20 %; if a validation ETKDG baseline differs from its
-test value by more than 10 % relative, that threshold is scaled by validation ÷ test.
+test value by more than 10 % relative, that threshold is scaled by validation ÷ test. The test value is the one
+computed here with the SAME recipe (review P2 B2): the published 0.152 Å comes from a CTRL_rematch generation run
+(E-JOINT-007), a different recipe, so it is only compared with the same-recipe test value (``recipe_check``, flagged
+if they differ by more than the same 10 %).
 
 Subcommands: ``confs`` (seed pickle keyed by the csv ``smiles`` column → generated-conformer pickle keyed by
 ``corrected_smiles``, the evaluator's format) and ``summary``.
@@ -88,7 +91,11 @@ def summarise(out_dir: Path, val_l_error: Path, test_l_error: Path) -> dict:
             if name == 'val' and cond == 'L_etkdg2L':
                 R.to_csv(out_dir / 'val_ring_seeds.csv', index=False)
     res['published_test'] = PUBLISHED_TEST
-    res['gate0_thresholds'] = thresholds(res['val'], PUBLISHED_TEST)
+    res['gate0_thresholds'] = thresholds(res['val'], res['test'])
+    res['recipe_check'] = {k: {src: dict(same_recipe_test=res['test'][k][src], published=pub,
+                                         rel_diff=res['test'][k][src] / pub - 1,
+                                         flagged=abs(res['test'][k][src] / pub - 1) > SCALE_IF_REL_DIFF)
+                               for src, pub in v.items()} for k, v in PUBLISHED_TEST.items()}
     (out_dir / 'gate0_baselines.json').write_text(json.dumps(res, indent=1) + '\n')
     write_provenance(out_dir)
     return res
@@ -120,7 +127,9 @@ def main() -> None:
               f'(n = {r["n_rigid"]["ETKDG"]}); >= 4-ring seeds > 10 deg: ETKDG {100 * r["ring_share_gt10"]["ETKDG"]:.1f} '
               f'% / MMFF {100 * r["ring_share_gt10"]["MMFF"]:.1f} % (n = {r["n_ring_seeds"]["ETKDG"]})')
     print('published test:', res['published_test'])
-    print('Gate-0 thresholds (validation):', json.dumps(res['gate0_thresholds']))
+    print('same-recipe test vs published:', json.dumps(res['recipe_check']))
+    print('Gate-0 thresholds (validation, scaled by validation / same-recipe test):',
+          json.dumps(res['gate0_thresholds']))
 
 
 if __name__ == '__main__':
