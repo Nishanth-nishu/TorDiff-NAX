@@ -42,10 +42,10 @@ case $TASK in
        tools/tests/test_leakfree.py tools/tests/test_leakfree_budget.py 2>&1 | tee "$O/tools_tests.txt")
     ;;
   rescore)
-    [[ -s $O/strata.csv ]] || python -m flexitors.data.strata --csv "$QM9_TEST_CSV" --out "$O/strata.csv"
+    [[ -s $O/m_strata.csv ]] || python -m flexitors.data.strata --csv "$QM9_TEST_CSV" --out "$O/m_strata.csv"
     [[ -s $O/budget_matched_summary.txt ]] || python "$TOOLS/analyze_leakfree.py" --res "$RES" \
       --split_dir "$QM9_DIR/round4_splithalf" --s4_subset "$QM9_SEEDS2/S4_test_subset.txt" --out "$O" \
-      --ref_subsample 10 --strata "$O/strata.csv" > "$O/stdout.txt"
+      --ref_subsample 10 --strata "$O/m_strata.csv" > "$O/stdout.txt"
     # the round-4 part must reproduce the committed round-4 analysis exactly; a mismatch fails the job (review P2 S7)
     cmp "$O/leakfree_summary.txt" "$RES/analysis_r4_leakfree/leakfree_summary.txt" \
       || { echo "FAIL round-4 summary not reproduced" | tee "$O/cmp.txt"; exit 3; }
