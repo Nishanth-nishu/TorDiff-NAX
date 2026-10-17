@@ -27,8 +27,8 @@ def provenance() -> dict:
     import numpy
     import rdkit
     commit = os.environ.get('FLEXITORS_COMMIT') or _git('rev-parse', 'HEAD') or 'unknown'
-    dirty = 'unknown' if 'FLEXITORS_COMMIT' in os.environ else bool(_git('status', '--porcelain', '--', 'flexitors',
-                                                                         'tools'))
+    dirty = 'unknown' if 'FLEXITORS_COMMIT' in os.environ else bool(
+        _git('status', '--porcelain', '--', 'flexitors', 'tools', 'experiments', 'round5/data'))
     return dict(commit=commit, dirty=dirty, python=sys.version.split()[0], rdkit=rdkit.__version__,
                 numpy=numpy.__version__, host=platform.node(), argv=sys.argv,
                 baseline_changed_files=changed_baseline_files())

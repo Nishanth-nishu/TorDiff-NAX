@@ -11,9 +11,10 @@ ssh ada 'sbatch --export=ALL,TASK=<task> --job-name=r5_<task> ~/r5_cpu.sbatch'
 | Task | Spec | Output (`$RES/round5/<task>/`) |
 |---|---|---|
 | `tests` | DECISION graft 1 (SHA pins, dead code), cluster-only golden tests | `flexitors_tests.txt`, `tools_tests.txt` |
-| `rescore` | EXP-1 §3.6 / §10.5 (D-001, Q-P1-011) | `budget_matched_summary.txt`, `budget_contrasts.csv`, `budget_per_model.csv`, `budget_mc_check.csv` |
+| `rescore` | EXP-1 §3.6 / §10.5 (D-001, Q-P1-011) | `strata.csv`, `cmp.txt`, `budget_matched_summary.txt`, `budget_contrasts.csv`, `budget_per_model.csv`, `budget_mc_check.csv` |
 | `floor`, `floor_mmff` | EXP-1 §9 item 1, §10.5 (D-003) | `local_structure_test_fixed.csv` (new file; the round-1 CSVs are not overwritten) |
 | `valset` | EVAL §1.1, EXP-5 §12 | `val_smiles.csv`, `val_indices.csv`, `val_mols.pkl` (not committed), `population.txt`, `self_check.txt` |
+| `validity_cal` | EVAL §3.1, review P2 B1 | `gt_calibration.csv`, `gt_calibration.txt` (GT conformers screened against the first GT conformer) |
 | `gate0` | EXP-1 §10.3 | ETKDG / MMFF seeds of the validation set, their `eval.pkl` and breakdowns, `gate0_baselines.json` |
 
 Everything here is ORACLE-free except `rescore` and `floor*`, which read test-set ground truth and are analysis only

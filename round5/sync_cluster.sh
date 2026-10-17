@@ -20,8 +20,9 @@ P=/scratch/nishanth.r/tordiff
 rm -rf \$P/tmp/r5sync && mkdir -p \$P/tmp/r5sync && tar xzf ~/r5sync.tgz -C \$P/tmp/r5sync
 rm -rf \$P/flexitors && cp -a \$P/tmp/r5sync/flexitors \$P/flexitors
 cp -a \$P/tmp/r5sync/tools/. \$P/tools/
-rm -rf \$P/round5 && mkdir -p \$P/round5/ledger && cp -a \$P/tmp/r5sync/round5/ledger/chem_data \$P/round5/ledger/
-if [ -d \$P/tmp/r5sync/round5/data ]; then cp -a \$P/tmp/r5sync/round5/data \$P/round5/data; fi
+# replace only the two copied subtrees; anything else under \$P/round5 is kept (review P1 S5)
+mkdir -p \$P/round5/ledger && rm -rf \$P/round5/ledger/chem_data && cp -a \$P/tmp/r5sync/round5/ledger/chem_data \$P/round5/ledger/
+if [ -d \$P/tmp/r5sync/round5/data ]; then rm -rf \$P/round5/data && cp -a \$P/tmp/r5sync/round5/data \$P/round5/data; fi
 if [ -d \$P/tmp/r5sync/experiments ]; then rm -rf \$P/experiments && cp -a \$P/tmp/r5sync/experiments \$P/experiments; fi
 echo $COMMIT > \$P/FLEXITORS_COMMIT
 echo synced $COMMIT

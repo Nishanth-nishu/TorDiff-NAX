@@ -15,6 +15,7 @@
 #   floor_mmff the same with --mmff_seeds
 #   valset     QM9 validation subset (EVAL §1.1) with the test-file self-check
 #   gate0      ETKDG / MMFF validation seeds and Gate-0 baselines (EXP-1 §10.3), after valset
+#   validity_cal  GT calibration of flexitors/eval/validity.py on QM9 test and validation GT (review P2 B1)
 # Outputs: $RES/round5/<task>/ (never overwritten: a task whose output marker exists is skipped).
 # Memory: <= 5000 MB per CPU on plafnet2 (round2/FIXES.md X2).
 PROJECT=/scratch/nishanth.r/tordiff
@@ -27,6 +28,7 @@ export CUDA_VISIBLE_DEVICES=""
 export FLEXITORS_COMMIT
 FLEXITORS_COMMIT=$(cat "$PROJECT/FLEXITORS_COMMIT")
 export PYTHONPATH=$PROJECT
+export FLEXITORS_RES=$RES
 NW=${SLURM_CPUS_PER_TASK:-8}
 TASK=${TASK:?set TASK}
 O=$RES/round5/$TASK
@@ -40,11 +42,14 @@ case $TASK in
        tools/tests/test_leakfree.py tools/tests/test_leakfree_budget.py 2>&1 | tee "$O/tools_tests.txt")
     ;;
   rescore)
+    [[ -s $O/strata.csv ]] || python -m flexitors.data.strata --csv "$QM9_TEST_CSV" --out "$O/strata.csv"
     [[ -s $O/budget_matched_summary.txt ]] || python "$TOOLS/analyze_leakfree.py" --res "$RES" \
       --split_dir "$QM9_DIR/round4_splithalf" --s4_subset "$QM9_SEEDS2/S4_test_subset.txt" --out "$O" \
-      --ref_subsample 10 > "$O/stdout.txt"
-    # the round-4 part must reproduce the committed round-4 analysis exactly
-    cmp "$O/leakfree_summary.txt" "$RES/analysis_r4_leakfree/leakfree_summary.txt" && echo "round-4 summary reproduced"
+      --ref_subsample 10 --strata "$O/strata.csv" > "$O/stdout.txt"
+    # the round-4 part must reproduce the committed round-4 analysis exactly; a mismatch fails the job (review P2 S7)
+    cmp "$O/leakfree_summary.txt" "$RES/analysis_r4_leakfree/leakfree_summary.txt" \
+      || { echo "FAIL round-4 summary not reproduced" | tee "$O/cmp.txt"; exit 3; }
+    echo "round-4 summary reproduced byte for byte" | tee "$O/cmp.txt"
     ;;
   floor|floor_mmff)
     EXTRA=""; [[ $TASK == floor_mmff ]] && EXTRA="--mmff_seeds"
@@ -78,6 +83,12 @@ case $TASK in
     done
     python -m flexitors.data.gate0_baselines summary --dir "$O" --val_l_error "$O/val_seeds/l_error.csv" \
       --test_l_error "$QM9_SEEDS2/l_error.csv" | tee "$O/gate0_baselines.txt"
+    ;;
+  validity_cal)
+    [[ -s $O/gt_calibration.csv ]] || python -m flexitors.eval.validity \
+      --set qm9_test "$QM9_TEST_CSV" "$QM9_TEST_MOLS" \
+      --set qm9_val "$RES/round5/valset/val_smiles.csv" "$RES/round5/valset/val_mols.pkl" \
+      --out "$O/gt_calibration.csv" | tee "$O/stdout.txt"
     ;;
   *) echo "unknown TASK $TASK"; exit 2 ;;
 esac
