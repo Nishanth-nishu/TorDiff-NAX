@@ -86,7 +86,8 @@ def test_driver_ref_half(tmp_path):
     res, sd, mols, full = build(tmp_path, np.random.default_rng(3))
     out0, out1 = tmp_path / 'out0', tmp_path / 'out1'
     alf.analyse(str(res), str(sd), str(out0), n_boot=200)
-    alf.analyse(str(res), str(sd), str(out1), n_boot=200, ref_subsample=10)
+    pd.DataFrame(dict(corrected_smiles=list(mols), m=[0, 2, 0, 3])).to_csv(tmp_path / 'strata.csv', index=False)
+    alf.analyse(str(res), str(sd), str(out1), n_boot=200, ref_subsample=10, strata=str(tmp_path / 'strata.csv'))
     for f in os.listdir(out0):  # round-4 outputs are unchanged by the option
         if not f.endswith('.gz'):
             assert filecmp.cmp(out0 / f, out1 / f, shallow=False), f
@@ -108,6 +109,10 @@ def test_driver_ref_half(tmp_path):
     assert set(fam.id) == {f'B.{m}.split-ref_half' for m in ('CR', 'B1', 'S3', 'S4')}
     assert set(fam.metric) == {'AMR-R', 'COV-R@0.5'}
     assert (C.family == 'descriptive').sum() == 4 * 3
+    h = C[C.family == 'post hoc']
+    assert set(h.id) == {f'H.{m}.split-ref_half.{lab}' for m in ('CR', 'B1', 'S3', 'S4') for lab in ('m=0', 'm>0')}
+    assert (h.groupby(['id']).n.first().groupby(lambda i: i.split('.')[1]).sum() == 4).all() and h.p_holm.isna().all()
     d = C[C.id == 'B.CR.split_d-ref_half_d']
     assert len(d) == 3 and (d.n == 3).all()  # m1 has no distinct target
+    assert d.note.str.contains('post hoc').all()
     assert (out1 / 'budget_mc_check.csv').exists() and (out1 / 'budget_matched_summary.txt').exists()

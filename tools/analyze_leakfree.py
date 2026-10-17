@@ -54,6 +54,10 @@ ref_half value existed; only with --ref_subsample N, default 0 = the round-4 ana
     bootstrap on seed-averaged differences, hierarchical interval (seeds, then molecules) beside each row.
   Secondary (no Holm): COV-R@0.1, and split_d - ref_half_d on the distinct-target universe.
   Descriptive: split - ref_rdkitL (the published full-budget gaps) on the same universe.
+  POST HOC (added after the first result, review P2 S8; with --strata): split - ref_half on molecules with m = 0
+    TD-rotatable bonds (TD runs no model there, generate_confs.py:150-153, so the split output is the other half's
+    GT conformers for every model) and m > 0. The distinct-target rows stay pre-declared secondary; reading them as
+    primary for the coupling question (EXP-1 §11) is post hoc and is labelled so in the outputs.
 
 Usage (on gnode118, after slurm/r4_leakfree_array.sbatch):
   python tools/analyze_leakfree.py --res $RES --split_dir $QM9_DIR/round4_splithalf \
@@ -211,7 +215,7 @@ def load_all(res, families, masks=None):
 
 
 def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=('CR', 'B1', 'S3', 'S4'),
-            ref_subsample=0):
+            ref_subsample=0, strata=None):
     os.makedirs(out, exist_ok=True)
     split = pd.read_csv(os.path.join(split_dir, 'split.tsv'), sep='\t').set_index('corrected_smiles')
     masks, NN = nn_masks(split_dir)
@@ -415,7 +419,8 @@ def analyse(res, split_dir, out, s4_subset=None, n_boot=5000, seed=0, families=(
         f.write(txt + '\n')
     print(txt)
     if ref_subsample:
-        budget_matched(res, split, universe, universe_d, masks, V, fams, out, ref_subsample, n_boot, seed)
+        budget_matched(res, split, universe, universe_d, masks, V, fams, out, ref_subsample, n_boot, seed,
+                       pd.read_csv(strata) if strata else None)
     return models, C, S
 
 
@@ -520,7 +525,7 @@ def mc_check_lines(MC, fams):
     return lines + ['']
 
 
-def budget_matched(res, split, universe, universe_d, masks, V, fams, out, n_draws, n_boot, seed):
+def budget_matched(res, split, universe, universe_d, masks, V, fams, out, n_draws, n_boot, seed, strata=None):
     """EXP-1 §3.6 / §10.5 budget-matched leak-free reference and the pre-declared BUDGET family (module doc)."""
     rng_mc = np.random.default_rng([seed, 2026])
     rng = np.random.default_rng(seed)
@@ -537,7 +542,12 @@ def budget_matched(res, split, universe, universe_d, masks, V, fams, out, n_draw
     Ud = [m for m in universe_d if m not in bad]
     lines = ['# Budget-matched leak-free reference ref_half (ORACLE; EXP-1 §3.6 / §10.5; tools/analyze_leakfree.py)',
              f'split-half universe {len(universe)}; excluded from ref_half (every view and model) {len(bad)}; '
-             f'analysed {len(U)}; distinct-target universe {len(Ud)}; MC check draws per half {n_draws}', '']
+             f'analysed {len(U)}; distinct-target universe {len(Ud)}; MC check draws per half {n_draws}',
+             'NOTE: the excluded molecules are not missing at random: they lack a full-set RDKit-L result (ETKDG cannot '
+             'embed them) while their GT-L split runs exist; the exclusion is paired across models and views.',
+             'NOTE: the MC check is descriptive (10-draw SE estimates); the exact expectation is the primary value.',
+             'NOTE: *_d rows are the pre-declared secondary distinct-target view; promoting them to primary for the '
+             'coupling reading (EXP-1 §11) is POST HOC.', '']
     MC = pd.DataFrame(MC)
     lines += mc_check_lines(MC, fams)
     MC.to_csv(os.path.join(out, 'budget_mc_check.csv'), index=False)
@@ -566,13 +576,29 @@ def budget_matched(res, split, universe, universe_d, masks, V, fams, out, n_draw
                 crow.append(dict(id=f'B.{fam}.split{sfx}-ref_half{sfx}', metric=m, n=len(mols),
                                  family='budget' if (sfx == '' and m in PRIMARY_METRICS) else 'secondary',
                                  arm_value=A.mean() * sc, ref_value=Rh.mean() * sc, diff=mean * sc, ci_lo=lo * sc,
-                                 ci_hi=hi * sc, p_boot=p, hier_lo=hlo * sc, hier_hi=hhi * sc))
+                                 ci_hi=hi * sc, p_boot=p, hier_lo=hlo * sc, hier_hi=hhi * sc,
+                                 note='pre-declared secondary; as primary for coupling (EXP-1 §11): post hoc'
+                                 if sfx else ''))
         for m in METRICS:  # descriptive: the published full-budget gap on the same molecules
             A, Rl = stack(fam, m, U, 'split'), stack(fam, m, U, 'ref_rdkitL')
             sc = 1.0 if m == 'AMR-R' else 100.0
             levels.append(dict(model=fam, view='ref_rdkitL', metric=m, n=len(U), value=float(Rl.mean())))
             crow.append(dict(id=f'D.{fam}.split-ref_rdkitL', metric=m, n=len(U), family='descriptive',
                              arm_value=A.mean() * sc, ref_value=Rl.mean() * sc, diff=float((A - Rl).mean()) * sc))
+    if strata is not None:  # POST HOC (review P2 S8a), own RNG so the rows above are unchanged
+        rng_ph = np.random.default_rng([seed, 8])
+        mcol = strata.drop_duplicates('corrected_smiles').set_index('corrected_smiles')['m'].reindex(U)
+        for fam in fams:
+            for lab, mols in (('m=0', [x for x in U if mcol[x] == 0]), ('m>0', [x for x in U if mcol[x] > 0])):
+                for m in PRIMARY_METRICS:
+                    D = stack(fam, m, mols, 'split') - stack(fam, m, mols, 'ref_half')
+                    mean, lo, hi, p = boot(D.mean(0), rng_ph, n_boot)
+                    sc = 1.0 if m == 'AMR-R' else 100.0
+                    crow.append(dict(id=f'H.{fam}.split-ref_half.{lab}', metric=m, n=len(mols), family='post hoc',
+                                     arm_value=stack(fam, m, mols, 'split').mean() * sc,
+                                     ref_value=stack(fam, m, mols, 'ref_half').mean() * sc, diff=mean * sc,
+                                     ci_lo=lo * sc, ci_hi=hi * sc, p_boot=p,
+                                     note='m = TD-rotatable bonds; added after the result (review P2 S8a)'))
     P, C = pd.DataFrame(levels), pd.DataFrame(crow)
     C['p_holm'] = np.nan
     fb = C.family == 'budget'
@@ -601,5 +627,8 @@ if __name__ == '__main__':
     ap.add_argument('--seed', type=int, default=0)
     ap.add_argument('--ref_subsample', type=int, default=0,
                     help='[round5] > 0: also the budget-matched ref_half (EXP-1 §3.6) with this many MC check draws')
+    ap.add_argument('--strata', default=None,
+                    help='[round5, post hoc] csv with corrected_smiles, m (python -m flexitors.data.strata)')
     a = ap.parse_args()
-    analyse(a.res, a.split_dir, a.out, a.s4_subset, a.n_boot, a.seed, ref_subsample=a.ref_subsample)
+    analyse(a.res, a.split_dir, a.out, a.s4_subset, a.n_boot, a.seed, ref_subsample=a.ref_subsample,
+            strata=a.strata)
