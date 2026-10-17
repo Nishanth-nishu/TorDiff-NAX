@@ -63,7 +63,9 @@ def test_bicyclopentane_extra_perceived_bond_is_explained_by_the_reference():
     for s in ('C1C2CC1C2', 'OC12CC(C1)C2', 'N#CC12CC(C1)C2'):
         seed, relaxed = seed_and_relaxed(s)
         r = validate_conformer(relaxed, ref=seed)
-        assert r.n_extra_bonds == 1 and r.n_extra_bonds_unexplained == 0 and r.n_missing_bonds == 0
+        # RDKit 2026.03.6 perceives the 1,3-bridgehead pair as a bond, 2022.09.5 geometry may not: either way the
+        # reference explains it
+        assert r.n_extra_bonds <= 1 and r.n_extra_bonds_unexplained == 0 and r.n_missing_bonds == 0
         assert r.valid is True, s
 
 
