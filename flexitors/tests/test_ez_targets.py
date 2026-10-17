@@ -41,3 +41,29 @@ def test_committed_table_is_reproducible():
             assert list(again.bond_idx) == list(rows.bond_idx)
             assert list(again[['c', 'a', 'b', 'd']].itertuples(index=False)) == \
                 list(rows[['c', 'a', 'b', 'd']].itertuples(index=False))
+
+
+@pytest.mark.skipif(not TABLE.exists(), reason='table not built yet')
+@pytest.mark.cluster
+def test_table_indices_hold_under_generation_rdkit():
+    """review P1 S2 / P2 S5: under the cluster's RDKit (2022.09.5) and TD's featurisation, every row's bond_idx is the
+    same structural double bond with the same TD quadruple, and ETKDG honours every specified target"""
+    from rdkit import Chem
+
+    from flexitors.data.ez_targets import embed_check
+    from flexitors.geometry.torsion_types import structural_stereo_bonds
+    from flexitors.td import import_baseline
+    feat = import_baseline('utils.featurization')
+    T = pd.read_csv(TABLE)
+    disagree = []
+    for smi, rows in T.groupby('corrected_smiles', sort=False):
+        mol, data = feat.featurize_mol_from_smiles(smi, dataset='drugs')
+        mh = Chem.AddHs(Chem.MolFromSmiles(smi))
+        assert mol is None or mol.GetNumAtoms() == mh.GetNumAtoms()
+        now = {b.bond_idx: b.quad for b in structural_stereo_bonds(mh)}
+        for r in rows.itertuples():
+            assert now.get(r.bond_idx) == (r.c, r.a, r.b, r.d), (smi, r.bond_idx)
+            assert mh.GetBondWithIdx(r.bond_idx).GetBondType() == Chem.BondType.DOUBLE
+            if r.specified and embed_check(mh, (r.c, r.a, r.b, r.d), r.phi) == 'disagree':
+                disagree.append((smi, r.bond_idx))
+    assert disagree == [], disagree
