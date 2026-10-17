@@ -7,10 +7,13 @@ for baseline imports, and it pins the baseline files by SHA-256 so that any chan
 
 Two baseline quirks are handled here (plan_P1 §1.2 item 2):
 * ``diffusion/torus.py:26-34`` loads ``.p.npy`` / ``.score.npy`` from the *current directory* and otherwise recomputes
-  and writes them there, so every ``diffusion.*`` import runs with the cwd set to the TD root and asserts the tables
-  exist;
+  and writes them there. TD modules import it indirectly (``utils/utils.py:6`` -> ``diffusion/score_model.py:11``;
+  ``utils/training.py:5``; ``train.py:5-9``; ``utils/boltzmann.py:1``), so EVERY baseline import, TD or tools, runs
+  with the cwd set to the TD root, and imports of TD modules first assert that the tables exist (review P1 B1 /
+  P2 S1). Their SHA-256 are pinned in ``TORUS_TABLE_PINS`` (checked on gnode118 by ``test_td_gateway.py``);
 * TD's top-level packages are called ``diffusion`` and ``utils`` (and ``train`` is a script), so no flexitors module
-  may use those names (checked by ``test_td_gateway.py``).
+  may use those names (checked by ``test_td_gateway.py``). After the first call ``TD_ROOT`` and ``TOOLS_ROOT`` stay on
+  ``sys.path`` for the rest of the process, so a bare ``import utils`` then resolves to TD.
 """
 from __future__ import annotations
 
@@ -50,6 +53,10 @@ BASELINE_PINS = {
     'utils/xtb.py': '002fa88735ca0a4145afe9a01256a479636445fa89233af3f3b3afa4e05a1757',
 }
 
+# SHA-256 of the torus tables diffusion/torus.py reads from the TD root (gnode118 copies, 2026-10-01)
+TORUS_TABLE_PINS = {'.p.npy': 'dbc17c9ed911e0e489ae36210f27b03e39dd60ed5dca3341ef1a65d15c3d4bea',
+                    '.score.npy': 'a0ca1caa14fe16107f28325a7170a3442ff3e19f04ee5c238463c18e2bacce6c'}
+
 
 def lf_sha256(path: Path) -> str:
     """SHA-256 of a text file with CRLF normalised to LF (the repo stores LF; Windows checkouts may not)."""
@@ -66,21 +73,26 @@ def changed_baseline_files() -> list[str]:
     return out
 
 
+def _is_td_module(name: str) -> bool:
+    """True if the top-level name of ``name`` resolves inside the TD root (package directory or script)."""
+    top = name.split('.')[0]
+    return (TD_ROOT / top).is_dir() or (TD_ROOT / f'{top}.py').exists()
+
+
 def import_baseline(name: str) -> ModuleType:
-    """Import a module of the frozen baseline (e.g. ``'utils.torsion'``) or of ``tools/`` (e.g.
+    """Import a module of the frozen baseline (e.g. ``'utils.training'``) or of ``tools/`` (e.g.
     ``'make_split_half'``) without modifying either.
 
-    ``diffusion.*`` modules are imported with the cwd set to the TD root so that ``diffusion/torus.py`` finds its
-    precomputed tables instead of recomputing them in the caller's directory.
+    The import always runs with the cwd set to the TD root, so a direct or indirect import of ``diffusion.torus``
+    reads the precomputed tables there instead of recomputing and writing them in the caller's directory.
     """
     for p in (str(TOOLS_ROOT), str(TD_ROOT)):
         if p not in sys.path:
             sys.path.insert(0, p)
-    if not name.startswith('diffusion'):
-        return importlib.import_module(name)
-    for table in ('.p.npy', '.score.npy'):
-        if not (TD_ROOT / table).exists():
-            raise FileNotFoundError(f'{TD_ROOT / table} missing: diffusion/torus.py would recompute it in the cwd')
+    if _is_td_module(name):
+        for table in TORUS_TABLE_PINS:
+            if not (TD_ROOT / table).exists():
+                raise FileNotFoundError(f'{TD_ROOT / table} missing: diffusion/torus.py would recompute it')
     old = os.getcwd()
     os.chdir(TD_ROOT)
     try:

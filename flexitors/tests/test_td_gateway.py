@@ -1,10 +1,13 @@
 """The gateway imports baseline code without side effects (plan_P1 §4.1 test_td_gateway)."""
 import ast
+import hashlib
 import os
+import sys
 from pathlib import Path
 
 import pytest
 
+from flexitors import td
 from flexitors.td import RESERVED_NAMES, TD_ROOT, import_baseline
 
 PKG = Path(__file__).resolve().parent.parent
@@ -30,13 +33,40 @@ def test_tools_import_keeps_cwd():
     assert msh.split_indices(5) == ([0, 2, 4], [1, 3])
 
 
-@pytest.mark.cluster
-def test_torus_import_uses_td_tables_and_keeps_cwd(tmp_path, monkeypatch):
+def test_every_baseline_import_runs_in_the_td_root(tmp_path, monkeypatch):
+    """review P1 B1 / P2 S1: indirect imports of diffusion.torus must also see the TD root as cwd"""
+    tools = tmp_path / 'tools'
+    tools.mkdir()
+    (tools / 'probe_cwd_r5.py').write_text('import os\nCWD = os.getcwd()\n')
+    monkeypatch.setattr(td, 'TOOLS_ROOT', tools)
     monkeypatch.chdir(tmp_path)
-    torus = import_baseline('diffusion.torus')
+    probe = td.import_baseline('probe_cwd_r5')
+    assert Path(probe.CWD).resolve() == TD_ROOT.resolve() and Path(os.getcwd()) == tmp_path
+
+
+@pytest.mark.cluster
+@pytest.mark.parametrize('name', ['diffusion.torus', 'utils.training', 'utils.utils', 'diffusion.sampling'])
+def test_torus_tables_never_written_outside_td_root(tmp_path, monkeypatch, name):
+    """fails if importing a TD module (directly or through another module) writes torus tables anywhere but the TD
+    root, or changes the TD tables (pinned SHA-256 and mtimes)"""
+    before = {t: (TD_ROOT / t).stat().st_mtime for t in td.TORUS_TABLE_PINS}
+    monkeypatch.chdir(tmp_path)
+    mod = import_baseline(name)
     assert os.getcwd() == str(tmp_path)
-    assert not (tmp_path / '.p.npy').exists()  # tables were read from the TD root, not recomputed here
-    assert Path(torus.__file__).resolve().parent.parent == TD_ROOT.resolve()
+    assert not list(tmp_path.rglob('*.npy'))
+    torus = sys.modules['diffusion.torus']
+    assert Path(torus.__file__).resolve().parent.parent == TD_ROOT.resolve() and mod is not None
+    assert {t: (TD_ROOT / t).stat().st_mtime for t in td.TORUS_TABLE_PINS} == before
+
+
+@pytest.mark.cluster
+def test_torus_table_pins():
+    for t, pin in td.TORUS_TABLE_PINS.items():
+        h = hashlib.sha256()
+        with open(TD_ROOT / t, 'rb') as f:
+            for chunk in iter(lambda: f.read(1 << 24), b''):
+                h.update(chunk)
+        assert h.hexdigest() == pin, t
 
 
 def test_gateway_module_imports_no_heavy_dependency():
