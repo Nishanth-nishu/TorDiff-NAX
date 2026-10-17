@@ -146,3 +146,74 @@ E-JOINT-002). MC check (10 draws per half): dataset means within 0.0005 Å of th
 re-run (`r5_floor`, `r5_floor_mmff`, new files `local_structure_test_fixed.csv`; the round-1 CSVs stay untouched). The
 plafnet2 backfill window is shorter than an hour at the moment, so these 4-CPU jobs wait for free cores (expected start
 ≈ 12:00 on 2026-10-17). Their results will be added here before the Gate-0 ask.
+
+
+### Conformance (JOINT): budget-matched leak-free re-score (milestone 1 §5)
+Checked 2026-10-17 against EXP-1 §3.6 and §10.5 (as pre-declared on 2026-10-16), by reading
+`tools/analyze_leakfree.py:426-505` and `:523` and the outputs in `cluster_sync/round5/rescore/`.
+
+| Pre-declared mechanism (EXP-1) | Code / output | Ruling |
+|---|---|---|
+| ref_half = 2·|H|-subset of the full RDKit-L run scored against half H, direction-averaged (§3.6, D-001) | `ref_half_molecule` :456-476, s = 2·len(idx[h]); averaged over A and B as `view()` | MATCHES |
+| Exact expectation as primary: E[min] = Σ r₍ᵢ₎ C(N−i, s−1)/C(N, s); P(cov) = 1 − C(N−c, s)/C(N, s) (§10.5) | `subset_min_expectation` :435-444, `subset_cover_prob` :447-453 (strict <, as the evaluator) | MATCHES |
+| 10 random draws as a consistency check (§10.5) | MC rows; dataset means within ≤ 0.0005 Å of exact | MATCHES |
+| One Holm family of 8 (CR, B1, S3, S4 × AMR-R, COV-R@0.5); paired molecule bootstrap; hierarchical interval beside (§10.5) | `budget_matched` :523; `budget_contrasts.csv` family = budget, p_holm, hier_lo/hi | MATCHES |
+| Secondary: COV-R@0.1 and split_d − ref_half_d (§10.5) | rows tagged secondary | MATCHES |
+| Same universe for every view | 32 molecules excluded from every view and model because ref_half is undefined (missing full-set RDKit-L result, or 2|H| larger than the generated count); 711 analysed | JUSTIFIED DEVIATION (743 → 711, listed in `budget_excluded.csv`; the exclusion is paired, so contrasts are unbiased with respect to it) |
+| Run before any Exp-1 GPU time (§3.6) | run in milestone 1, CPU only | MATCHES |
+
+No MISMATCH. The interpretation changed after the result and is recorded in EXP-1 §11 / Revision 3:
+- the distinct-target view is promoted to primary *for the coupling reading only*;
+- the BUDGET family itself is unchanged.
+
+That promotion is a post-hoc reading choice and is labelled as such. — R-JOINT
+
+## Milestone 1 fixes (after review_P1.md and review_P2.md, 2026-10-17)
+
+Every BLOCKER and SHOULD-FIX is addressed; NITs as listed. Commits `a5b5d32..db53b1b` (repo author only, not pushed).
+
+| Finding | Fix | Commit | Test / evidence |
+|---|---|---|---|
+| P1 B1 / P2 S1: gateway chdir only for `diffusion*`; `utils.utils`, `utils.training`, `train` import torus indirectly | every baseline import (TD or tools) runs with cwd = TD root; TD imports first assert the tables exist; torus table SHA-256 pinned (`TORUS_TABLE_PINS`) | `a5b5d32` | `test_td_gateway.py`: local probe module records cwd = TD root; cluster: `diffusion.torus`, `utils.training`, `utils.utils`, `diffusion.sampling` from a temp cwd write no `.npy` there and leave the TD tables' mtimes unchanged; table SHA pins — all pass on gnode118 |
+| P2 B1: bicyclo[1.1.1]pentanes get an extra perceived bond | connectivity = no graph bond missing, and no extra perceived bond absent from the **reference's own** perception; GT calibration CLI | `76785ae`, `7b82ae5` | bicyclopentane tests; **GT calibration** (`cluster_sync/round5/validity_cal/gt_calibration.txt`, RDKit 2022.09.5): every cleaned GT conformer vs the molecule's first GT conformer — QM9 test 13,231 conformers / 997 molecules: 12 invalid (0.09 %, 9 molecules); QM9 val 13,892 / 1000: 12 invalid (0.09 %, 9 molecules). Missing bonds, unexplained extra bonds, clashes, sanitisation: 0 everywhere. All 24 residuals are signed-volume flips, almost all at ring N (degree-3 bridgehead or fused-ring amine N), i.e. N invertomers inside the GEOM ensembles (plus one GT ensemble with a reacted conformer); reported, not hidden |
+| P2 B2: Gate-0 scaling divided by a published value from another recipe | thresholds scaled by validation ÷ **same-recipe** test value; the published 0.152 / 0.128 Å, 49.6 / 35.1 % only enter a `recipe_check` (flagged if > 10 % apart) | `54e3173` | `test_gate0_baselines.py` (ratio exactly 1 for identical recipes; flag behaviour) |
+| P1 S1 / P2 S3: bond window inside `valid` | bond window (EXP-1 §2.6) reported as `n_bond_window_all` / `_ring`, not part of EVAL §3.1 `valid`; ring closure diagnostic only | `76785ae` | 16 % stretch still perceived → `valid` True with window flagged |
+| P2 S2: `valid` passed without a reference | `valid` is None (undetermined) without a reference | `76785ae` | `test_no_reference_is_undetermined` |
+| P2 S4 / P1 S6: RDKit-version-dependent chirality, no bridgeheads | structural centres (every degree-4 atom + every degree-3 atom in ≥ 2 rings) with a |χ_ref| ≥ 0.05 Å³ floor; for an independent reference only centres with pairwise topologically distinct neighbours (`ref_is_seed=False`) | `76785ae` | enantiomer, quinuclidine-type bridgehead inversion, seed-vs-relaxed and cross-conformer tests |
+| P1 S6: checks not reusable by the M2 constraint layer | array-level batched primitives `clash_index`/`clash_mask`, `bond_window_mask`, `chirality_centres`/`chirality_flip_mask` + thin Mol wrappers | `76785ae` | `test_clash_detected_and_primitives_are_batched` |
+| P1 S2 / P2 S5: E/Z table indices unchecked under RDKit 2022.09.5 | cluster test: for every table row, same structural bond and TD quadruple under 2022.09.5 + TD featurisation; ETKDG under 2022.09.5 honours every specified target | `53290e9` | passes on gnode118 (in the 67 passed) |
+| P1 S3: two n_rot_heavy implementations | `flexitors/data/strata.py` (m, n_rot_heavy) from the single `torsion_types` implementation | `72980b4` | cluster test: equals `n_rot_heavy` and `n_rot_repo` of `tools/breakdown.py`'s output for CTRL_rematch s0 — passes |
+| P2 S6: split.tsv alignment not asserted in the floor re-run | per molecule, pre-cap clean count must equal `split.tsv` n_clean, else a `split_misaligned` error row; cap-after-splitting reading written in the help text | `b6e4aa8` | `test_split_misalignment_is_reported` |
+| P1 S4 / P2 S7: `cmp` could not fail the job | `cmp … || exit 3`, result written to `cmp.txt` | `02e39f6` | rerun: "round-4 summary reproduced byte for byte" (`cluster_sync/round5/rescore/cmp.txt`) |
+| P1 S5: sync ran `rm -rf $P/round5` | only `round5/ledger/chem_data` and `round5/data` are replaced | `02e39f6` | — |
+| P1 S7 / P2 N1: dead-code audit counted docstring mentions | AST references only (Name, imported name, `x.name`), recursion excluded, scope (no methods) stated; `TEST_ONLY_API` now empty (`validate_conformer` has a production caller, the calibration CLI) | `03a5d31` | `test_comment_mentions_do_not_count` |
+| P2 S8a: m = 0 molecules carry no model | post-hoc m = 0 / m > 0 split (`--strata`, family "post hoc") | `d68ba5d`, `db53b1b` | see table below |
+| P2 S8b: distinct-target view promoted after the result | `_d` rows carry the note "pre-declared secondary; as primary for coupling (EXP-1 §11): post hoc"; summary header states it | `d68ba5d` | `test_leakfree_budget.py` |
+| P2 S8c / N8: informative exclusion, descriptive MC check | both stated in the summary header | `d68ba5d` | — |
+| NITs | P1 N2 (escaped tab), N3/P2 N4 (cap reading), N4 (toggled φ asserted), N5 (double bond selected explicitly), N6 (seed vs relaxed reference), N7 (`n_bond_window_all`), N9 (provenance dirty dirs), N11 (`_graph`); P2 N2 (sanitisation docstring), N3 (old slice contains the target) | `b6e4aa8`, `76785ae`, `02e39f6`, `b2e9ed4` | — |
+
+Not changed: P1 N8 (the `.txt` summary already lists `embed_failed` among specified rows; there are none), N10 (the RDKit
+version is in every provenance record and the calibration header), P2 N5 (the floor re-run keeps split-half molecules
+only; G9 is to be checked on the intersection with the old CSV once it runs), N6 (the heavy-first W quadruple is a
+milestone-2 function), N7 (the `corrected_smiles` rule still needs R-SAMPLE's sign-off; the acceptance rows were also
+used to choose among the four candidates).
+
+**Re-score, post-hoc m split** (`budget_contrasts.csv`, family "post hoc"; BUDGET rows unchanged by the rerun):
+
+| Model | m = 0 (n = 14) AMR-R diff [95 % CI] | m > 0 (n = 697) AMR-R diff [95 % CI] | m > 0 COV-R@0.5 (pt) |
+|---|---|---|---|
+| CR | +0.107 [+0.016, +0.195] | **−0.041** [−0.051, −0.032] | +0.5 [−0.9, +1.8] |
+| B1 | +0.107 (identical: no model runs) | −0.019 [−0.034, −0.005] | −4.1 |
+| S3 | +0.107 | +0.015 [+0.003, +0.027] | −8.5 |
+| S4 | +0.107 | −0.009 [−0.020, +0.002] | −5.1 |
+
+The m = 0 rows are identical across models, as they must be (the split output there is the other half's GT
+conformers). They go the other way and are only 14 molecules, so CR's gain comes entirely from molecules where the
+torsion model runs.
+
+**Tests after the fixes.** Local: `flexitors/tests` 62 passed, 8 skipped (cluster-only); tools 15 passed.
+gnode118 (`cluster_sync/round5/tests/`): `flexitors/tests` 67 passed, 3 skipped (2026-pinned E-CHEM-066 counts and table
+reproducibility, local-only `l_error.csv`); tools 15 passed.
+
+Still queued (unchanged): `gate0` (now with the like-for-like scaling) and the floor re-run (with the alignment
+assert).

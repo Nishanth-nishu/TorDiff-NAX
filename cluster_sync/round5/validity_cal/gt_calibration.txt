@@ -1,0 +1,21 @@
+# GT calibration of flexitors/eval/validity.py (RDKit 2022.09.5)
+qm9_test: 13231 GT conformers of 997 molecules; invalid conformers 12 (0.09 %), molecules with any 9
+  sanitizable False: 0
+  rings_closed False: 0
+  n_missing_bonds > 0: 0 conformers
+  n_extra_bonds > 0: 0 conformers
+  n_extra_bonds_unexplained > 0: 0 conformers
+  n_clashes > 0: 0 conformers
+  n_chirality_flips > 0: 12 conformers
+  n_nonplanar > 0: 22 conformers
+  n_bond_window_all > 0: 0 conformers
+qm9_val: 13892 GT conformers of 1000 molecules; invalid conformers 12 (0.09 %), molecules with any 9
+  sanitizable False: 0
+  rings_closed False: 0
+  n_missing_bonds > 0: 0 conformers
+  n_extra_bonds > 0: 0 conformers
+  n_extra_bonds_unexplained > 0: 0 conformers
+  n_clashes > 0: 0 conformers
+  n_chirality_flips > 0: 12 conformers
+  n_nonplanar > 0: 74 conformers
+  n_bond_window_all > 0: 0 conformers
